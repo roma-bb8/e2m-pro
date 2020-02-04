@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <M2E_e2M>
+            <active>true</active>
+            <codePool>local</codePool>
+        </M2E_e2M>
+    </modules>
+</config>

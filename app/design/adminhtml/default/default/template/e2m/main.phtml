@@ -1,0 +1,526 @@
+<?php
+$dataHelper = Mage::helper('m2i');
+$marketplaces = array(
+    M2e_M2i_Helper_Data::MARKETPLACE_US_ID => 'US',
+    M2e_M2i_Helper_Data::MARKETPLACE_CA_ID => 'CA',
+    /* M2e_M2i_Helper_Data::MARKETPLACE_UK_ID => 'UK',
+    M2e_M2i_Helper_Data::MARKETPLACE_AU_ID => 'AU',
+    M2e_M2i_Helper_Data::MARKETPLACE_AT_ID => 'AT',
+    M2e_M2i_Helper_Data::MARKETPLACE_BE_FR_ID => 'BR_FR',
+    M2e_M2i_Helper_Data::MARKETPLACE_FR_ID => 'FR',
+    M2e_M2i_Helper_Data::MARKETPLACE_DE_ID => 'DE',
+    M2e_M2i_Helper_Data::MARKETPLACE_MOTORS_ID => 'MOTORS',
+    M2e_M2i_Helper_Data::MARKETPLACE_IT_ID => 'IT',
+    M2e_M2i_Helper_Data::MARKETPLACE_BE_DU_ID => 'BE_DU',
+    M2e_M2i_Helper_Data::MARKETPLACE_NL_ID => 'NL',
+    M2e_M2i_Helper_Data::MARKETPLACE_SP_ID => 'SP',
+    M2e_M2i_Helper_Data::MARKETPLACE_CH_ID => 'CH',
+    M2e_M2i_Helper_Data::MARKETPLACE_HK_ID => 'HK',
+    M2e_M2i_Helper_Data::MARKETPLACE_IN_ID => 'IN',
+    M2e_M2i_Helper_Data::MARKETPLACE_IE_ID => 'IE',
+    M2e_M2i_Helper_Data::MARKETPLACE_MY_ID => 'MY',
+    M2e_M2i_Helper_Data::MARKETPLACE_CA_FR_ID => 'CA_FR',
+    M2e_M2i_Helper_Data::MARKETPLACE_PH_ID => 'PH',
+    M2e_M2i_Helper_Data::MARKETPLACE_PL_ID => 'PL',
+    M2e_M2i_Helper_Data::MARKETPLACE_SG_ID => 'SG'*/
+);
+?>
+
+<?php $formData['user_id'] = Mage::registry(M2e_M2i_Adminhtml_M2iController::CONFIG_PATH . 'user_id'); ?>
+<?php $formData['token_expired_date'] = Mage::registry(M2e_M2i_Adminhtml_M2iController::CONFIG_PATH . 'expiration_time'); ?>
+<?php $formData['items_count'] = Mage::registry(M2e_M2i_Adminhtml_M2iController::CONFIG_PATH . 'items_count') ?: 0; ?>
+<?php $formData['progress'] = Mage::registry(M2e_M2i_Adminhtml_M2iController::CONFIG_PATH . 'progress') ?: 0; ?>
+<?php $formData['stores'] = Mage::registry(M2e_M2i_Adminhtml_M2iController::CONFIG_PATH . 'stores'); ?>
+<?php $formData['marketplaces'] = Mage::registry(M2e_M2i_Adminhtml_M2iController::CONFIG_PATH . 'marketplaces'); ?>
+<?php $formData['attr_map'] = Mage::registry(M2e_M2i_Adminhtml_M2iController::CONFIG_PATH . 'attr/map') ?: ''; ?>
+<?php $formData['marketplaces_stores_map'] = json_decode(Mage::registry(M2e_M2i_Adminhtml_M2iController::CONFIG_PATH . 'marketplaces/stores/map') ?: null, true); ?>
+<?php $formData['ebay_attributes'] = $dataHelper->geteBayAttributesAll(); ?>
+<?php $formData['magento_attributes'] = $dataHelper->getMagentoAttributesAll(); ?>
+<?php $formData['map_attributes'] = json_decode(Mage::registry(M2e_M2i_Adminhtml_M2iController::CONFIG_PATH . 'map_attributes'), true); ?>
+
+<script type="text/javascript">
+    <?php if ($formData['map_attributes']) { ?>
+        var arrMap = <?php echo json_encode($formData['map_attributes'], true); ?>;
+    <?php } else { ?>
+        var arrMap = {};
+    <?php } ?>
+    <?php if ($formData['marketplaces_stores_map']) { ?>
+    var marStore = <?php echo json_encode($formData['marketplaces_stores_map'], true); ?>;
+    <?php } else { ?>
+    var marStore = {};
+    <?php } ?>
+
+    //////
+
+    function getDownloadInventoryProgressStatus() {
+        new Ajax.Request('<?php echo $this->getUrl('*/m2i/getDownloadInventoryProgressStatus') ?>', {
+            method:'get',
+            asynchronous: true,
+            onSuccess: function(transport) {
+                var response = JSON.parse(transport.responseText);
+                $('progress').innerHTML = response.progress;
+                !response.complete && setTimeout(getDownloadInventoryProgressStatus, 2000);
+            },
+            onFailure: function() {
+                alert('Something went wrong...');
+                return false;
+            }
+        });
+    }
+
+    //////
+
+    function getToken() {
+        new Ajax.Request('<?php echo $this->getUrl('*/m2i/beforeGetToken') ?>', {
+            method:'get',
+            parameters: {},
+            onSuccess: function(transport) {
+                var response = JSON.parse(transport.responseText);
+                if (response.error == 1) {
+                    alert(response.message);
+                    return false;
+                } else {
+                    window.location.replace(response.url);
+                }
+            },
+            onFailure: function() {
+                alert('Something went wrong...');
+                return false;
+            }
+        });
+    }
+
+    function deleteToken() {
+        new Ajax.Request('<?php echo $this->getUrl('*/m2i/deleteToken') ?>', {
+            method:'get',
+            parameters: {},
+            onSuccess: function(transport) {
+                location.reload(true);
+            },
+            onFailure: function() {
+                alert('Something went wrong...');
+                return false;
+            }
+        });
+    }
+
+    function startDownloadInventory() {
+        new Ajax.Request('<?php echo $this->getUrl('*/m2i/startDownloadInventory') ?>', {
+            method:'get',
+            asynchronous: true,
+            onCreate: function() {
+                setTimeout(function () {
+                    $('loading-mask').setStyle({visibility: 'hidden'});
+                }, 1000);
+
+                setTimeout(getDownloadInventoryProgressStatus, 2000);
+            },
+            onSuccess: function(transport) {
+                var response = JSON.parse(transport.responseText);
+                $('progress').innerHTML = 0;
+            },
+            onFailure: function() {
+                alert('Something went wrong...');
+                return false;
+            }
+        });
+    }
+
+    function mappingMarketplacesStores() {
+
+        var itemList = document.getElementsByName('mar');
+        itemList.forEach(function (element) {
+
+            value = element.options[element.selectedIndex].value;
+            if (!value) {
+                alert('Not all selected marketplaces.');
+                return;
+            }
+
+            marStore[element.id] = value;
+
+            new Ajax.Request('<?php echo $this->getUrl('*/m2i/mappingMarketplacesStores') ?>', {
+                method:'get',
+                parameters: {
+                    maps: JSON.stringify(marStore)
+                },
+                asynchronous: true,
+                onFailure: function() {
+                    alert('Something went wrong...');
+                    return false;
+                },
+                onSuccess: function(transport) {
+                    var response = JSON.parse(transport.responseText);
+                    console.log(response);
+                }
+            });
+        });
+
+
+    }
+
+    function mappingMangetoToeBayAtt() {
+
+        var ebayAtt = document.getElementById('ebay-att');
+        var magentoAtt = document.getElementById('magento-att');
+        var value1 = magentoAtt.options[magentoAtt.selectedIndex].value;
+        var value2 = ebayAtt.options[ebayAtt.selectedIndex].value;
+        arrMap[value1] = value2;
+
+        new Ajax.Request('<?php echo $this->getUrl('*/m2i/mappingMangetoToeBayAtt') ?>', {
+            method:'get',
+            parameters: {
+                maps: JSON.stringify(arrMap)
+            },
+            asynchronous: true,
+            onFailure: function() {
+                alert('Something went wrong...');
+                return false;
+            },
+            onSuccess: function(transport) {
+
+                var response = JSON.parse(transport.responseText);
+                console.log(response);
+
+                var tr = document.createElement('tr');
+                tr.classList.add('add-ing');
+
+                var td1 = document.createElement('td');
+                td1.classList.add('label');
+                td1.innerHTML = value1;
+
+                var td2 = document.createElement('td');
+                td2.innerHTML = ' -> ';
+
+                var td3 = document.createElement('td');
+                td3.name = value1;
+                td3.classList.add('value');
+                td3.innerHTML = value2;
+
+                tr.appendChild(td1);
+                tr.appendChild(td2);
+                tr.appendChild(td3);
+
+                var addIng = document.getElementsByClassName("add-ing1");
+                var add = addIng[addIng.length - 1];
+                add.insert(tr);
+            }
+        });
+    }
+
+    function mapRelationProduct() {
+
+        var mapMar = document.getElementById('map-mar');
+        var value = mapMar.options[mapMar.selectedIndex].value;
+        if (!value) {
+            alert('Something went wrong...');
+            return false;
+        }
+
+        new Ajax.Request('<?php echo $this->getUrl('*/m2i/mapRelationProduct') ?>', {
+            method:'get',
+            asynchronous: true,
+            parameters: {
+                attr: value
+            },
+            onCreate: function() {},
+            onSuccess: function(transport) {
+                var response = JSON.parse(transport.responseText);
+                console.log(response);
+            },
+            onFailure: function() {
+                alert('Something went wrong...');
+                return false;
+            }
+        });
+    }
+
+    function startImportInventory() {
+        new Ajax.Request('<?php echo $this->getUrl('*/m2i/startImportInventory') ?>', {
+            method:'get',
+            asynchronous: true,
+            onCreate: function() {},
+            onSuccess: function(transport) {
+                var response = JSON.parse(transport.responseText);
+            },
+            onFailure: function() {
+                alert('Something went wrong...');
+                return false;
+            }
+        });
+    }
+
+</script>
+
+<div class="content-header">
+    <table cellspacing="0">
+        <tr>
+            <td>
+                <h3 class="head-dashboard">
+                    <?php echo $dataHelper->__('eBay Data Import Tool') ?>
+                </h3>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<h4><?php echo $dataHelper->__('Step 0 - Get Access') ?></h4>
+
+<div class="entry-edit" id="magento_block_ebay_accounts_general_token">
+    <div class="entry-edit-head">
+        <h4 class="icon-head head-edit-form fieldset-legend"><?php echo $dataHelper->__('Access Details'); ?></h4>
+    </div>
+    <div class="fieldset">
+        <div class="hor-scroll">
+            <table class="form-list" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td class="label">
+                        <label for="mode"><?php echo $dataHelper->__('Environment'); ?>: <span
+                                    class="required">*</span></label>
+                    </td>
+                    <td class="value" style="width: auto;">
+                        <select <?php if ($formData['token_session'] != ''): ?>disabled="disabled"
+                                <?php else: ?>id="mode" name="mode"<?php endif; ?> class="required-entry">
+                            <option value="<?php echo M2e_M2i_Helper_Data::MODE_PRODUCTION; ?>" <?php if ($formData['mode'] == M2e_M2i_Helper_Data::MODE_PRODUCTION): echo ' selected="selected"'; endif; ?>><?php echo $dataHelper->__('Production (Live)'); ?></option>
+                            <option value="<?php echo M2e_M2i_Helper_Data::MODE_SANDBOX; ?>" <?php if ($formData['mode'] == M2e_M2i_Helper_Data::MODE_SANDBOX): echo ' selected="selected"'; endif; ?>><?php echo $dataHelper->__('Sandbox (Test)'); ?></option>
+                        </select>
+                        <?php if ($formData['token_session'] != ''): ?>
+                            <input id="mode" name="mode" value="<?php echo $formData['mode']; ?>" type="hidden"
+                                   class="required-entry"/>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="label">
+                        <label><?php echo $dataHelper->__('Grant Access'); ?>:</label>
+                    </td>
+                    <td class="value" style="width: auto;">
+                        <?php echo $this->getChildHtml('get_token_button'); ?>
+                    </td>
+                </tr>
+
+                <tr <?php if (empty($formData['user_id'])) echo 'style="display: none"'; ?>>
+                    <td class="label">
+                        <label for="title"><?php echo $dataHelper->__('eBay User ID'); ?>: </label>
+                    </td>
+                    <td class="value" style="width: auto;">
+                            <span id="account_title">
+                                <?php if (!empty($formData['user_id'])): ?>
+                                    <a target="_blank" href="<?php echo $dataHelper
+                                        ->getMemberUrl($formData['user_id'], $formData['mode']); ?>">
+                                        <?php echo $this->escapeHtml($formData['user_id']); ?></a>
+                                <?php else: ?>
+                                    <?php echo $this->escapeHtml($formData['title']); ?>
+                                <?php endif; ?>
+                            </span>
+                    </td>
+                </tr>
+
+                <tr <?php if ($formData['token_expired_date'] == ''): ?>style="display: none;"<?php endif; ?>>
+                    <td class="label">
+                        <label for="token_expired_date"><?php echo $dataHelper->__('Expiration Date'); ?>: <span
+                                    class="required">*</span></label>
+                    </td>
+                    <td class="value" style="width: auto;">
+                        <div><?php echo $formData['token_expired_date']; ?></div>
+                        <input id="token_expired_date" name="token_expired_date"
+                               value="<?php echo $formData['token_expired_date']; ?>" type="hidden"/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<?php if ($formData['token_expired_date'] != ''): ?>
+
+<h4><?php echo $dataHelper->__('Step 1 - Download inventory') ?></h4>
+
+<div class="entry-edit" id="magento_block_ebay_accounts_general_token">
+        <div class="entry-edit-head">
+            <h4 class="icon-head head-edit-form fieldset-legend"><?php echo $dataHelper->__('Download inventory'); ?></h4>
+        </div>
+        <div class="fieldset">
+            <div class="hor-scroll">
+                <table class="form-list" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td class="label">
+                            <label><?php echo $dataHelper->__('Items'); ?>:</label>
+                        </td>
+                        <td class="value" style="width: auto;">
+                            <?php echo $this->escapeHtml($formData['items_count']); ?>&nbsp;&nbsp;&nbsp;<label><?php echo $dataHelper->__('Progress'); ?>: </label><span id="progress"><?php echo $this->escapeHtml($formData['progress']); ?></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">
+                            <label><?php echo $dataHelper->__('Download'); ?>:</label>
+                        </td>
+                        <td class="value" style="width: auto;">
+                            <?php echo $this->getChildHtml('start_download_inventory_button'); ?>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+<h4><?php echo $dataHelper->__('Step 1.5 - Relations product between Marketplaces') ?></h4>
+
+<div class="entry-edit" id="magento_block_ebay_accounts_general_token">
+        <div class="entry-edit-head">
+            <h4 class="icon-head head-edit-form fieldset-legend"><?php echo $dataHelper->__('Download inventory'); ?></h4>
+        </div>
+        <div class="fieldset">
+            <div class="hor-scroll">
+                <table class="form-list" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td class="label">
+                            <label><?php echo $dataHelper->__('Map'); ?>:</label>
+                        </td>
+                        <td class="value" style="width: auto;">
+                            <select id="map-mar">
+                                <option <?php if ('' == $formData['attr_map']) echo ' selected="selected"'; ?>></option>
+                                <option value="sku" <?php if ('sku' == $formData['attr_map']) echo ' selected="selected"'; ?>><?php echo $dataHelper->__('SKU'); ?></option>
+                                <option value="upc" <?php if ('upc' == $formData['attr_map']) echo ' selected="selected"'; ?>><?php echo $dataHelper->__('UPC'); ?></option>
+                                <option value="mpn" <?php if ('mpn' == $formData['attr_map']) echo ' selected="selected"'; ?>><?php echo $dataHelper->__('MPN'); ?></option>
+                                <option value="ean" <?php if ('ean' == $formData['attr_map']) echo ' selected="selected"'; ?>><?php echo $dataHelper->__('EAN'); ?></option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">
+                            <?php echo $this->getChildHtml('map_relation_product_button'); ?>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+<h4><?php echo $dataHelper->__('Step 2 - Mapping Marketplaces to Stores') ?></h4>
+
+<div class="entry-edit" id="magento_block_ebay_accounts_general_token">
+        <div class="entry-edit-head">
+            <h4 class="icon-head head-edit-form fieldset-legend"><?php echo $dataHelper->__('Mapping'); ?></h4>
+        </div>
+        <div class="fieldset">
+            <div class="hor-scroll">
+                <table class="form-list" cellspacing="0" cellpadding="0">
+                    <?php foreach ($formData['marketplaces'] as $index => $marketplace): ?>
+                        <tr>
+                            <td class="label"><label><?php echo $marketplace; ?></label></td>
+                            <td class="value" style="width: auto;">
+                                <select id="mar-<?php echo $marketplace; ?>" name="mar">
+                                    <option></option>
+                                    <?php foreach ($formData['stores'] as $id => $store): ?>
+                                        <option value="<?php echo $id; ?>" <?php if (isset($formData['marketplaces_stores_map']['mar-' . $marketplace]) && $formData['marketplaces_stores_map']['mar-' . $marketplace] == $id) echo ' selected="selected"'; ?>><?php echo $store; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    <tr>
+                        <td class="value" style="width: auto;">
+                            <?php echo $this->getChildHtml('mapping_marketplaces_stores_button'); ?>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+<h4><?php echo $dataHelper->__('Step 4 - Mapping eBay properties to Magento Product attribute') ?></h4>
+
+<div class="entry-edit" id="magento_block_ebay_accounts_general_token">
+        <div class="entry-edit-head">
+            <h4 class="icon-head head-edit-form fieldset-legend"><?php echo $dataHelper->__('Mapping'); ?></h4>
+        </div>
+        <div class="fieldset">
+            <div class="hor-scroll">
+                <table class="form-list" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td class="label">
+                            <select id="ebay-att">
+                                <option></option>
+                                <?php foreach ($formData['ebay_attributes'] as $code): ?>
+                                    <option value="<?php echo $code; ?>"><?php echo $code; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
+                        <td class="value">
+                            <select id="magento-att">
+                                <option></option>
+                                <?php foreach ($formData['magento_attributes'] as $code => $title): ?>
+                                    <option value="<?php echo $code; ?>"><?php echo $title; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
+                    </tr>
+                    <?php foreach ($formData['map_attributes'] as $mag => $eba): ?>
+                    <tr class="add-ing">
+                        <td class="value" name="<?php echo $mag; ?>"><?php echo $eba; ?></td>
+                        <td> -> </td>
+                        <td class="label"><?php echo $formData['magento_attributes'][$mag]; ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                    <tr class="add-ing1"></tr>
+                    <tr>
+                        <td class="value" style="width: auto;">
+                            <?php echo $this->getChildHtml('mapping_mangeto_to_eBay_att_button'); ?>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+</div>
+
+<h4><?php echo $dataHelper->__('Step 5 - Import inventory') ?></h4>
+
+<div class="entry-edit" id="magento_block_ebay_accounts_general_token">
+        <div class="entry-edit-head">
+            <h4 class="icon-head head-edit-form fieldset-legend"><?php echo $dataHelper->__('Import inventory'); ?></h4>
+        </div>
+        <div class="fieldset">
+            <div class="hor-scroll">
+                <table class="form-list" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td class="label">
+                            <label><?php echo $dataHelper->__('Items'); ?>:</label>
+                        </td>
+                        <td class="value" style="width: auto;">
+                            <?php echo $this->escapeHtml($formData['items_count']); ?>&nbsp;&nbsp;&nbsp;<?php echo $this->getChildHtml('start_import_inventory_button'); ?>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+<h4><?php echo $dataHelper->__('Step x - Delete Access') ?></h4>
+
+<div class="entry-edit" id="magento_block_ebay_accounts_general_token">
+    <div class="entry-edit-head">
+        <h4 class="icon-head head-edit-form fieldset-legend"><?php echo $dataHelper->__('Credentials'); ?></h4>
+    </div>
+    <div class="fieldset">
+        <div class="hor-scroll">
+            <table class="form-list" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td class="label">
+                        <label><?php echo $dataHelper->__('Grant Access'); ?>:</label>
+                    </td>
+                    <td class="value" style="width: auto;">
+                        <?php echo $this->getChildHtml('delete_token_button'); ?>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<?php endif; ?>

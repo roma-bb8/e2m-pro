@@ -1,6 +1,6 @@
 <?php
 
-class M2e_M2i_Helper_Data extends Mage_Core_Helper_Abstract {
+class M2E_e2M_Helper_Data extends Mage_Core_Helper_Abstract {
 
     const MODE_SANDBOX = 0;
     const MODE_PRODUCTION = 1;

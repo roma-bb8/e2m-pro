@@ -1,6 +1,6 @@
 <?php
 
-class M2e_M2i_Helper_Full extends Mage_Core_Helper_Abstract {
+class M2E_e2M_Helper_Full extends Mage_Core_Helper_Abstract {
 
     // ########################################
 

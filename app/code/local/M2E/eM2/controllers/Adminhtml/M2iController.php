@@ -1,6 +1,6 @@
 <?php
 
-class M2e_M2i_Adminhtml_M2iController extends Mage_Adminhtml_Controller_Action {
+class M2E_e2M_Adminhtml_M2iController extends Mage_Adminhtml_Controller_Action {
 
     const CONFIG_PATH = 'm2e/m2i/';
     const MAX_DAYS = 118;

@@ -17,7 +17,7 @@ defaul setup value
 
 export import configs
 */
-class M2e_M2i_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
+class M2E_e2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
 
     public function __construct() {
         parent::__construct();

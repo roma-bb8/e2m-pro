@@ -1,6 +1,6 @@
 <?php
 
-class M2e_M2i_Model_Api_Ebay {
+class M2E_e2M_Model_Api_Ebay {
 
     private $sandbox = 'https://signin.sandbox.ebay.com/ws/eBayISAPI.dll?SignIn&runame=%s&SessID=%s&ruparams=VarA%%3D%s';
     private $url = 'https://api.sandbox.ebay.com/ws/api.dll';

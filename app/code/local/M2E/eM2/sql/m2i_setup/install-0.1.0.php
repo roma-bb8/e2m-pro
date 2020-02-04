@@ -3,8 +3,8 @@
 /* @var Mage_Core_Model_Resource_Setup $installer */
 $installer = $this;
 $sql = <<<SQL
-DROP TABLE IF EXISTS `{$installer->getTable('m2e_m2i_inventory')}`;
-CREATE TABLE `{$installer->getTable('m2e_m2i_inventory')}` (
+DROP TABLE IF EXISTS `{$installer->getTable('m2e_e2m_inventory')}`;
+CREATE TABLE `{$installer->getTable('m2e_e2m_inventory')}` (
   `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
   `item_id` DECIMAL(20) UNSIGNED NOT NULL,
   `site` VARCHAR(5) NOT NULL,
@@ -16,8 +16,8 @@ CREATE TABLE `{$installer->getTable('m2e_m2i_inventory')}` (
   INDEX `site` (`site`)
 ) ENGINE = INNODB CHARACTER SET utf8 COLLATE utf8_general_ci;
 
-DROP TABLE IF EXISTS `{$installer->getTable('m2e_m2i_processing')}`;
-CREATE TABLE `{$installer->getTable('m2e_m2i_processing')}` (
+DROP TABLE IF EXISTS `{$installer->getTable('m2e_e2m_processing')}`;
+CREATE TABLE `{$installer->getTable('m2e_e2m_processing')}` (
   `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` DECIMAL(20) UNSIGNED NOT NULL,
   `from` TIMESTAMP NOT NULL,
