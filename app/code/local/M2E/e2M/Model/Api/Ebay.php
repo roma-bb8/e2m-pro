@@ -16,6 +16,15 @@ class M2E_e2M_Model_Api_Ebay {
         'X-EBAY-API-CALL-NAME' => ''
     );
 
+    public function __construct() {
+
+        $access = json_decode(file_get_contents(__DIR__ . '/../../../../../../../access.json'), true);
+        $this->ruName = $access['RuName'];
+        $this->headers['X-EBAY-API-DEV-NAME'] = $access['X-EBAY-API-DEV-NAME'];
+        $this->headers['X-EBAY-API-APP-NAME'] = $access['X-EBAY-API-APP-NAME'];
+        $this->headers['X-EBAY-API-CERT-NAME'] = $access['X-EBAY-API-CERT-NAME'];
+    }
+
     /**
      * @return string
      * @throws Exception
