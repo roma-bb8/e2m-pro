@@ -26,6 +26,6 @@ LICENSE_AFL.txt
 mage
 php.ini.sample
 RELEASE_NOTES.txt
-!app/code/local/M2E/eM2/*
+!app/code/local/M2E/e2M/*
 !app/design/adminhtml/default/default/template/e2m/*
 !app/etc/modules/M2E_e2M.xml

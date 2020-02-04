@@ -1,42 +1,42 @@
 <?php
-$dataHelper = Mage::helper('m2i');
+$dataHelper = Mage::helper('e2m');
 $marketplaces = array(
-    M2e_M2i_Helper_Data::MARKETPLACE_US_ID => 'US',
-    M2e_M2i_Helper_Data::MARKETPLACE_CA_ID => 'CA',
-    /* M2e_M2i_Helper_Data::MARKETPLACE_UK_ID => 'UK',
-    M2e_M2i_Helper_Data::MARKETPLACE_AU_ID => 'AU',
-    M2e_M2i_Helper_Data::MARKETPLACE_AT_ID => 'AT',
-    M2e_M2i_Helper_Data::MARKETPLACE_BE_FR_ID => 'BR_FR',
-    M2e_M2i_Helper_Data::MARKETPLACE_FR_ID => 'FR',
-    M2e_M2i_Helper_Data::MARKETPLACE_DE_ID => 'DE',
-    M2e_M2i_Helper_Data::MARKETPLACE_MOTORS_ID => 'MOTORS',
-    M2e_M2i_Helper_Data::MARKETPLACE_IT_ID => 'IT',
-    M2e_M2i_Helper_Data::MARKETPLACE_BE_DU_ID => 'BE_DU',
-    M2e_M2i_Helper_Data::MARKETPLACE_NL_ID => 'NL',
-    M2e_M2i_Helper_Data::MARKETPLACE_SP_ID => 'SP',
-    M2e_M2i_Helper_Data::MARKETPLACE_CH_ID => 'CH',
-    M2e_M2i_Helper_Data::MARKETPLACE_HK_ID => 'HK',
-    M2e_M2i_Helper_Data::MARKETPLACE_IN_ID => 'IN',
-    M2e_M2i_Helper_Data::MARKETPLACE_IE_ID => 'IE',
-    M2e_M2i_Helper_Data::MARKETPLACE_MY_ID => 'MY',
-    M2e_M2i_Helper_Data::MARKETPLACE_CA_FR_ID => 'CA_FR',
-    M2e_M2i_Helper_Data::MARKETPLACE_PH_ID => 'PH',
-    M2e_M2i_Helper_Data::MARKETPLACE_PL_ID => 'PL',
-    M2e_M2i_Helper_Data::MARKETPLACE_SG_ID => 'SG'*/
+    M2E_e2M_Helper_Data::MARKETPLACE_US_ID => 'US',
+    M2E_e2M_Helper_Data::MARKETPLACE_CA_ID => 'CA',
+    /* M2E_e2M_Helper_Data::MARKETPLACE_UK_ID => 'UK',
+    M2E_e2M_Helper_Data::MARKETPLACE_AU_ID => 'AU',
+    M2E_e2M_Helper_Data::MARKETPLACE_AT_ID => 'AT',
+    M2E_e2M_Helper_Data::MARKETPLACE_BE_FR_ID => 'BR_FR',
+    M2E_e2M_Helper_Data::MARKETPLACE_FR_ID => 'FR',
+    M2E_e2M_Helper_Data::MARKETPLACE_DE_ID => 'DE',
+    M2E_e2M_Helper_Data::MARKETPLACE_MOTORS_ID => 'MOTORS',
+    M2E_e2M_Helper_Data::MARKETPLACE_IT_ID => 'IT',
+    M2E_e2M_Helper_Data::MARKETPLACE_BE_DU_ID => 'BE_DU',
+    M2E_e2M_Helper_Data::MARKETPLACE_NL_ID => 'NL',
+    M2E_e2M_Helper_Data::MARKETPLACE_SP_ID => 'SP',
+    M2E_e2M_Helper_Data::MARKETPLACE_CH_ID => 'CH',
+    M2E_e2M_Helper_Data::MARKETPLACE_HK_ID => 'HK',
+    M2E_e2M_Helper_Data::MARKETPLACE_IN_ID => 'IN',
+    M2E_e2M_Helper_Data::MARKETPLACE_IE_ID => 'IE',
+    M2E_e2M_Helper_Data::MARKETPLACE_MY_ID => 'MY',
+    M2E_e2M_Helper_Data::MARKETPLACE_CA_FR_ID => 'CA_FR',
+    M2E_e2M_Helper_Data::MARKETPLACE_PH_ID => 'PH',
+    M2E_e2M_Helper_Data::MARKETPLACE_PL_ID => 'PL',
+    M2E_e2M_Helper_Data::MARKETPLACE_SG_ID => 'SG'*/
 );
 ?>
 
-<?php $formData['user_id'] = Mage::registry(M2e_M2i_Adminhtml_M2iController::CONFIG_PATH . 'user_id'); ?>
-<?php $formData['token_expired_date'] = Mage::registry(M2e_M2i_Adminhtml_M2iController::CONFIG_PATH . 'expiration_time'); ?>
-<?php $formData['items_count'] = Mage::registry(M2e_M2i_Adminhtml_M2iController::CONFIG_PATH . 'items_count') ?: 0; ?>
-<?php $formData['progress'] = Mage::registry(M2e_M2i_Adminhtml_M2iController::CONFIG_PATH . 'progress') ?: 0; ?>
-<?php $formData['stores'] = Mage::registry(M2e_M2i_Adminhtml_M2iController::CONFIG_PATH . 'stores'); ?>
-<?php $formData['marketplaces'] = Mage::registry(M2e_M2i_Adminhtml_M2iController::CONFIG_PATH . 'marketplaces'); ?>
-<?php $formData['attr_map'] = Mage::registry(M2e_M2i_Adminhtml_M2iController::CONFIG_PATH . 'attr/map') ?: ''; ?>
-<?php $formData['marketplaces_stores_map'] = json_decode(Mage::registry(M2e_M2i_Adminhtml_M2iController::CONFIG_PATH . 'marketplaces/stores/map') ?: null, true); ?>
+<?php $formData['user_id'] = Mage::registry(M2E_e2M_Adminhtml_E2MController::CONFIG_PATH . 'user_id'); ?>
+<?php $formData['token_expired_date'] = Mage::registry(M2E_e2M_Adminhtml_E2MController::CONFIG_PATH . 'expiration_time'); ?>
+<?php $formData['items_count'] = Mage::registry(M2E_e2M_Adminhtml_E2MController::CONFIG_PATH . 'items_count') ?: 0; ?>
+<?php $formData['progress'] = Mage::registry(M2E_e2M_Adminhtml_E2MController::CONFIG_PATH . 'progress') ?: 0; ?>
+<?php $formData['stores'] = Mage::registry(M2E_e2M_Adminhtml_E2MController::CONFIG_PATH . 'stores'); ?>
+<?php $formData['marketplaces'] = Mage::registry(M2E_e2M_Adminhtml_E2MController::CONFIG_PATH . 'marketplaces'); ?>
+<?php $formData['attr_map'] = Mage::registry(M2E_e2M_Adminhtml_E2MController::CONFIG_PATH . 'attr/map') ?: ''; ?>
+<?php $formData['marketplaces_stores_map'] = json_decode(Mage::registry(M2E_e2M_Adminhtml_E2MController::CONFIG_PATH . 'marketplaces/stores/map') ?: null, true); ?>
 <?php $formData['ebay_attributes'] = $dataHelper->geteBayAttributesAll(); ?>
 <?php $formData['magento_attributes'] = $dataHelper->getMagentoAttributesAll(); ?>
-<?php $formData['map_attributes'] = json_decode(Mage::registry(M2e_M2i_Adminhtml_M2iController::CONFIG_PATH . 'map_attributes'), true); ?>
+<?php $formData['map_attributes'] = json_decode(Mage::registry(M2E_e2M_Adminhtml_E2MController::CONFIG_PATH . 'map_attributes'), true); ?>
 
 <script type="text/javascript">
     <?php if ($formData['map_attributes']) { ?>
@@ -53,7 +53,7 @@ $marketplaces = array(
     //////
 
     function getDownloadInventoryProgressStatus() {
-        new Ajax.Request('<?php echo $this->getUrl('*/m2i/getDownloadInventoryProgressStatus') ?>', {
+        new Ajax.Request('<?php echo $this->getUrl('*/e2m/getDownloadInventoryProgressStatus') ?>', {
             method:'get',
             asynchronous: true,
             onSuccess: function(transport) {
@@ -71,7 +71,7 @@ $marketplaces = array(
     //////
 
     function getToken() {
-        new Ajax.Request('<?php echo $this->getUrl('*/m2i/beforeGetToken') ?>', {
+        new Ajax.Request('<?php echo $this->getUrl('*/e2m/beforeGetToken') ?>', {
             method:'get',
             parameters: {},
             onSuccess: function(transport) {
@@ -91,7 +91,7 @@ $marketplaces = array(
     }
 
     function deleteToken() {
-        new Ajax.Request('<?php echo $this->getUrl('*/m2i/deleteToken') ?>', {
+        new Ajax.Request('<?php echo $this->getUrl('*/e2m/deleteToken') ?>', {
             method:'get',
             parameters: {},
             onSuccess: function(transport) {
@@ -105,7 +105,7 @@ $marketplaces = array(
     }
 
     function startDownloadInventory() {
-        new Ajax.Request('<?php echo $this->getUrl('*/m2i/startDownloadInventory') ?>', {
+        new Ajax.Request('<?php echo $this->getUrl('*/e2m/startDownloadInventory') ?>', {
             method:'get',
             asynchronous: true,
             onCreate: function() {
@@ -139,7 +139,7 @@ $marketplaces = array(
 
             marStore[element.id] = value;
 
-            new Ajax.Request('<?php echo $this->getUrl('*/m2i/mappingMarketplacesStores') ?>', {
+            new Ajax.Request('<?php echo $this->getUrl('*/e2m/mappingMarketplacesStores') ?>', {
                 method:'get',
                 parameters: {
                     maps: JSON.stringify(marStore)
@@ -167,7 +167,7 @@ $marketplaces = array(
         var value2 = ebayAtt.options[ebayAtt.selectedIndex].value;
         arrMap[value1] = value2;
 
-        new Ajax.Request('<?php echo $this->getUrl('*/m2i/mappingMangetoToeBayAtt') ?>', {
+        new Ajax.Request('<?php echo $this->getUrl('*/e2m/mappingMangetoToeBayAtt') ?>', {
             method:'get',
             parameters: {
                 maps: JSON.stringify(arrMap)
@@ -217,7 +217,7 @@ $marketplaces = array(
             return false;
         }
 
-        new Ajax.Request('<?php echo $this->getUrl('*/m2i/mapRelationProduct') ?>', {
+        new Ajax.Request('<?php echo $this->getUrl('*/e2m/mapRelationProduct') ?>', {
             method:'get',
             asynchronous: true,
             parameters: {
@@ -236,7 +236,7 @@ $marketplaces = array(
     }
 
     function startImportInventory() {
-        new Ajax.Request('<?php echo $this->getUrl('*/m2i/startImportInventory') ?>', {
+        new Ajax.Request('<?php echo $this->getUrl('*/e2m/startImportInventory') ?>', {
             method:'get',
             asynchronous: true,
             onCreate: function() {},
@@ -281,8 +281,8 @@ $marketplaces = array(
                     <td class="value" style="width: auto;">
                         <select <?php if ($formData['token_session'] != ''): ?>disabled="disabled"
                                 <?php else: ?>id="mode" name="mode"<?php endif; ?> class="required-entry">
-                            <option value="<?php echo M2e_M2i_Helper_Data::MODE_PRODUCTION; ?>" <?php if ($formData['mode'] == M2e_M2i_Helper_Data::MODE_PRODUCTION): echo ' selected="selected"'; endif; ?>><?php echo $dataHelper->__('Production (Live)'); ?></option>
-                            <option value="<?php echo M2e_M2i_Helper_Data::MODE_SANDBOX; ?>" <?php if ($formData['mode'] == M2e_M2i_Helper_Data::MODE_SANDBOX): echo ' selected="selected"'; endif; ?>><?php echo $dataHelper->__('Sandbox (Test)'); ?></option>
+                            <option value="<?php echo M2E_e2M_Helper_Data::MODE_PRODUCTION; ?>" <?php if ($formData['mode'] == M2E_e2M_Helper_Data::MODE_PRODUCTION): echo ' selected="selected"'; endif; ?>><?php echo $dataHelper->__('Production (Live)'); ?></option>
+                            <option value="<?php echo M2E_e2M_Helper_Data::MODE_SANDBOX; ?>" <?php if ($formData['mode'] == M2E_e2M_Helper_Data::MODE_SANDBOX): echo ' selected="selected"'; endif; ?>><?php echo $dataHelper->__('Sandbox (Test)'); ?></option>
                         </select>
                         <?php if ($formData['token_session'] != ''): ?>
                             <input id="mode" name="mode" value="<?php echo $formData['mode']; ?>" type="hidden"
