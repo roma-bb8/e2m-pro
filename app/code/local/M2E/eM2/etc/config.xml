@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <M2e_M2i>
+            <version>0.1.0</version>
+        </M2e_M2i>
+    </modules>
+    <global>
+        <blocks>
+            <m2i>
+                <class>M2e_M2i_Block</class>
+            </m2i>
+        </blocks>
+        <helpers>
+            <m2i>
+                <class>M2e_M2i_Helper</class>
+            </m2i>
+        </helpers>
+        <models>
+            <m2i>
+                <class>M2e_M2i_Model</class>
+            </m2i>
+        </models>
+        <resources>
+            <m2i_setup>
+                <setup>
+                    <module>M2e_M2i</module>
+                </setup>
+            </m2i_setup>
+        </resources>
+    </global>
+    <adminhtml>
+        <menu>
+            <m2i module="m2i">
+                <title>e2MPro</title>
+                <sort_order>72</sort_order>
+                <action>adminhtml/m2i</action>
+            </m2i>
+        </menu>
+    </adminhtml>
+    <admin>
+        <routers>
+            <adminhtml>
+                <args>
+                    <modules>
+                        <m2i after="Mage_Adminhtml">M2e_M2i_Adminhtml</m2i>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    </admin>
+</config>
