@@ -1,6 +1,9 @@
 {
   "require": {
     "php": "*",
+    "ext-dom": "*",
+    "ext-curl": "*",
+    "ext-simplexml": "*",
     "ext-json": "*"
   }
 }
