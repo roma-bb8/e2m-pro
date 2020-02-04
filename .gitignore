@@ -1,3 +1,4 @@
+.idea/
 app/
 dev/
 downloader/
@@ -25,3 +26,4 @@ LICENSE_AFL.txt
 mage
 php.ini.sample
 RELEASE_NOTES.txt
+!app/code/local/M2E/eM2/*
