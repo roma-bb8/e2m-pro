@@ -8,6 +8,9 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
     public function indexAction() {
         $this->loadLayout();
 
+        $this->getLayout()->getBlock('head')->addJs('e2M/eBay/UrlHandler.js');
+        $this->getLayout()->getBlock('head')->addJs('e2M/eBay/AccountHandler.js');
+
         $this->_addContent($this->getLayout()->createBlock('e2m/adminhtml_main'));
         $this->_setActiveMenu('e2m');
         $this->renderLayout();
