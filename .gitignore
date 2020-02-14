@@ -30,5 +30,5 @@ RELEASE_NOTES.txt
 !app/code/local/M2E/e2M/*
 !app/design/adminhtml/default/default/template/e2m/*
 !app/etc/modules/M2E_e2M.xml
-!skin/adminhtml/default/default/e2m/images/*
+!skin/adminhtml/default/default/e2m/*
 access.json

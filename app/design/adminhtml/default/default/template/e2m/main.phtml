@@ -170,6 +170,11 @@
                             <option value="<?php echo M2E_e2M_Helper_eBay_Config::VALUE_MPN_PRODUCT_IDENTIFIER; ?>" <?php if (M2E_e2M_Helper_eBay_Config::VALUE_MPN_PRODUCT_IDENTIFIER === $this->getConfigHelper()->getProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('MPN'); ?></option>
                             <option value="<?php echo M2E_e2M_Helper_eBay_Config::VALUE_GTIN_PRODUCT_IDENTIFIER; ?>" <?php if (M2E_e2M_Helper_eBay_Config::VALUE_GTIN_PRODUCT_IDENTIFIER === $this->getConfigHelper()->getProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('GTIN'); ?></option>
                         </select>
+                        <p class="note">
+                                <span><?php echo Mage::helper('e2m')->__('SKU is a unique identifier for each Item in your catalog. Select Attribute where the SKU values are stored.<br/>
+                                                                            <b>Note:</b> SKU is required when you create a new offer on Walmart. Must be less than 50 characters.'); ?>
+                                </span>
+                        </p>
                     </td>
                 </tr>
                 <tr>
@@ -182,6 +187,11 @@
                             <option value="<?php echo M2E_e2M_Helper_eBay_Config::VALUE_IGNORE_ACTION_FOUND; ?>" <?php if (M2E_e2M_Helper_eBay_Config::VALUE_IGNORE_ACTION_FOUND === $this->getConfigHelper()->getActionFound()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Ignore'); ?></option>
                             <option value="<?php echo M2E_e2M_Helper_eBay_Config::VALUE_UPDATE_ACTION_FOUND; ?>" <?php if (M2E_e2M_Helper_eBay_Config::VALUE_UPDATE_ACTION_FOUND === $this->getConfigHelper()->getActionFound()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Update'); ?></option>
                         </select>
+                        <p class="note">
+                                <span><?php echo Mage::helper('e2m')->__('SKU is a unique identifier for each Item in your catalog. Select Attribute where the SKU values are stored.<br/>
+                                                                            <b>Note:</b> SKU is required when you create a new offer on Walmart. Must be less than 50 characters.'); ?>
+                                </span>
+                        </p>
                     </td>
                 </tr>
                 <tr>
@@ -193,6 +203,11 @@
                             <option value="1" <?php if ($this->getConfigHelper()->isImportQty() === true) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
                             <option value="0" <?php if ($this->getConfigHelper()->isImportQty() === false) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
                         </select>
+                        <p class="note">
+                                <span><?php echo Mage::helper('e2m')->__('SKU is a unique identifier for each Item in your catalog. Select Attribute where the SKU values are stored.<br/>
+                                                                            <b>Note:</b> SKU is required when you create a new offer on Walmart. Must be less than 50 characters.'); ?>
+                                </span>
+                        </p>
                     </td>
                 </tr>
             </table>
@@ -232,6 +247,11 @@
                             <option value="1" <?php if ($this->getConfigHelper()->isImportImage() === true) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
                             <option value="0" <?php if ($this->getConfigHelper()->isImportImage() === false) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
                         </select>
+                        <p class="note">
+                                <span><?php echo Mage::helper('e2m')->__('SKU is a unique identifier for each Item in your catalog. Select Attribute where the SKU values are stored.<br/>
+                                                                            <b>Note:</b> SKU is required when you create a new offer on Walmart. Must be less than 50 characters.'); ?>
+                                </span>
+                        </p>
                     </td>
                 </tr>
                 <tr>
@@ -243,6 +263,11 @@
                             <option value="1" <?php if ($this->getConfigHelper()->isImportImage() === true) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
                             <option value="0" <?php if ($this->getConfigHelper()->isImportImage() === false) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
                         </select>
+                        <p class="note">
+                                <span><?php echo Mage::helper('e2m')->__('SKU is a unique identifier for each Item in your catalog. Select Attribute where the SKU values are stored.<br/>
+                                                                            <b>Note:</b> SKU is required when you create a new offer on Walmart. Must be less than 50 characters.'); ?>
+                                </span>
+                        </p>
                     </td>
                 </tr>
                 <tr>
@@ -256,6 +281,11 @@
                                 <option value="<?php echo $id; ?>" <?php if ($this->getConfigHelper()->getAttributeSet() == $id) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__($title); ?></option>
                             <?php endforeach; ?>
                         </select>
+                        <p class="note">
+                                <span><?php echo Mage::helper('e2m')->__('SKU is a unique identifier for each Item in your catalog. Select Attribute where the SKU values are stored.<br/>
+                                                                            <b>Note:</b> SKU is required when you create a new offer on Walmart. Must be less than 50 characters.'); ?>
+                                </span>
+                        </p>
                     </td>
                 </tr>
                 <tr>
@@ -332,57 +362,6 @@
 </div>
 <br <?php if ($this->getConfigHelper()->isFull()): ?> style="display: none" <?php endif; ?> class="config-button"/>
 
-<style>
-    .tool-tip-image {
-        cursor: help;
-    }
-
-    .tool-tip-message {
-        position: absolute;
-        background: none repeat scroll 0 0 #D7E5EF;
-        border: 1px solid #2BB0D7;
-        border-radius: 3px;
-        padding: 0.8em 1em;
-        display: block;
-        margin-top: -5px;
-        margin-right: 20px;
-        cursor: default;
-        z-index: 9999;
-        word-wrap: normal;
-        font-weight: normal;
-    }
-    .tool-tip-message strong {
-        color: black !important;
-    }
-    .tool-tip-message a {
-        color: orange !important;
-    }
-
-    .tip-right {
-        margin-left: 17px;
-        margin-right: 15px;
-        padding-left: 10px;
-    }
-
-    .tip-left {
-        margin-right: 17px;
-        margin-left: 15px;
-    }
-
-    .tool-tip-message img {
-        border: 0;
-        margin-top: -17px;
-        width: 24px;
-        height: 24px;
-        margin-right: -25px;
-        float: right;
-    }
-
-    .tip-left img {
-        margin-left: -25px;
-        float: left;
-    }
-</style>
 <script>
 
 

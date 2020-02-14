@@ -10,6 +10,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
 
         $this->getLayout()->getBlock('head')->setTitle(Mage::helper('e2m')->__('eBay Data Import / eM2Pro'));
 
+        $this->getLayout()->getBlock('head')->addCss('e2m/css/main.css');
         $this->getLayout()->getBlock('head')->addJs('e2m/callbacks.js');
         $this->getLayout()->getBlock('head')->addJs('e2m/helper.js');
         $this->getLayout()->getBlock('head')->addJs('e2m/settings.js');
