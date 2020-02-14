@@ -1,18 +1,24 @@
 function paintFieldsAttributes() {
-    var list = $('field-attribute-list');
-    if (list === null) {
+    var listE = $('field-attribute-list-e');
+    var listM = $('field-attribute-list-m');
+    if (listE === null || listM === null) {
         return;
     }
 
-    list.innerHTML = '';
+    listE.innerHTML = '';
+    listM.innerHTML = '';
     for (var [key, value] of Object.entries(e2M.fieldAttribute)) {
 
-        var span = document.createElement('span');
-        span.id = key;
-        span.innerHTML = e2M.eBayAllFields[key] + ' > ' + e2M.magentoAllAttributes[value];
-        span.append(document.createElement('br'));
+        var span1 = document.createElement('span');
 
-        list.append(span);
+        span1.innerHTML = " <&nbsp;&nbsp;" + e2M.eBayAllFields[key];
+        span1.append(document.createElement('br'));
+        listE.append(span1);
+
+        var span2 = document.createElement('span');
+        span2.innerHTML = e2M.magentoAllAttributes[value];
+        span2.append(document.createElement('br'));
+        listM.append(span2);
     }
 }
 
@@ -32,6 +38,12 @@ $$('.ebay-field-magento-attribute').invoke('observe', 'change', function () {
         delete e2M.fieldAttribute[ebayFieldValue];
         return;
     } else {
+
+        e2M.fieldAttribute.forEach(function (e, i) {
+            if (e === magentoAttributeValue) {
+                delete e2M.fieldAttribute[i];
+            }
+        });
 
         e2M.fieldAttribute[ebayFieldValue] = magentoAttributeValue;
 

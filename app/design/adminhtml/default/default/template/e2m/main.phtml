@@ -11,6 +11,7 @@
     e2M.url.sendSettings = '<?php echo $this->getUrl('*/e2m/sendSettings') ?>';
     e2M.url.startTaskDownloadInventory = '<?php echo $this->getUrl('*/e2m/startTaskDownloadInventory') ?>';
     e2M.url.startTaskImportInventory = '<?php echo $this->getUrl('*/e2m/startTaskImportInventory') ?>';
+    e2M.url.skinURL = '<?php echo $this->getSkinUrl('e2m') ?>';
 
     e2M.eBayAllFields = JSON.parse('<?php echo $this->getCoreHelper()->jsonEncode($this->getDataHelper()->getEbayAllFields()) ?>');
     e2M.magentoAllAttributes = JSON.parse('<?php echo str_replace("'", '', $this->getCoreHelper()->jsonEncode($this->getDataHelper()->getMagentoAllAttributes())) ?>');
@@ -62,6 +63,62 @@
                             <?php echo $this->getChildHtml('get_token_button'); ?>
                         </td>
                     </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+
+<?php if (!empty($this->getAccountHelper()->getToken())): ?>
+    <div class="entry-edit">
+        <header class="entry-edit-head">
+            <h4><?php echo $this->getDataHelper()->__('Summary inventory'); ?></h4>
+        </header>
+        <div class="fieldset">
+            <div>
+                <table class="form-list" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td class="label">
+                            <label><?php echo $this->getDataHelper()->__('Total items downloaded'); ?>:</label>
+                        </td>
+                        <td class="value" style="width: auto">
+                            <span id="download-inventory-total-items"><?php echo $this->escapeHtml($this->getInventoryHelper()->getItemsTotal()) ?></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">
+                            <label><?php echo $this->getDataHelper()->__('Variation items'); ?>:</label>
+                        </td>
+                        <td class="value" style="width: auto">
+                            <span id="download-inventory-variation-items"><?php echo $this->escapeHtml($this->getInventoryHelper()->getItemsVariation()); ?></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">
+                            <label><?php echo $this->getDataHelper()->__('Simple items'); ?>:</label>
+                        </td>
+                        <td class="value" style="width: auto">
+                            <span id="download-inventory-simple-items"><?php echo $this->escapeHtml($this->getInventoryHelper()->getItemsSimple()); ?></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">
+                            <?php echo $this->getChildHtml('start_download_inventory_button'); ?>
+                        </td>
+                        <td class="value block-download-inventory-progress" style="width: auto">
+                            <span id="download-inventory-progress"><?php echo $this->escapeHtml($this->getProgressHelper()->getProgressByTag(M2E_e2M_Helper_Data::EBAY_DOWNLOAD_INVENTORY)); ?></span>%
+                        </td>
+                    </tr>
+                    <?php if ($this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Helper_Data::EBAY_DOWNLOAD_INVENTORY)): ?>
+                        <tr>
+                            <td class="label">
+                                <?php echo $this->getChildHtml('start_import_inventory_button'); ?>
+                            </td>
+                            <td class="value block-import-inventory-progress" style="width: auto">
+                                <span id="import-inventory-progress"><?php echo $this->escapeHtml($this->getProgressHelper()->getProgressByTag(M2E_e2M_Helper_Data::MAGENTO_IMPORT_INVENTORY)); ?></span>%
+                            </td>
+                        </tr>
+                    <?php endif; ?>
                 </table>
             </div>
         </div>
@@ -127,6 +184,17 @@
                         </select>
                     </td>
                 </tr>
+                <tr>
+                    <td class="label">
+                        <label for="import-qty"><?php echo $this->getDataHelper()->__('Create Stock item (Import QTY)') ?>:</label>
+                    </td>
+                    <td class="value" style="width: auto">
+                        <select id="import-qty" class="attribute-set config-input">
+                            <option value="1" <?php if ($this->getConfigHelper()->isImportQty() === true) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
+                            <option value="0" <?php if ($this->getConfigHelper()->isImportQty() === false) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
+                        </select>
+                    </td>
+                </tr>
             </table>
         </div>
     </div>
@@ -141,51 +209,18 @@
             <table class="form-list" cellspacing="0" cellpadding="0">
                 <tr>
                     <td class="label">
-                        <label for="attribute-set"><?php echo $this->getDataHelper()->__('Attribute Set') ?>:</label>
+                        <label for="import-image"><?php echo $this->getDataHelper()->__('Generate SKU (if empty)') ?>:</label>
                     </td>
-                    <td class="value" style="width: auto">
-                        <select id="attribute-set" class="attribute-set config-input">
-                            <option>-- Please Select --</option>
-                            <?php foreach ($this->getDataHelper()->getAllAttributeSet() as $id => $title): ?>
-                                <option value="<?php echo $id; ?>" <?php if ($this->getConfigHelper()->getAttributeSet() == $id) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__($title); ?></option>
-                            <?php endforeach; ?>
+                    <td class="value">
+                        <select id="import-image" class="attribute-set config-input">
+                            <option value="1" <?php if ($this->getConfigHelper()->isImportImage() === true) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
+                            <option value="0" <?php if ($this->getConfigHelper()->isImportImage() === false) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
                         </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label">
-                        <br/>
-                        <label for="ebay-field"><?php echo $this->getDataHelper()->__('eBay fields'); ?>:</label>
-                    </td>
-                    <td class="value" style="width: auto">
-                        <br/>
-                        <label for="magento-attribute"><?php echo $this->getDataHelper()->__('Magento attributes'); ?>:</label>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label">
-                        <select id="ebay-field" class="ebay-field-magento-attribute config-input">
-                            <option></option>
-                            <?php foreach ($this->getDataHelper()->getEbayAllFields() as $code => $title): ?>
-                                <option value="<?php echo $code; ?>"><?php echo $this->getDataHelper()->__($title); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </td>
-                    <td class="value" style="width: auto">
-                        <select id="magento-attribute" class="ebay-field-magento-attribute config-input">
-                            <option></option>
-                            <?php foreach ($this->getDataHelper()->getMagentoAllAttributes() as $code => $title): ?>
-                                <option value="<?php echo $code; ?>"><?php echo $this->getDataHelper()->__($title); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label">
-                        <label><?php echo $this->getDataHelper()->__('List eBay fields to Magento attributes'); ?>:</label>
-                    </td>
-                    <td class="value" style="width: auto">
-                        <div id="field-attribute-list"></div>
+                        <p class="note">
+                                <span><?php echo Mage::helper('e2m')->__('SKU is a unique identifier for each Item in your catalog. Select Attribute where the SKU values are stored.<br/>
+                                                                            <b>Note:</b> SKU is required when you create a new offer on Walmart. Must be less than 50 characters.'); ?>
+                                </span>
+                        </p>
                     </td>
                 </tr>
                 <tr>
@@ -201,13 +236,90 @@
                 </tr>
                 <tr>
                     <td class="label">
-                        <label for="import-qty"><?php echo $this->getDataHelper()->__('Create Stock item') ?>:</label>
+                        <label for="import-image"><?php echo $this->getDataHelper()->__('Clean HTML in Description') ?>:</label>
                     </td>
                     <td class="value" style="width: auto">
-                        <select id="import-qty" class="attribute-set config-input">
-                            <option value="1" <?php if ($this->getConfigHelper()->isImportQty() === true) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
-                            <option value="0" <?php if ($this->getConfigHelper()->isImportQty() === false) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
+                        <select id="import-image" class="attribute-set config-input">
+                            <option value="1" <?php if ($this->getConfigHelper()->isImportImage() === true) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
+                            <option value="0" <?php if ($this->getConfigHelper()->isImportImage() === false) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
                         </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        <label for="attribute-set"><?php echo $this->getDataHelper()->__('Attribute Set') ?>:</label>
+                    </td>
+                    <td class="value" style="width: auto">
+                        <select id="attribute-set" class="attribute-set config-input">
+                            <option>-- Please Select --</option>
+                            <?php foreach ($this->getDataHelper()->getAllAttributeSet() as $id => $title): ?>
+                                <option value="<?php echo $id; ?>" <?php if ($this->getConfigHelper()->getAttributeSet() == $id) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__($title); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        <label><?php echo $this->getDataHelper()->__('List properties'); ?>:</label>
+                    </td>
+                    <td class="value" style="width: auto">
+
+                        <table class="form-list" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td class="label">
+                                    <label for="ebay-field"><?php echo $this->getDataHelper()->__('eBay fields'); ?>:</label>
+                                </td>
+                                <td class="value" style="width: auto">
+                                    <label for="magento-attribute"><?php echo $this->getDataHelper()->__('Magento attributes'); ?>:</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label">
+                                    <select id="ebay-field" class="ebay-field-magento-attribute config-input">
+                                        <option></option>
+                                        <?php foreach ($this->getDataHelper()->getEbayAllFields() as $code => $title): ?>
+                                            <option value="<?php echo $code; ?>"><?php echo $this->getDataHelper()->__($title); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </td>
+                                <td class="value" style="width: auto">
+                                    <select id="magento-attribute" class="ebay-field-magento-attribute config-input">
+                                        <option></option>
+                                        <?php foreach ($this->getDataHelper()->getMagentoAllAttributes() as $code => $title): ?>
+                                            <option value="<?php echo $code; ?>"><?php echo $this->getDataHelper()->__($title); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        <label><?php echo $this->getDataHelper()->__('Import properties'); ?>:</label>
+                    </td>
+                    <td class="value" style="width: auto">
+
+                        <table class="form-list" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td class="value" style="width: auto">
+                                    <label for="magento-attribute"><?php echo $this->getDataHelper()->__('Magento attributes'); ?></label>
+                                </td>
+                                <td class="label">
+                                    <label for="ebay-field">&nbsp;/&nbsp;&nbsp;<?php echo $this->getDataHelper()->__('eBay fields'); ?></label>
+                                </td>
+                            </tr>
+
+
+                            <tr>
+                                <td class="value" style="width: auto">
+                                    <div id="field-attribute-list-m"></div>
+                                </td>
+                                <td class="label">
+                                    <div id="field-attribute-list-e"></div>
+                                </td>
+                            </tr>
+                        </table>
                     </td>
                 </tr>
             </table>
@@ -220,73 +332,198 @@
 </div>
 <br <?php if ($this->getConfigHelper()->isFull()): ?> style="display: none" <?php endif; ?> class="config-button"/>
 
-<?php if (!empty($this->getAccountHelper()->getToken())): ?>
-    <div class="entry-edit">
-        <header class="entry-edit-head">
-            <h4><?php echo $this->getDataHelper()->__('Summary inventory'); ?></h4>
-        </header>
-        <div class="fieldset">
-            <div>
-                <table class="form-list" cellspacing="0" cellpadding="0">
-                    <tr>
-                        <td class="label">
-                            <label><?php echo $this->getDataHelper()->__('Total items downloaded'); ?>:</label>
-                        </td>
-                        <td class="value" style="width: auto">
-                            <span id="download-inventory-total-items"><?php echo $this->escapeHtml($this->getInventoryHelper()->getItemsTotal()) ?></span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="label">
-                            <label><?php echo $this->getDataHelper()->__('Variation items'); ?>:</label>
-                        </td>
-                        <td class="value" style="width: auto">
-                            <span id="download-inventory-variation-items"><?php echo $this->escapeHtml($this->getInventoryHelper()->getItemsVariation()); ?></span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="label">
-                            <label><?php echo $this->getDataHelper()->__('Simple items'); ?>:</label>
-                        </td>
-                        <td class="value" style="width: auto">
-                            <span id="download-inventory-simple-items"><?php echo $this->escapeHtml($this->getInventoryHelper()->getItemsSimple()); ?></span>
-                        </td>
-                    </tr>
-                    <tr class="block-download-inventory-progress">
-                        <td class="label">
-                            <label><?php echo $this->getDataHelper()->__('Progress'); ?>:</label>
-                        </td>
-                        <td class="value" style="width: auto">
-                            <span id="download-inventory-progress"><?php echo $this->escapeHtml($this->getProgressHelper()->getProgressByTag(M2E_e2M_Helper_Data::EBAY_DOWNLOAD_INVENTORY)); ?></span>%
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="value" style="width: auto">
-                            <?php echo $this->getChildHtml('start_download_inventory_button'); ?>
-                        </td>
-                    </tr>
-                    <tr class="block-import-inventory-progress">
-                        <td class="label">
-                            <label><?php echo $this->getDataHelper()->__('Progress'); ?>:</label>
-                        </td>
-                        <td class="value" style="width: auto">
-                            <span id="import-inventory-progress"><?php echo $this->escapeHtml($this->getProgressHelper()->getProgressByTag(M2E_e2M_Helper_Data::MAGENTO_IMPORT_INVENTORY)); ?></span>%
-                        </td>
-                    </tr>
-                    <?php if ($this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Helper_Data::EBAY_DOWNLOAD_INVENTORY)): ?>
-                        <tr>
-                            <td class="value" style="width: auto">
-                                <?php echo $this->getChildHtml('start_import_inventory_button'); ?>
-                            </td>
-                        </tr>
-                    <?php endif; ?>
-                </table>
-            </div>
-        </div>
-    </div>
-<?php endif; ?>
+<style>
+    .tool-tip-image {
+        cursor: help;
+    }
 
+    .tool-tip-message {
+        position: absolute;
+        background: none repeat scroll 0 0 #D7E5EF;
+        border: 1px solid #2BB0D7;
+        border-radius: 3px;
+        padding: 0.8em 1em;
+        display: block;
+        margin-top: -5px;
+        margin-right: 20px;
+        cursor: default;
+        z-index: 9999;
+        word-wrap: normal;
+        font-weight: normal;
+    }
+    .tool-tip-message strong {
+        color: black !important;
+    }
+    .tool-tip-message a {
+        color: orange !important;
+    }
+
+    .tip-right {
+        margin-left: 17px;
+        margin-right: 15px;
+        padding-left: 10px;
+    }
+
+    .tip-left {
+        margin-right: 17px;
+        margin-left: 15px;
+    }
+
+    .tool-tip-message img {
+        border: 0;
+        margin-top: -17px;
+        width: 24px;
+        height: 24px;
+        margin-right: -25px;
+        float: right;
+    }
+
+    .tip-left img {
+        margin-left: -25px;
+        float: left;
+    }
+</style>
 <script>
+
+
+    MagentoFieldTip = Class.create();
+    MagentoFieldTip.prototype = {
+
+        // ---------------------------------------
+
+        initialize: function()
+        {
+            this.isHideToolTip = false;
+        },
+
+        // ---------------------------------------
+
+        onToolTipMouseLeave: function()
+        {
+            var self = MagentoFieldTipObj;
+            var element = this;
+
+            self.isHideToolTip = true;
+
+            setTimeout(function() {
+                self.isHideToolTip && element.hide();
+            }, 1000);
+        },
+
+        onToolTipMouseEnter: function()
+        {
+            var self = MagentoFieldTipObj;
+            self.isHideToolTip = false;
+        },
+
+        onToolTipIconMouseLeave: function()
+        {
+            var self = MagentoFieldTipObj;
+            var element = this.up().select('.tool-tip-message')[0];
+
+            self.isHideToolTip = true;
+
+            setTimeout(function() {
+                self.isHideToolTip && element.hide();
+            }, 1000);
+        },
+
+        // ---------------------------------------
+
+        showToolTip: function()
+        {
+            var self = MagentoFieldTipObj;
+
+            self.isHideToolTip = false;
+
+            $$('.tool-tip-message').each(function(element) {
+                element.hide();
+            });
+
+            if (this.up().select('.tool-tip-message').length > 0) {
+                self.changeToolTipPosition(this);
+                this.up().select('.tool-tip-message')[0].show();
+
+                return;
+            }
+
+            var isShowLeft = false;
+            if (this.up().previous('td').select('p.note')[0].hasClassName('show-left')) {
+                isShowLeft = true;
+            }
+
+            var tipText = this.up().previous('td').select('p.note')[0].innerHTML;
+            var tipWidth = this.up().previous('td').select('p.note')[0].getWidth();
+            if (tipWidth > 500) {
+                tipWidth = 500;
+            }
+
+            var additionalClassName = 'tip-right';
+            if (isShowLeft) {
+                additionalClassName = 'tip-left';
+            }
+
+            var toolTipSpan = new Element('span', {
+                'class': 'tool-tip-message ' + additionalClassName
+            }).update(tipText).hide();
+
+            if (isShowLeft) {
+                toolTipSpan.style.width = tipWidth + 'px';
+            }
+
+            var imgUrl = e2M.url.skinURL + '/images/help.png';
+            var toolTipImg = new Element('img', {
+                'src': imgUrl
+            });
+
+            toolTipSpan.insert({top: toolTipImg});
+            this.insert({after: toolTipSpan});
+
+            self.changeToolTipPosition(this);
+
+            toolTipSpan.show();
+
+            toolTipSpan.observe('mouseout', self.onToolTipMouseLeave);
+            toolTipSpan.observe('mouseover', self.onToolTipMouseEnter);
+        },
+
+        // ---------------------------------------
+
+        changeToolTipPosition: function(element)
+        {
+            var toolTip = element.up().select('.tool-tip-message')[0];
+
+            var settings = {
+                setHeight: false,
+                setWidth: false,
+                setLeft: true,
+                offsetTop: 25,
+                offsetLeft: 0
+            };
+
+            if (element.up().getStyle('float') == 'right') {
+                settings.offsetLeft += 18;
+            }
+            if (element.up().match('span')) {
+                settings.offsetLeft += 15;
+            }
+
+            toolTip.clonePosition(element, settings);
+
+            if (toolTip.hasClassName('tip-left')) {
+                toolTip.style.left = (parseInt(toolTip.style.left) - toolTip.getWidth() - 10) + 'px';
+            }
+        }
+
+        // ---------------------------------------
+    };
+    MagentoFieldTipObj = new MagentoFieldTip();
+
+
+
+
+
+
     $$('.ebay-field-magento-attribute').invoke('observe', 'change', function() {
 
         var ebayField = $('ebay-field');
@@ -326,7 +563,47 @@
         blockObj.select('div.entry-edit-head')[0].innerHTML = '<div class="entry-edit-head-left" style="float: left; width: 78%;">' + blockObj.select('div.entry-edit-head')[0].innerHTML + '</div>' +
             '<div class="entry-edit-head-right" style="float: right; width: 20%;"></div>';
         MagentoBlockObj.observePrepareStart(blockObj);
+
+        blockObj.select('p.note').each(function(noteElement) {
+
+            if (noteElement.hasClassName('note-no-tool-tip') || noteElement.innerHTML.length <= 0) {
+                return;
+            }
+
+            if (typeof noteElement.up().next() != "undefined" && noteElement.up().next() != null
+                && noteElement.up().next().select('.tool-tip-image').length > 0) {
+
+                return;
+            }
+
+            noteElement.hide();
+
+            var toolTipContainer = new Element('td', {
+                'class': 'value'
+            });
+
+            var imageUrl = e2M.url.skinURL + '/images/tool-tip-icon.png';
+            var toolTipImg = new Element('img', {
+                'class': 'tool-tip-image',
+                'src': imageUrl
+            });
+
+            toolTipContainer.insert({top: toolTipImg});
+
+            noteElement.up().insert({after: toolTipContainer});
+        });
     });
+
+    $$('.tool-tip-image').each(function(element) {
+        element.observe('mouseover', MagentoFieldTipObj.showToolTip);
+        element.observe('mouseout', MagentoFieldTipObj.onToolTipIconMouseLeave);
+    });
+
+    $$('.tool-tip-message').each(function(element) {
+        element.observe('mouseout', MagentoFieldTipObj.onToolTipMouseLeave);
+        element.observe('mouseover', MagentoFieldTipObj.onToolTipMouseEnter);
+    });
+
 
     $$('.config-input').invoke('observe', 'change', function() {
         $$('.config-button').forEach(function (element) {

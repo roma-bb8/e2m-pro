@@ -377,9 +377,9 @@ class M2E_e2M_Model_Product_Magento_Builder extends Mage_Core_Model_Abstract {
         }
 
         /** assigning associated product to configurable */
+        $configProduct = (clone $this->product)->load($configProduct->getId());
         $configProduct->getTypeInstance()->setUsedProductAttributeIds(array_keys($attributes));
         $configurableAttributesData = $configProduct->getTypeInstance()->getConfigurableAttributesAsArray();
-
         foreach ($configurableAttributesData as &$configurableAttributesDatum) {
             $configurableAttributesDatum['values'] = array_merge(
                 $configurableAttributesDatum['values'],
@@ -394,7 +394,7 @@ class M2E_e2M_Model_Product_Magento_Builder extends Mage_Core_Model_Abstract {
 
         $configProduct->setData('configurable_products_data', $configurableProductsData);
         $configProduct->setData('configurable_attributes_data', $configurableAttributesData);
-        $configProduct->setData('can_save_configurable_attributes',true);
+        $configProduct->setData('can_save_configurable_attributes', true);
         $configProduct->save();
 
         return $configProduct;
