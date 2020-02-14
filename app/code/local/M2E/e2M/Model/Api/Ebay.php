@@ -2,6 +2,8 @@
 
 class M2E_e2M_Model_Api_Ebay {
 
+    const MAX_PAGE_NUMBER = 50;
+
     private $sandbox = 'https://signin.sandbox.ebay.com/ws/eBayISAPI.dll?SignIn&runame=%s&SessID=%s&ruparams=VarA%%3D%s';
     private $url = 'https://api.sandbox.ebay.com/ws/api.dll';
     private $ruName = 'xxx';
@@ -15,6 +17,7 @@ class M2E_e2M_Model_Api_Ebay {
         'X-EBAY-API-CERT-NAME' => 'xxx',
         'X-EBAY-API-CALL-NAME' => ''
     );
+    private $mode;
 
     public function __construct() {
 
@@ -24,6 +27,20 @@ class M2E_e2M_Model_Api_Ebay {
         $this->headers['X-EBAY-API-APP-NAME'] = $access['X-EBAY-API-APP-NAME'];
         $this->headers['X-EBAY-API-CERT-NAME'] = $access['X-EBAY-API-CERT-NAME'];
     }
+
+    /**
+     * @return M2E_e2M_Helper_Data
+     */
+    public function getCURL() {
+        return Mage::helper('e2m');
+    }
+
+    public function setMode($mode) {
+        $this->mode = $mode;
+    }
+
+
+    //########################################
 
     /**
      * @return string
@@ -72,7 +89,7 @@ XML;
      * @return array
      * @throws Exception
      */
-    public function getTokenInfo($sessionID) {
+    public function getInfo($sessionID) {
 
         $this->headers['X-EBAY-API-CALL-NAME'] = 'FetchToken';
         $body = <<<XML
@@ -122,7 +139,7 @@ XML;
         }
 
         if (is_null($dateTime)) {
-            throw new Exception('eBay DateTime object is null');
+            throw new Exception('ebay DateTime object is null');
         }
 
         return $dateTime;
@@ -165,30 +182,32 @@ XML;
     }
 
     /**
-     * @param array $marketplaces
      * @param string $token
-     *
      * @param DateTime $fromDateTime
      * @param DateTime $toDateTime
      *
-     * @return bool
      * @throws Exception
      */
-    public function loadInventory($token, $fromDateTime, $toDateTime) {
-        $ii = 0;
+    public function downloadInventory($token, $fromDateTime, $toDateTime) {
 
-        /** @var M2e_e2m_Helper_Full $full */
-        $full = Mage::helper('e2m/Full');
+        $this->headers['X-EBAY-API-CALL-NAME'] = 'GetSellerList';
+
+        //----------------------------------------
+
+        /** @var M2e_e2m_Helper_Full $parser */
+        $itemParserHelper = Mage::helper('e2m/Full');
+        $coreHelper = Mage::helper('core');
 
         $resource = Mage::getSingleton('core/resource');
+        $connRead = $resource->getConnection('core_read');
         $connWrite = $resource->getConnection('core_write');
-        $inventoryTableName = $resource->getTableName('m2e_e2m_inventory');
 
-        $i = 1;
-        $this->headers['X-EBAY-API-CALL-NAME'] = 'GetSellerList';
-        $next = true;
+        $inventoryTableName = $resource->getTableName('m2e_e2m_inventory_ebay');
 
-        do {
+        //----------------------------------------
+
+        $pageNumber = 1;
+        while (self::MAX_PAGE_NUMBER > $pageNumber) {
             $body = <<<XML
 <?xml version="1.0" encoding="utf-8" ?>
 <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
@@ -202,73 +221,65 @@ XML;
     <StartTimeTo>{$toDateTime->format('Y-m-d H:i:s')}</StartTimeTo>
     <Pagination ComplexType="PaginationType">
         <EntriesPerPage>200</EntriesPerPage>
-        <PageNumber>{$i}</PageNumber>
+        <PageNumber>{$pageNumber}</PageNumber>
     </Pagination>
 </GetSellerListRequest>
 XML;
+
             $cURL = $this->getCURL();
 
             $cURL->setUrl($this->url);
             $cURL->setHeader($this->headers);
             $cURL->setBody($body);
 
-            $response = $cURL->getResponse();
-            $response = new SimpleXMLElement($response);
-            $i++;
-
-            if (!$response->ReturnedItemCountActual) {
-                break;
-            }
-
-            if ((int)$response->ReturnedItemCountActual < 200) {
-                $next = false;
-            }
-
-            if (empty($response->ItemArray)) {
-                $next = false;
+            $response = new SimpleXMLElement($cURL->getResponse());
+            if (empty($response->ItemArray) || empty($response->ItemArray->Item)) {
                 break;
             }
 
             $items = array();
-            foreach ($response->ItemArray->Item as $item) {
-                $arr = $full->parseItem($item);
-                $items[$arr['identifiers']['item_id']] = $arr;
+            foreach ($response->ItemArray->Item as $xmlItem) {
+                $item = $itemParserHelper->parseItem($xmlItem);
+                $items[$item['identifiers']['item_id']] = $item;
             }
 
-            $result = $connWrite->select()
-                ->from($inventoryTableName, 'item_id')
-                ->where('item_id IN (?)', array_keys($items))
-                ->query();
+            //----------------------------------------
 
-            $itemIDs = array_column($result->fetchAll(), 'item_id');
+            $itemIDs = array();
+            $rows = $connRead->select()->from($inventoryTableName, 'item_id')
+                ->where('item_id IN (?)', array_keys($items))->query()->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($rows as $row) {
+                $itemIDs[] = $row['item_id'];
+            }
+
             foreach ($itemIDs as $itemId) {
-                $connWrite->update($inventoryTableName,
-                    array('data' => json_encode($items[$itemId])),
-                    array('item_id = ?' => $itemId)
-                );
+                $connWrite->update($inventoryTableName, array(
+                    'data' => $coreHelper->jsonEncode($items[$itemId])
+                ), array('item_id = ?' => $itemId));
 
                 unset($items[$itemId]);
             }
 
+            //----------------------------------------
+
             foreach ($items as $item => $data) {
                 $connWrite->insert($inventoryTableName, array(
+                    'marketplace_id' => $data['marketplace_id'],
                     'item_id' => $item,
-                    'site' => $data['marketplace'],
-                    'data' => json_encode($data)
+                    'variation' => !empty($data['variations']),
+                    'data' => $coreHelper->jsonEncode($data)
                 ));
             }
 
-        } while ($next);
+            //----------------------------------------
 
-        return $ii;
+            if (isset($response->ReturnedItemCountActual) && $response->ReturnedItemCountActual < 200) {
+                break;
+            }
+
+            $pageNumber++;
+        }
     }
 
     //########################################
-
-    /**
-     * @return M2E_e2M_Helper_Data
-     */
-    public function getCURL() {
-        return Mage::helper('e2m');
-    }
 }

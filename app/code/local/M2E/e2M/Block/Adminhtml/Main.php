@@ -1,148 +1,151 @@
 <?php
 
-/*
-Step 1.5
-Map:
-gtin : upc -> ean
-
-еще одна настройка если нашел
-update no action
-
-
-summary
-сколько вариационных
-сколько симплов
-
-defaul setup value
-
-export import configs
-*/
 class M2E_e2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
 
-    public function __construct() {
-        parent::__construct();
-        $this->setTemplate('e2m/main.phtml');
+    /**
+     * @return M2E_e2M_Helper_Data
+     */
+    public function getDataHelper() {
+        return Mage::helper('e2m');
+    }
+
+    /**
+     * @return Mage_Core_Helper_Data
+     */
+    public function getCoreHelper() {
+        return Mage::helper('core');
+    }
+
+    /**
+     * @return M2E_e2M_Helper_eBay_Config
+     */
+    public function getConfigHelper() {
+        return Mage::helper('e2m/eBay_Config');
+    }
+
+    /**
+     * @return M2E_e2M_Helper_eBay_Inventory
+     */
+    public function getInventoryHelper() {
+        return Mage::helper('e2m/eBay_Inventory');
+    }
+
+    /**
+     * @return M2E_e2M_Helper_eBay_Account
+     */
+    public function getAccountHelper() {
+        return Mage::helper('e2m/eBay_Account');
+    }
+
+    /**
+     * @return M2E_e2M_Helper_Progress
+     */
+    public function getProgressHelper() {
+        return Mage::helper('e2m/Progress');
     }
 
     protected function _beforeToHtml() {
 
-        $data = array(
-            'label' => Mage::helper('e2m')->__('Get Token'),
-            'onclick' => 'getToken();',
-            'class' => 'get_token_button'
-        );
-        $buttonBlock = $this->getLayout()->createBlock('adminhtml/widget_button')->setData($data);
-        $this->setChild('get_token_button', $buttonBlock);
+        /** @var Mage_Adminhtml_Block_Widget_Button $button */
+        /** @var Mage_Adminhtml_Block_Widget_Button $widgetButton */
+        $widgetButton = $this->getLayout()->createBlock('adminhtml/widget_button');
 
-        $resource = Mage::getSingleton('core/resource');
-        $connWrite = $resource->getConnection('core_write');
-        $coreConfigDataTableName = $resource->getTableName('core_config_data');
-        $result = $connWrite->select()
-            ->from($coreConfigDataTableName, array('value', 'path'))
-            ->where('scope = ?', 'default')
-            ->where('scope_id = ?', 0)
-            ->where('path LIKE ?', M2E_e2M_Adminhtml_E2MController::CONFIG_PATH . '%')
-            ->query();
+        //----------------------------------------
 
-        while ($row = $result->fetch()) {
-            $data = Mage::registry($row['path']);
-            if (empty($data)) {
-                Mage::register($row['path'], $row['value']);
-            } else {
-                Mage::unregister($row['path']);
-                Mage::register($row['path'], $row['value']);
-            }
+        if (empty($this->getAccountHelper()->getToken())) {
+
+            $button = (clone $widgetButton)->setData(array(
+                'label' => $this->getDataHelper()->__('Get Token'),
+                'onclick' => 'getToken();'
+            ));
+            $this->setChild('get_token_button', $button);
+
+            return;
         }
 
-        $data = array(
-            'label' => Mage::helper('e2m')->__('Delete token'),
-            'onclick' => 'deleteToken();',
-            'class' => 'delete_token_button'
-        );
-        $buttonBlock = $this->getLayout()->createBlock('adminhtml/widget_button')->setData($data);
-        $this->setChild('delete_token_button', $buttonBlock);
+        //----------------------------------------
 
+        $button = (clone $widgetButton)->setData(array(
+            'label' => $this->getDataHelper()->__('Logout'),
+            'onclick' => 'unsetToken();'
+        ));
+        $this->setChild('logout_button', $button);
 
-        $data = array(
-            'label' => Mage::helper('e2m')->__('Start download inventory'),
-            'onclick' => 'startDownloadInventory();',
-            'class' => 'start_download_inventory_button'
-        );
-        $buttonBlock = $this->getLayout()->createBlock('adminhtml/widget_button')->setData($data);
-        $this->setChild('start_download_inventory_button', $buttonBlock);
-
-
-        $data = array(
-            'label' => Mage::helper('e2m')->__('Map relation product'),
-            'onclick' => 'mapRelationProduct();',
-            'class' => 'map_relation_product_button'
-        );
-        $buttonBlock = $this->getLayout()->createBlock('adminhtml/widget_button')->setData($data);
-        $this->setChild('map_relation_product_button', $buttonBlock);
-
-        $data = array(
-            'label' => Mage::helper('e2m')->__('Start download inventory'),
-            'onclick' => 'startDownloadInventory();',
-            'class' => 'start_download_inventory_button'
-        );
-        $buttonBlock = $this->getLayout()->createBlock('adminhtml/widget_button')->setData($data);
-        $this->setChild('start_download_inventory_button', $buttonBlock);
-
-        $stores = array();
-        foreach (Mage::app()->getStores(true) as $store) {
-            /** @var Mage_Core_Model_Store $store */
-            $stores[$store->getId()] = $store->getName();
-        }
-
-        Mage::unregister(M2E_e2M_Adminhtml_E2MController::CONFIG_PATH . 'stores');
-        Mage::register(M2E_e2M_Adminhtml_E2MController::CONFIG_PATH . 'stores', $stores);
-
-        $m2ee2mInventory = $resource->getTableName('m2e_e2m_inventory');
-        $marketplaces = array_column($connWrite->select()
-            ->from($m2ee2mInventory, array('site'))
-            ->group('site')
-            ->query()
-            ->fetchAll(), 'site');
-
-        Mage::unregister(M2E_e2M_Adminhtml_E2MController::CONFIG_PATH . 'marketplaces');
-        Mage::register(M2E_e2M_Adminhtml_E2MController::CONFIG_PATH . 'marketplaces', $marketplaces);
-
-        $data = array(
-            'label' => Mage::helper('e2m')->__('Map'),
-            'onclick' => 'mappingMarketplacesStores();',
-            'class' => 'mapping_marketplaces_stores_button'
-        );
-        $buttonBlock = $this->getLayout()->createBlock('adminhtml/widget_button')->setData($data);
-        $this->setChild('mapping_marketplaces_stores_button', $buttonBlock);
+        //----------------------------------------
 
         $resource = Mage::getSingleton('core/resource');
-        $connWrite = $resource->getConnection('core_write');
-        $coreConfigDataTableName = $resource->getTableName('core_config_data');
-        $maps = $connWrite->select()
-            ->from($coreConfigDataTableName, 'value')
-            ->where('scope = ?', 'default')
-            ->where('scope_id = ?', 0)
-            ->where('path = ?', M2E_e2M_Adminhtml_E2MController::CONFIG_PATH . 'maps')
-            ->query()->fetchColumn();
+        $id = $resource->getConnection('core_read')->select()
+            ->from($resource->getTableName('m2e_e2m_cron_tasks_in_processing'), 'id')
+            ->where('instance = ?', 'Cron_Task_eBay_DownloadInventory')->query()->fetchColumn();
 
-        Mage::unregister(M2E_e2M_Adminhtml_E2MController::CONFIG_PATH . 'map_attributes');
-        Mage::register(M2E_e2M_Adminhtml_E2MController::CONFIG_PATH . 'map_attributes', $maps);
+        $label = empty($id) ? 'Start download inventory' : 'Download inventory (in progress...)';
+        $disabled = !empty($id);
+        if ($this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Helper_Data::EBAY_DOWNLOAD_INVENTORY)) {
+            $label = 'Reload inventory (completed)';
+            $disabled = false;
+        }
 
-        $data = array(
-            'label' => Mage::helper('e2m')->__('Map'),
-            'onclick' => 'mappingMangetoToeBayAtt();',
-            'class' => 'mapping_mangeto_to_eBay_att_button'
-        );
-        $buttonBlock = $this->getLayout()->createBlock('adminhtml/widget_button')->setData($data);
-        $this->setChild('mapping_mangeto_to_eBay_att_button', $buttonBlock);
+        $button = (clone $widgetButton)->setData(array(
+            'label' => $this->getDataHelper()->__($label),
+            'onclick' => 'startDownloadInventory(this);',
+            'disabled' => $disabled
+        ));
+        $this->setChild('start_download_inventory_button', $button);
 
+        //----------------------------------------
 
-        $data = array(
-            'label' => Mage::helper('e2m')->__('Start import inventory'),
+        if ($this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Helper_Data::EBAY_DOWNLOAD_INVENTORY)) {
+            $button = (clone $widgetButton)->setData(array(
+                'label' => Mage::helper('e2m')->__('Save config'),
+                'class' => 'save',
+                'onclick' => 'sendSettings();'
+            ));
+            $this->setChild('send_settings_button', $button);
+        }
+
+        //----------------------------------------
+
+        $resource = Mage::getSingleton('core/resource');
+        $id = $resource->getConnection('core_read')->select()
+            ->from($resource->getTableName('m2e_e2m_cron_tasks_in_processing'), 'id')
+            ->where('instance = ?', 'Cron_Task_Magento_ImportInventory')->query()->fetchColumn();
+
+        switch (true) {
+
+            case !$this->getConfigHelper()->isFull():
+                $label = 'Import inventory (look for settings)';
+                $disabled = true;
+                break;
+
+            case !empty($id):
+                $label = 'Import inventory (in progress...)';
+                $disabled = true;
+                break;
+
+            case $this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Helper_Data::MAGENTO_IMPORT_INVENTORY):
+                $label = 'Reimport inventory (completed)';
+                $disabled = false;
+                break;
+
+            case $this->getConfigHelper()->isFull():
+                $label = 'Start import inventory';
+                $disabled = false;
+                break;
+        }
+
+        $button = (clone $widgetButton)->setData(array(
+            'label' => Mage::helper('e2m')->__($label),
             'onclick' => 'startImportInventory();',
-            'class' => 'start_import_inventory_button'
-        );
-        $buttonBlock = $this->getLayout()->createBlock('adminhtml/widget_button')->setData($data);
-        $this->setChild('start_import_inventory_button', $buttonBlock);
+            'disabled' => $disabled
+        ));
+        $this->setChild('start_import_inventory_button', $button);
+    }
+
+    //########################################
+
+    public function __construct() {
+        parent::__construct();
+
+        $this->setTemplate('e2m/main.phtml');
     }
 }

@@ -2,32 +2,38 @@
 
 /* @var Mage_Core_Model_Resource_Setup $installer */
 $installer = $this;
-$sql = <<<SQL
-DROP TABLE IF EXISTS `{$installer->getTable('m2e_e2m_inventory')}`;
-CREATE TABLE `{$installer->getTable('m2e_e2m_inventory')}` (
-  `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `item_id` DECIMAL(20) UNSIGNED NOT NULL,
-  `site` VARCHAR(5) NOT NULL,
-  `data` LONGTEXT NOT NULL,
-  `update_date` TIMESTAMP DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  `create_date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  INDEX `item_id` (`item_id`),
-  INDEX `site` (`site`)
-) ENGINE = INNODB CHARACTER SET utf8 COLLATE utf8_general_ci;
 
-DROP TABLE IF EXISTS `{$installer->getTable('m2e_e2m_processing')}`;
-CREATE TABLE `{$installer->getTable('m2e_e2m_processing')}` (
+//########################################
+
+$sql = <<<SQL
+DROP TABLE IF EXISTS `m2e_e2m_cron_tasks_in_processing`;
+CREATE TABLE `m2e_e2m_cron_tasks_in_processing` (
   `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `name` DECIMAL(20) UNSIGNED NOT NULL,
-  `from` TIMESTAMP NOT NULL,
-  `to` TIMESTAMP NOT NULL,
-  `item_count` VARCHAR(255) DEFAULT NULL,
-  `update_date` TIMESTAMP DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  `create_date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `is_running` BOOL NOT NULL DEFAULT FALSE,
+  `instance` VARCHAR(255) NOT NULL,
+  `data` TEXT DEFAULT NULL,
+  `updated` TIMESTAMP DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  INDEX `name` (`name`)
-) ENGINE = INNODB CHARACTER SET utf8 COLLATE utf8_general_ci;
+  UNIQUE KEY (`instance`)
+) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+DROP TABLE IF EXISTS `m2e_e2m_inventory_ebay`;
+CREATE TABLE `m2e_e2m_inventory_ebay` (
+  `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `marketplace_id` SMALLINT NOT NULL,
+  `item_id` DECIMAL(20) UNSIGNED NOT NULL,
+  `variation` BOOL NOT NULL DEFAULT FALSE,
+  `data` TEXT DEFAULT NULL,
+  `updated` TIMESTAMP DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  INDEX `marketplace_id` (`marketplace_id`),
+  INDEX `item_id` (`item_id`),
+  INDEX `variation` (`variation`)
+) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+INSERT INTO `m2e_e2m_cron_tasks_in_processing` (`instance`, `data`) VALUES ('Cron_Task_Completed', '{}');
 SQL;
 
 $installer->run($sql);
