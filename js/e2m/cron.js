@@ -1,5 +1,5 @@
 function cron() {
-    new Ajax.Request(e2M.url.cronURL, {
+    new Ajax.Request(e2m.url.cronURL, {
         method: 'get',
         onCreate: function () {
             $('loading-mask').setStyle({
