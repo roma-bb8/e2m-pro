@@ -2,6 +2,9 @@
     'use strict';
 
     Event.observe(window, 'load', function () {
+
+        e2m.isHideTooltip = false;
+
         $$('div.entry-edit').each(function (blockObj) {
             blockObj.select('p.note').each(function (noteElement) {
 
