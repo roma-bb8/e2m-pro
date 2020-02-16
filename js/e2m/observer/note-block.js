@@ -32,5 +32,15 @@
                 noteElement.up().insert({after: toolTipContainer});
             });
         });
+
+        $$('.tool-tip-image').each(function(element) {
+            element.observe('mouseover', showToolTip);
+            element.observe('mouseout', onToolTipIconMouseLeave);
+        });
+
+        $$('.tool-tip-message').each(function(element) {
+            element.observe('mouseout', onToolTipMouseLeave);
+            element.observe('mouseover', onToolTipMouseEnter);
+        });
     }, false);
 })();
