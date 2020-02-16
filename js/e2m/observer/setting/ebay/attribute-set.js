@@ -2,6 +2,9 @@
     'use strict';
 
     Event.observe(window, 'load', function () {
+
+        paintImportProperties();
+
         $('attribute-set1').observe('change', function (element) {
             new Ajax.Request(e2m.url.getAttributsBySet, {
                 method: 'get',
