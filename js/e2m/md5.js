@@ -1,10 +1,9 @@
-function md5(data) {
-
-    var rotateLeft = function (lValue, iShiftBits) {
+function md5(str) {
+    var RotateLeft = function (lValue, iShiftBits) {
         return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits));
     };
 
-    var addUnsigned = function (lX, lY) {
+    var AddUnsigned = function (lX, lY) {
         var lX4, lY4, lX8, lY8, lResult;
         lX8 = (lX & 0x80000000);
         lY8 = (lY & 0x80000000);
@@ -25,57 +24,42 @@ function md5(data) {
         }
     };
 
-    /**
-     * @return {number}
-     */
     var F = function (x, y, z) {
         return (x & y) | ((~x) & z);
     };
-
-    /**
-     * @return {number}
-     */
     var G = function (x, y, z) {
         return (x & z) | (y & (~z));
     };
-
-    /**
-     * @return {number}
-     */
     var H = function (x, y, z) {
         return (x ^ y ^ z);
     };
-
-    /**
-     * @return {number}
-     */
     var I = function (x, y, z) {
         return (y ^ (x | (~z)));
     };
 
     var FF = function (a, b, c, d, x, s, ac) {
-        a = addUnsigned(a, addUnsigned(addUnsigned(F(b, c, d), x), ac));
-        return addUnsigned(rotateLeft(a, s), b);
+        a = AddUnsigned(a, AddUnsigned(AddUnsigned(F(b, c, d), x), ac));
+        return AddUnsigned(RotateLeft(a, s), b);
     };
 
     var GG = function (a, b, c, d, x, s, ac) {
-        a = addUnsigned(a, addUnsigned(addUnsigned(G(b, c, d), x), ac));
-        return addUnsigned(rotateLeft(a, s), b);
+        a = AddUnsigned(a, AddUnsigned(AddUnsigned(G(b, c, d), x), ac));
+        return AddUnsigned(RotateLeft(a, s), b);
     };
 
     var HH = function (a, b, c, d, x, s, ac) {
-        a = addUnsigned(a, addUnsigned(addUnsigned(H(b, c, d), x), ac));
-        return addUnsigned(rotateLeft(a, s), b);
+        a = AddUnsigned(a, AddUnsigned(AddUnsigned(H(b, c, d), x), ac));
+        return AddUnsigned(RotateLeft(a, s), b);
     };
 
     var II = function (a, b, c, d, x, s, ac) {
-        a = addUnsigned(a, addUnsigned(addUnsigned(I(b, c, d), x), ac));
-        return addUnsigned(rotateLeft(a, s), b);
+        a = AddUnsigned(a, AddUnsigned(AddUnsigned(I(b, c, d), x), ac));
+        return AddUnsigned(RotateLeft(a, s), b);
     };
 
-    var ConvertToWordArray = function (data) {
+    var ConvertToWordArray = function (str) {
         var lWordCount;
-        var lMessageLength = data.length;
+        var lMessageLength = str.length;
         var lNumberOfWords_temp1 = lMessageLength + 8;
         var lNumberOfWords_temp2 = (lNumberOfWords_temp1 - (lNumberOfWords_temp1 % 64)) / 64;
         var lNumberOfWords = (lNumberOfWords_temp2 + 1) * 16;
@@ -85,7 +69,7 @@ function md5(data) {
         while (lByteCount < lMessageLength) {
             lWordCount = (lByteCount - (lByteCount % 4)) / 4;
             lBytePosition = (lByteCount % 4) * 8;
-            lWordArray[lWordCount] = (lWordArray[lWordCount] | (data.charCodeAt(lByteCount) << lBytePosition));
+            lWordArray[lWordCount] = (lWordArray[lWordCount] | (str.charCodeAt(lByteCount) << lBytePosition));
             lByteCount++;
         }
         lWordCount = (lByteCount - (lByteCount % 4)) / 4;
@@ -96,15 +80,12 @@ function md5(data) {
         return lWordArray;
     };
 
-    /**
-     * @return {string}
-     */
     var WordToHex = function (lValue) {
         var WordToHexValue = "", WordToHexValue_temp = "", lByte, lCount;
         for (lCount = 0; lCount <= 3; lCount++) {
             lByte = (lValue >>> (lCount * 8)) & 255;
-            WordToHexValue_temp = "0" + lByte.todataing(16);
-            WordToHexValue = WordToHexValue + WordToHexValue_temp.subdata(WordToHexValue_temp.length - 2, 2);
+            WordToHexValue_temp = "0" + lByte.toString(16);
+            WordToHexValue = WordToHexValue + WordToHexValue_temp.substr(WordToHexValue_temp.length - 2, 2);
         }
         return WordToHexValue;
     };
@@ -116,8 +97,8 @@ function md5(data) {
     var S31 = 4, S32 = 11, S33 = 16, S34 = 23;
     var S41 = 6, S42 = 10, S43 = 15, S44 = 21;
 
-    data = this.utf8Encode(data);
-    x = ConvertToWordArray(data);
+    str = this.utf8Encode(str);
+    x = ConvertToWordArray(str);
     a = 0x67452301;
     b = 0xEFCDAB89;
     c = 0x98BADCFE;
@@ -128,7 +109,7 @@ function md5(data) {
         BB = b;
         CC = c;
         DD = d;
-        a = FF(a, b, c, d, x[k], S11, 0xD76AA478);
+        a = FF(a, b, c, d, x[k + 0], S11, 0xD76AA478);
         d = FF(d, a, b, c, x[k + 1], S12, 0xE8C7B756);
         c = FF(c, d, a, b, x[k + 2], S13, 0x242070DB);
         b = FF(b, c, d, a, x[k + 3], S14, 0xC1BDCEEE);
@@ -147,7 +128,7 @@ function md5(data) {
         a = GG(a, b, c, d, x[k + 1], S21, 0xF61E2562);
         d = GG(d, a, b, c, x[k + 6], S22, 0xC040B340);
         c = GG(c, d, a, b, x[k + 11], S23, 0x265E5A51);
-        b = GG(b, c, d, a, x[k], S24, 0xE9B6C7AA);
+        b = GG(b, c, d, a, x[k + 0], S24, 0xE9B6C7AA);
         a = GG(a, b, c, d, x[k + 5], S21, 0xD62F105D);
         d = GG(d, a, b, c, x[k + 10], S22, 0x2441453);
         c = GG(c, d, a, b, x[k + 15], S23, 0xD8A1E681);
@@ -169,14 +150,14 @@ function md5(data) {
         c = HH(c, d, a, b, x[k + 7], S33, 0xF6BB4B60);
         b = HH(b, c, d, a, x[k + 10], S34, 0xBEBFBC70);
         a = HH(a, b, c, d, x[k + 13], S31, 0x289B7EC6);
-        d = HH(d, a, b, c, x[k], S32, 0xEAA127FA);
+        d = HH(d, a, b, c, x[k + 0], S32, 0xEAA127FA);
         c = HH(c, d, a, b, x[k + 3], S33, 0xD4EF3085);
         b = HH(b, c, d, a, x[k + 6], S34, 0x4881D05);
         a = HH(a, b, c, d, x[k + 9], S31, 0xD9D4D039);
         d = HH(d, a, b, c, x[k + 12], S32, 0xE6DB99E5);
         c = HH(c, d, a, b, x[k + 15], S33, 0x1FA27CF8);
         b = HH(b, c, d, a, x[k + 2], S34, 0xC4AC5665);
-        a = II(a, b, c, d, x[k], S41, 0xF4292244);
+        a = II(a, b, c, d, x[k + 0], S41, 0xF4292244);
         d = II(d, a, b, c, x[k + 7], S42, 0x432AFF97);
         c = II(c, d, a, b, x[k + 14], S43, 0xAB9423A7);
         b = II(b, c, d, a, x[k + 5], S44, 0xFC93A039);
@@ -192,10 +173,10 @@ function md5(data) {
         d = II(d, a, b, c, x[k + 11], S42, 0xBD3AF235);
         c = II(c, d, a, b, x[k + 2], S43, 0x2AD7D2BB);
         b = II(b, c, d, a, x[k + 9], S44, 0xEB86D391);
-        a = addUnsigned(a, AA);
-        b = addUnsigned(b, BB);
-        c = addUnsigned(c, CC);
-        d = addUnsigned(d, DD);
+        a = AddUnsigned(a, AA);
+        b = AddUnsigned(b, BB);
+        c = AddUnsigned(c, CC);
+        d = AddUnsigned(d, DD);
     }
 
     var temp = WordToHex(a) + WordToHex(b) + WordToHex(c) + WordToHex(d);
