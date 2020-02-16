@@ -2,13 +2,13 @@ function showToolTip() {
 
     e2m.isHideTooltip = false;
 
-    $$('.tool-tip-message').each(function (element) {
+    $$('.tooltip-message').each(function (element) {
         element.hide();
     });
 
-    if (this.up().select('.tool-tip-message').length > 0) {
+    if (this.up().select('.tooltip-message').length > 0) {
         changeToolTipPosition(this);
-        this.up().select('.tool-tip-message')[0].show();
+        this.up().select('.tooltip-message')[0].show();
         return;
     }
 
@@ -23,13 +23,13 @@ function showToolTip() {
         tipWidth = 500;
     }
 
-    var additionalClassName = 'tip-right';
+    var additionalClassName = 'tooltip-right';
     if (isShowLeft) {
-        additionalClassName = 'tip-left';
+        additionalClassName = 'tooltip-left';
     }
 
     var toolTipSpan = new Element('span', {
-        'class': 'tool-tip-message ' + additionalClassName
+        'class': 'tooltip-message ' + additionalClassName
     }).update(tipText).hide();
 
     if (isShowLeft) {

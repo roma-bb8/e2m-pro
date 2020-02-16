@@ -13,13 +13,13 @@
                 }
 
                 if (typeof noteElement.up().next() != 'undefined' && noteElement.up().next() != null
-                    && noteElement.up().next().select('.tool-tip-image').length > 0) {
+                    && noteElement.up().next().select('.tooltip-image').length > 0) {
                     return;
                 }
 
                 var imageUrl = e2m.url.skinURL + '/images/tool-tip-icon.png';
                 var toolTipImg = new Element('img', {
-                    'class': 'tool-tip-image',
+                    'class': 'tooltip-image',
                     'src': imageUrl
                 });
 
@@ -36,12 +36,12 @@
             });
         });
 
-        $$('.tool-tip-image').each(function(element) {
+        $$('.tooltip-image').each(function(element) {
             element.observe('mouseover', showToolTip);
             element.observe('mouseout', onToolTipIconMouseLeave);
         });
 
-        $$('.tool-tip-message').each(function(element) {
+        $$('.tooltip-message').each(function(element) {
             element.observe('mouseout', onToolTipMouseLeave);
             element.observe('mouseover', onToolTipMouseEnter);
         });

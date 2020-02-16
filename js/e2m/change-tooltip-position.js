@@ -1,6 +1,6 @@
 function changeToolTipPosition(element) {
 
-    var toolTip = element.up().select('.tool-tip-message')[0];
+    var toolTip = element.up().select('.tooltip-message')[0];
     var settings = {
         setHeight: false,
         setWidth: false,
@@ -19,7 +19,7 @@ function changeToolTipPosition(element) {
 
     toolTip.clonePosition(element, settings);
 
-    if (toolTip.hasClassName('tip-left')) {
+    if (toolTip.hasClassName('tooltip-left')) {
         toolTip.style.left = (parseInt(toolTip.style.left) - toolTip.getWidth() - 10) + 'px';
     }
 }
