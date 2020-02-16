@@ -13,7 +13,9 @@ function getToken() {
 
             window.location.replace(response.url);
         },
-        onFailure: function () {
+        onFailure: function (transport) {
+            console.log(transport);
+
             alert('Something went wrong...');
             return false;
         }
