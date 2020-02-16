@@ -2,21 +2,36 @@
 
 <script type="text/javascript">
 
-    var e2M = {};
+    var e2m = {};
 
-    e2M.url = {};
-    e2M.url.cronURL = '<?php echo $this->getUrl('*/e2m/cron') ?>';
-    e2M.url.beforeEbayGetToken = '<?php echo $this->getUrl('*/e2m/beforeEbayGetToken') ?>';
-    e2M.url.deleteEbayToken = '<?php echo $this->getUrl('*/e2m/deleteEbayToken') ?>';
-    e2M.url.sendSettings = '<?php echo $this->getUrl('*/e2m/sendSettings') ?>';
-    e2M.url.startTaskDownloadInventory = '<?php echo $this->getUrl('*/e2m/startTaskDownloadInventory') ?>';
-    e2M.url.startTaskImportInventory = '<?php echo $this->getUrl('*/e2m/startTaskImportInventory') ?>';
-    e2M.url.skinURL = '<?php echo $this->getSkinUrl('e2m') ?>';
+    //----------------------------------------
 
-    e2M.eBayAllFields = JSON.parse('<?php echo $this->getCoreHelper()->jsonEncode($this->getDataHelper()->getEbayAllFields()) ?>');
-    e2M.magentoAllAttributes = JSON.parse('<?php echo str_replace("'", '', $this->getCoreHelper()->jsonEncode($this->getDataHelper()->getMagentoAllAttributes())) ?>');
-    e2M.fieldAttribute = JSON.parse('<?php if (empty($this->getConfigHelper()->getEbayFieldMagentoAttribute())) { echo '{}'; } else { echo str_replace("'", '', $this->getCoreHelper()->jsonEncode($this->getConfigHelper()->getEbayFieldMagentoAttribute())); } ?>');
+    e2m.url = {};
+    e2m.localStorage = {};
+    e2m.prefix = 'm2e_e2m';
+
+    //----------------------------------------
+
+    e2m.url.skin = '<?php echo $this->getSkinUrl('e2m') ?>';
+    e2m.url.cron = '<?php echo $this->getUrl('*/e2m/cron') ?>';
+    e2m.url.beforeEbayGetToken = '<?php echo $this->getUrl('*/e2m/beforeEbayGetToken') ?>';
+    e2m.url.unsetEbayToken = '<?php echo $this->getUrl('*/e2m/deleteEbayToken') ?>';
+    e2m.url.settings = '<?php echo $this->getUrl('*/e2m/sendSettings') ?>';
+    e2m.url.getAttributs = '<?php echo $this->getUrl('*/e2m/getAttributsBySet') ?>';
+    e2m.url.startTaskDownloadInventory = '<?php echo $this->getUrl('*/e2m/startTaskDownloadInventory') ?>';
+    e2m.url.startTaskImportInventory = '<?php echo $this->getUrl('*/e2m/startTaskImportInventory') ?>';
+
+    //----------------------------------------
+
+    e2m.magentoAttributes = JSON.parse('<?php echo str_replace("'", '', $this->getCoreHelper()->jsonEncode($this->getDataHelper()->getMagentoAllAttributes($this->getConfigHelper()->getAttributeSet()))) ?>');
+    e2m.eBayFields = JSON.parse('<?php echo $this->getCoreHelper()->jsonEncode($this->getDataHelper()->getEbayAllFields()) ?>');
+
+    e2m.attributes = JSON.parse('<?php if (empty($this->getConfigHelper()->getEbayFieldMagentoAttribute())) { echo '{}'; } else { echo str_replace("'", '', $this->getCoreHelper()->jsonEncode($this->getConfigHelper()->getEbayFieldMagentoAttribute())); } ?>');
 </script>
+
+<!-- Duck,Duck,Duck  _       _    -->
+<!--               >(.)__  <(.)__ -->
+<!--                (___/   (___/ -->
 
 <div class="content-header">
     <table cellspacing="0">
@@ -161,7 +176,7 @@
             <table class="form-list" cellspacing="0" cellpadding="0">
                 <tr>
                     <td class="label">
-                        <label for="inventory-settings-product-identifier"><?php echo $this->getDataHelper()->__('Product identifier on different marketplaces'); ?>:</label>
+                        <label for="inventory-settings-product-identifier"><?php echo $this->getDataHelper()->__('Product ID'); ?>:</label>
                     </td>
                     <td class="value" style="width: auto">
                         <select id="inventory-settings-product-identifier" class="config-input">
@@ -171,15 +186,14 @@
                             <option value="<?php echo M2E_e2M_Helper_eBay_Config::VALUE_GTIN_PRODUCT_IDENTIFIER; ?>" <?php if (M2E_e2M_Helper_eBay_Config::VALUE_GTIN_PRODUCT_IDENTIFIER === $this->getConfigHelper()->getProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('GTIN'); ?></option>
                         </select>
                         <p class="note">
-                                <span><?php echo Mage::helper('e2m')->__('SKU is a unique identifier for each Item in your catalog. Select Attribute where the SKU values are stored.<br/>
-                                                                            <b>Note:</b> SKU is required when you create a new offer on Walmart. Must be less than 50 characters.'); ?>
+                                <span><?php echo Mage::helper('e2m')->__('Product identifier on different marketplaces'); ?>
                                 </span>
                         </p>
                     </td>
                 </tr>
                 <tr>
                     <td class="label">
-                        <label for="inventory-settings-action-found"><?php echo $this->getDataHelper()->__('Action found a product in Magento inventory'); ?>:</label>
+                        <label for="inventory-settings-action-found"><?php echo $this->getDataHelper()->__('Found a product'); ?>:</label>
                     </td>
                     <td class="value" style="width: auto">
                         <select id="inventory-settings-action-found" class="config-input">
@@ -188,15 +202,14 @@
                             <option value="<?php echo M2E_e2M_Helper_eBay_Config::VALUE_UPDATE_ACTION_FOUND; ?>" <?php if (M2E_e2M_Helper_eBay_Config::VALUE_UPDATE_ACTION_FOUND === $this->getConfigHelper()->getActionFound()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Update'); ?></option>
                         </select>
                         <p class="note">
-                                <span><?php echo Mage::helper('e2m')->__('SKU is a unique identifier for each Item in your catalog. Select Attribute where the SKU values are stored.<br/>
-                                                                            <b>Note:</b> SKU is required when you create a new offer on Walmart. Must be less than 50 characters.'); ?>
+                                <span><?php echo Mage::helper('e2m')->__('Action found a product in Magento inventory'); ?>
                                 </span>
                         </p>
                     </td>
                 </tr>
                 <tr>
                     <td class="label">
-                        <label for="import-qty"><?php echo $this->getDataHelper()->__('Create Stock item (Import QTY)') ?>:</label>
+                        <label for="import-qty"><?php echo $this->getDataHelper()->__('Create Stock item') ?>:</label>
                     </td>
                     <td class="value" style="width: auto">
                         <select id="import-qty" class="attribute-set config-input">
@@ -204,8 +217,7 @@
                             <option value="0" <?php if ($this->getConfigHelper()->isImportQty() === false) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
                         </select>
                         <p class="note">
-                                <span><?php echo Mage::helper('e2m')->__('SKU is a unique identifier for each Item in your catalog. Select Attribute where the SKU values are stored.<br/>
-                                                                            <b>Note:</b> SKU is required when you create a new offer on Walmart. Must be less than 50 characters.'); ?>
+                                <span><?php echo Mage::helper('e2m')->__('Create Stock item (Import QTY)'); ?>
                                 </span>
                         </p>
                     </td>
@@ -224,7 +236,7 @@
             <table class="form-list" cellspacing="0" cellpadding="0">
                 <tr>
                     <td class="label">
-                        <label for="import-image"><?php echo $this->getDataHelper()->__('Generate SKU (if empty)') ?>:</label>
+                        <label for="import-image"><?php echo $this->getDataHelper()->__('Generate SKU') ?>:</label>
                     </td>
                     <td class="value">
                         <select id="import-image" class="attribute-set config-input">
@@ -232,8 +244,7 @@
                             <option value="0" <?php if ($this->getConfigHelper()->isImportImage() === false) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
                         </select>
                         <p class="note">
-                                <span><?php echo Mage::helper('e2m')->__('SKU is a unique identifier for each Item in your catalog. Select Attribute where the SKU values are stored.<br/>
-                                                                            <b>Note:</b> SKU is required when you create a new offer on Walmart. Must be less than 50 characters.'); ?>
+                                <span><?php echo Mage::helper('e2m')->__('Generate SKU (if empty)'); ?>
                                 </span>
                         </p>
                     </td>
@@ -248,15 +259,14 @@
                             <option value="0" <?php if ($this->getConfigHelper()->isImportImage() === false) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
                         </select>
                         <p class="note">
-                                <span><?php echo Mage::helper('e2m')->__('SKU is a unique identifier for each Item in your catalog. Select Attribute where the SKU values are stored.<br/>
-                                                                            <b>Note:</b> SKU is required when you create a new offer on Walmart. Must be less than 50 characters.'); ?>
+                                <span><?php echo Mage::helper('e2m')->__('Import image'); ?>
                                 </span>
                         </p>
                     </td>
                 </tr>
                 <tr>
                     <td class="label">
-                        <label for="import-image"><?php echo $this->getDataHelper()->__('Clean HTML in Description') ?>:</label>
+                        <label for="import-image"><?php echo $this->getDataHelper()->__('Delete HTML') ?>:</label>
                     </td>
                     <td class="value" style="width: auto">
                         <select id="import-image" class="attribute-set config-input">
@@ -264,64 +274,54 @@
                             <option value="0" <?php if ($this->getConfigHelper()->isImportImage() === false) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
                         </select>
                         <p class="note">
-                                <span><?php echo Mage::helper('e2m')->__('SKU is a unique identifier for each Item in your catalog. Select Attribute where the SKU values are stored.<br/>
-                                                                            <b>Note:</b> SKU is required when you create a new offer on Walmart. Must be less than 50 characters.'); ?>
+                                <span><?php echo Mage::helper('e2m')->__('Clean HTML in Description'); ?>
                                 </span>
                         </p>
                     </td>
                 </tr>
                 <tr>
                     <td class="label">
-                        <label for="attribute-set"><?php echo $this->getDataHelper()->__('Attribute Set') ?>:</label>
+                        <label for="attribute-set1"><?php echo $this->getDataHelper()->__('Attribute Set') ?>:</label>
                     </td>
                     <td class="value" style="width: auto">
-                        <select id="attribute-set" class="attribute-set config-input">
+                        <select id="attribute-set1" class="attribute-set config-input">
                             <option>-- Please Select --</option>
                             <?php foreach ($this->getDataHelper()->getAllAttributeSet() as $id => $title): ?>
                                 <option value="<?php echo $id; ?>" <?php if ($this->getConfigHelper()->getAttributeSet() == $id) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__($title); ?></option>
                             <?php endforeach; ?>
                         </select>
                         <p class="note">
-                                <span><?php echo Mage::helper('e2m')->__('SKU is a unique identifier for each Item in your catalog. Select Attribute where the SKU values are stored.<br/>
-                                                                            <b>Note:</b> SKU is required when you create a new offer on Walmart. Must be less than 50 characters.'); ?>
+                                <span><?php echo Mage::helper('e2m')->__('Attribute Set'); ?>
                                 </span>
                         </p>
                     </td>
                 </tr>
+
+
                 <tr>
                     <td class="label">
-                        <label><?php echo $this->getDataHelper()->__('List properties'); ?>:</label>
+                        <label for="ebay-field"><?php echo $this->getDataHelper()->__('eBay fields'); ?>:</label>
                     </td>
                     <td class="value" style="width: auto">
-
-                        <table class="form-list" cellspacing="0" cellpadding="0">
-                            <tr>
-                                <td class="label">
-                                    <label for="ebay-field"><?php echo $this->getDataHelper()->__('eBay fields'); ?>:</label>
-                                </td>
-                                <td class="value" style="width: auto">
-                                    <label for="magento-attribute"><?php echo $this->getDataHelper()->__('Magento attributes'); ?>:</label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="label">
-                                    <select id="ebay-field" class="ebay-field-magento-attribute config-input">
-                                        <option></option>
-                                        <?php foreach ($this->getDataHelper()->getEbayAllFields() as $code => $title): ?>
-                                            <option value="<?php echo $code; ?>"><?php echo $this->getDataHelper()->__($title); ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </td>
-                                <td class="value" style="width: auto">
-                                    <select id="magento-attribute" class="ebay-field-magento-attribute config-input">
-                                        <option></option>
-                                        <?php foreach ($this->getDataHelper()->getMagentoAllAttributes() as $code => $title): ?>
-                                            <option value="<?php echo $code; ?>"><?php echo $this->getDataHelper()->__($title); ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </td>
-                            </tr>
-                        </table>
+                        <select id="ebay-field" class="ebay-field-magento-attribute config-input">
+                            <option></option>
+                            <?php foreach ($this->getDataHelper()->getEbayAllFields() as $code => $title): ?>
+                                <option value="<?php echo $code; ?>"><?php echo $this->getDataHelper()->__($title); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        <label for="magento-attribute"><?php echo $this->getDataHelper()->__('Magento attributes'); ?>:</label>
+                    </td>
+                    <td class="value" style="width: auto">
+                        <select id="magento-attribute" class="ebay-field-magento-attribute config-input">
+                            <option></option>
+                            <?php foreach ($this->getDataHelper()->getMagentoAllAttributes($this->getConfigHelper()->getAttributeSet()) as $code => $title): ?>
+                                <option value="<?php echo $code; ?>"><?php echo $this->getDataHelper()->__($title); ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </td>
                 </tr>
                 <tr>
@@ -333,20 +333,20 @@
                         <table class="form-list" cellspacing="0" cellpadding="0">
                             <tr>
                                 <td class="value" style="width: auto">
-                                    <label for="magento-attribute"><?php echo $this->getDataHelper()->__('Magento attributes'); ?></label>
+                                    <label for="ebay-field"><?php echo $this->getDataHelper()->__('eBay fields'); ?></label>
                                 </td>
                                 <td class="label">
-                                    <label for="ebay-field">&nbsp;/&nbsp;&nbsp;<?php echo $this->getDataHelper()->__('eBay fields'); ?></label>
+                                    <label for="magento-attribute">/&nbsp;&nbsp;<?php echo $this->getDataHelper()->__('Magento attributes'); ?></label>
                                 </td>
                             </tr>
 
 
                             <tr>
                                 <td class="value" style="width: auto">
-                                    <div id="field-attribute-list-m"></div>
+                                    <div id="field-attribute-list-e"></div>
                                 </td>
                                 <td class="label">
-                                    <div id="field-attribute-list-e"></div>
+                                    <div id="field-attribute-list-m"></div>
                                 </td>
                             </tr>
                         </table>
@@ -360,234 +360,3 @@
 <div <?php if ($this->getConfigHelper()->isFull()): ?> style="display: none" <?php endif; ?> class="config-button">
     <?php echo $this->getChildHtml('send_settings_button'); ?>
 </div>
-<br <?php if ($this->getConfigHelper()->isFull()): ?> style="display: none" <?php endif; ?> class="config-button"/>
-
-<script>
-
-
-    MagentoFieldTip = Class.create();
-    MagentoFieldTip.prototype = {
-
-        // ---------------------------------------
-
-        initialize: function()
-        {
-            this.isHideToolTip = false;
-        },
-
-        // ---------------------------------------
-
-        onToolTipMouseLeave: function()
-        {
-            var self = MagentoFieldTipObj;
-            var element = this;
-
-            self.isHideToolTip = true;
-
-            setTimeout(function() {
-                self.isHideToolTip && element.hide();
-            }, 1000);
-        },
-
-        onToolTipMouseEnter: function()
-        {
-            var self = MagentoFieldTipObj;
-            self.isHideToolTip = false;
-        },
-
-        onToolTipIconMouseLeave: function()
-        {
-            var self = MagentoFieldTipObj;
-            var element = this.up().select('.tool-tip-message')[0];
-
-            self.isHideToolTip = true;
-
-            setTimeout(function() {
-                self.isHideToolTip && element.hide();
-            }, 1000);
-        },
-
-        // ---------------------------------------
-
-        showToolTip: function()
-        {
-            var self = MagentoFieldTipObj;
-
-            self.isHideToolTip = false;
-
-            $$('.tool-tip-message').each(function(element) {
-                element.hide();
-            });
-
-            if (this.up().select('.tool-tip-message').length > 0) {
-                self.changeToolTipPosition(this);
-                this.up().select('.tool-tip-message')[0].show();
-
-                return;
-            }
-
-            var isShowLeft = false;
-            if (this.up().previous('td').select('p.note')[0].hasClassName('show-left')) {
-                isShowLeft = true;
-            }
-
-            var tipText = this.up().previous('td').select('p.note')[0].innerHTML;
-            var tipWidth = this.up().previous('td').select('p.note')[0].getWidth();
-            if (tipWidth > 500) {
-                tipWidth = 500;
-            }
-
-            var additionalClassName = 'tip-right';
-            if (isShowLeft) {
-                additionalClassName = 'tip-left';
-            }
-
-            var toolTipSpan = new Element('span', {
-                'class': 'tool-tip-message ' + additionalClassName
-            }).update(tipText).hide();
-
-            if (isShowLeft) {
-                toolTipSpan.style.width = tipWidth + 'px';
-            }
-
-            var imgUrl = e2M.url.skinURL + '/images/help.png';
-            var toolTipImg = new Element('img', {
-                'src': imgUrl
-            });
-
-            toolTipSpan.insert({top: toolTipImg});
-            this.insert({after: toolTipSpan});
-
-            self.changeToolTipPosition(this);
-
-            toolTipSpan.show();
-
-            toolTipSpan.observe('mouseout', self.onToolTipMouseLeave);
-            toolTipSpan.observe('mouseover', self.onToolTipMouseEnter);
-        },
-
-        // ---------------------------------------
-
-        changeToolTipPosition: function(element)
-        {
-            var toolTip = element.up().select('.tool-tip-message')[0];
-
-            var settings = {
-                setHeight: false,
-                setWidth: false,
-                setLeft: true,
-                offsetTop: 25,
-                offsetLeft: 0
-            };
-
-            if (element.up().getStyle('float') == 'right') {
-                settings.offsetLeft += 18;
-            }
-            if (element.up().match('span')) {
-                settings.offsetLeft += 15;
-            }
-
-            toolTip.clonePosition(element, settings);
-
-            if (toolTip.hasClassName('tip-left')) {
-                toolTip.style.left = (parseInt(toolTip.style.left) - toolTip.getWidth() - 10) + 'px';
-            }
-        }
-
-        // ---------------------------------------
-    };
-    MagentoFieldTipObj = new MagentoFieldTip();
-
-
-
-
-
-
-    $$('.ebay-field-magento-attribute').invoke('observe', 'change', function() {
-
-        var ebayField = $('ebay-field');
-        var ebayFieldValue = ebayField.options[ebayField.selectedIndex].value;
-        if (!ebayFieldValue) {
-            return;
-        }
-
-        var magentoAttribute = $('magento-attribute');
-        var magentoAttributeValue = magentoAttribute.options[magentoAttribute.selectedIndex].value;
-        if (!magentoAttributeValue) {
-            delete e2M.fieldAttribute[ebayFieldValue];
-            return;
-        } else {
-
-            e2M.fieldAttribute[ebayFieldValue] = magentoAttributeValue;
-
-            $('magento-attribute').selectedIndex = 0;
-            $('ebay-field').selectedIndex = 0;
-        }
-
-        paintFieldsAttributes();
-    });
-
-    paintFieldsAttributes();
-
-    $$('div.entry-edit').each(function (blockObj) {
-
-        if (blockObj.select('div.entry-edit-head').length === 0) {
-            return;
-        }
-
-        if (blockObj.readAttribute('magento_block') === 'no') {
-            return;
-        }
-
-        blockObj.select('div.entry-edit-head')[0].innerHTML = '<div class="entry-edit-head-left" style="float: left; width: 78%;">' + blockObj.select('div.entry-edit-head')[0].innerHTML + '</div>' +
-            '<div class="entry-edit-head-right" style="float: right; width: 20%;"></div>';
-        MagentoBlockObj.observePrepareStart(blockObj);
-
-        blockObj.select('p.note').each(function(noteElement) {
-
-            if (noteElement.hasClassName('note-no-tool-tip') || noteElement.innerHTML.length <= 0) {
-                return;
-            }
-
-            if (typeof noteElement.up().next() != "undefined" && noteElement.up().next() != null
-                && noteElement.up().next().select('.tool-tip-image').length > 0) {
-
-                return;
-            }
-
-            noteElement.hide();
-
-            var toolTipContainer = new Element('td', {
-                'class': 'value'
-            });
-
-            var imageUrl = e2M.url.skinURL + '/images/tool-tip-icon.png';
-            var toolTipImg = new Element('img', {
-                'class': 'tool-tip-image',
-                'src': imageUrl
-            });
-
-            toolTipContainer.insert({top: toolTipImg});
-
-            noteElement.up().insert({after: toolTipContainer});
-        });
-    });
-
-    $$('.tool-tip-image').each(function(element) {
-        element.observe('mouseover', MagentoFieldTipObj.showToolTip);
-        element.observe('mouseout', MagentoFieldTipObj.onToolTipIconMouseLeave);
-    });
-
-    $$('.tool-tip-message').each(function(element) {
-        element.observe('mouseout', MagentoFieldTipObj.onToolTipMouseLeave);
-        element.observe('mouseover', MagentoFieldTipObj.onToolTipMouseEnter);
-    });
-
-
-    $$('.config-input').invoke('observe', 'change', function() {
-        $$('.config-button').forEach(function (element) {
-            console.log('s');
-            element.show();
-        });
-    });
-</script>
