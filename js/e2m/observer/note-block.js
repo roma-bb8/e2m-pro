@@ -17,7 +17,7 @@
                     return;
                 }
 
-                var imageUrl = e2m.url.skinURL + '/images/tool-tip-icon.png';
+                var imageUrl = e2m.url.skin + '/images/tool-tip-icon.png';
                 var toolTipImg = new Element('img', {
                     'class': 'tooltip-image',
                     'src': imageUrl

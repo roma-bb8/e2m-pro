@@ -6,7 +6,7 @@
         paintImportProperties();
 
         $('attribute-set1').observe('change', function (element) {
-            new Ajax.Request(e2m.url.getAttributsBySet, {
+            new Ajax.Request(e2m.url.getAttributs, {
                 method: 'get',
                 parameters: {
                     set_id: element.target.options[element.target.selectedIndex].value
@@ -14,8 +14,8 @@
                 onSuccess: function (transport) {
                     var response = JSON.parse(transport.responseText);
 
-                    e2m.magentoAllAttributes = response.attributes;
-                    e2m.fieldAttribute = {};
+                    e2m.magentoAttributes = response.attributes;
+                    e2m.attributes = {};
 
                     paintImportProperties();
 
@@ -26,7 +26,7 @@
                     cleanOption.text = '';
                     magentoAttribute.add(cleanOption);
 
-                    for (var [code, title] of Object.entries(e2m.magentoAllAttributes)) {
+                    for (var [code, title] of Object.entries(e2m.magentoAttributes)) {
                         var option = document.createElement('option');
                         option.id = code;
                         option.text = title.toString();

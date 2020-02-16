@@ -1,5 +1,5 @@
 function unsetToken() {
-    new Ajax.Request(e2m.url.deleteEbayToken, {
+    new Ajax.Request(e2m.url.unsetEbayToken, {
             method: 'get',
             onSuccess: function () {
                 window.location.reload();

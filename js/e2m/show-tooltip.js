@@ -36,7 +36,7 @@ function showToolTip() {
         toolTipSpan.style.width = tipWidth + 'px';
     }
 
-    var imgUrl = e2m.url.skinURL + '/images/help.png';
+    var imgUrl = e2m.url.skin + '/images/help.png';
     var toolTipImg = new Element('img', {
         'src': imgUrl
     });

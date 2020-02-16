@@ -13,11 +13,11 @@
             var magentoAttribute = $('magento-attribute');
             var magentoAttributeValue = magentoAttribute.options[magentoAttribute.selectedIndex].value;
             if (!magentoAttributeValue) {
-                delete e2m.fieldAttribute[ebayFieldValue];
+                delete e2m.attributes[ebayFieldValue];
                 return;
             }
 
-            e2m.fieldAttribute[ebayFieldValue] = magentoAttributeValue;
+            e2m.attributes[ebayFieldValue] = magentoAttributeValue;
 
             $('magento-attribute').selectedIndex = 0;
             $('ebay-field').selectedIndex = 0;

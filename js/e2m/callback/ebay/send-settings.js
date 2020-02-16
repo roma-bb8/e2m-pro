@@ -49,11 +49,11 @@ function sendSettings() {
 
     //----------------------------------------
 
-    settings['ebay-field-magento-attribute'] = e2m.fieldAttribute;
+    settings['ebay-field-magento-attribute'] = e2m.attributes;
 
     //----------------------------------------
 
-    new Ajax.Request(e2m.url.sendSettings, {
+    new Ajax.Request(e2m.url.settings, {
         method: 'get',
         parameters: {
             settings: JSON.stringify(settings)
