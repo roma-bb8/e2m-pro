@@ -8,7 +8,6 @@ function unsetToken() {
                 console.log(transport);
 
                 alert('Something went wrong...');
-                return false;
             }
         }
     );

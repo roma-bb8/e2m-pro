@@ -17,7 +17,6 @@ function getToken() {
             console.log(transport);
 
             alert('Something went wrong...');
-            return false;
         }
     });
 }

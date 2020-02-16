@@ -8,6 +8,7 @@ function cron() {
         },
         onSuccess: function (transport) {
             var response = JSON.parse(transport.responseText);
+            console.log(response);
 
             response.run && setTimeout(cron, 3000);
 
@@ -18,6 +19,7 @@ function cron() {
         },
         onFailure: function (transport) {
             console.log(transport);
+
             alert('Cron tasks did not complete successfully...');
         }
     });

@@ -15,7 +15,6 @@ function startDownloadInventory(element) {
             console.log(transport);
 
             alert('Something went wrong...');
-            return false;
         }
     });
 }

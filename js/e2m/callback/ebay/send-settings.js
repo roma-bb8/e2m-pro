@@ -65,7 +65,6 @@ function sendSettings() {
             console.log(transport);
 
             alert('Something went wrong...');
-            return false;
         }
     });
 }
