@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Class M2E_e2M_Helper_Progress
+ */
 class M2E_e2M_Helper_Progress {
 
     const POSTFIX = '/progress';
@@ -12,7 +15,33 @@ class M2E_e2M_Helper_Progress {
     //########################################
 
     /**
-     * @param $tag
+     * @param string $tag
+     * @param int $progress
+     *
+     * @return $this
+     */
+    public function setProgressByTag($tag, $progress) {
+
+        $this->progress[$tag] = $progress;
+
+        $resource = Mage::getSingleton('core/resource');
+        $connWrite = $resource->getConnection('core_write');
+        $coreConfigDataTableName = $resource->getTableName('core_config_data');
+
+        $connWrite->delete($coreConfigDataTableName, array(
+            'path = ?' => M2E_e2M_Helper_Data::PREFIX . $tag . M2E_e2M_Helper_Progress::POSTFIX
+        ));
+
+        $connWrite->insert($coreConfigDataTableName, array(
+            'path' => M2E_e2M_Helper_Data::PREFIX . $tag . M2E_e2M_Helper_Progress::POSTFIX,
+            'value' => $this->progress[$tag]
+        ));
+
+        return $this;
+    }
+
+    /**
+     * @param string $tag
      * @param bool $reload
      *
      * @return mixed
@@ -31,6 +60,8 @@ class M2E_e2M_Helper_Progress {
         return $this->progress[$tag];
     }
 
+    //----------------------------------------
+
     /**
      * @param string $tag
      * @param bool $reload
@@ -38,32 +69,6 @@ class M2E_e2M_Helper_Progress {
      * @return bool
      */
     public function isCompletedProgressByTag($tag, $reload = false) {
-        return 100 === $this->getProgressByTag($tag, $reload);
-    }
-
-    /**
-     * @param string $tag
-     * @param int $progress
-     *
-     * @return $this
-     */
-    public function setProgressByTag($tag, $progress) {
-
-        $this->progress[$tag] = $progress;
-
-        $resource = Mage::getSingleton('core/resource');
-        $connWrite = $resource->getConnection('core_write');
-        $coreConfigDataTableName = $resource->getTableName('core_config_data');
-
-        $resource->getConnection('core_write')->delete($coreConfigDataTableName, array(
-            'path = ?' => M2E_e2M_Helper_Data::PREFIX . $tag . M2E_e2M_Helper_Progress::POSTFIX
-        ));
-
-        $connWrite->insert($coreConfigDataTableName, array(
-            'path' => M2E_e2M_Helper_Data::PREFIX . $tag . M2E_e2M_Helper_Progress::POSTFIX,
-            'value' => $this->progress[$tag]
-        ));
-
-        return $this;
+        return $this->getProgressByTag($tag, $reload) === 100;
     }
 }
