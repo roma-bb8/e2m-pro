@@ -8,7 +8,7 @@ class M2E_e2M_Model_Cron_Task_Completed implements M2E_e2M_Model_Cron_Task {
     /**
      * @inheritDoc
      */
-    public function process($data) {
+    public function process($taskId, $data) {
 
         /** @var M2E_e2M_Helper_Progress $progressHelper */
         $progressHelper = Mage::helper('e2m/Progress');
