@@ -36,16 +36,15 @@ CREATE TABLE `{$installer->getTable('m2e_e2m_inventory_ebay')}` (
 DROP TABLE IF EXISTS `{$installer->getTable('m2e_e2m_log')}`;
 CREATE TABLE `{$installer->getTable('m2e_e2m_log')}` (
   `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `task_id` INT(11) UNSIGNED NOT NULL,
+  `type` TINYINT(5) NOT NULL DEFAULT 1,
   `description` TEXT DEFAULT NULL,
-  `updated` TIMESTAMP DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
 
-INSERT INTO `{$installer->getTable('m2e_e2m_cron_tasks_in_processing')}`
-    (`instance`, `data`)
-VALUES
-    ('Cron_Task_Completed', '{}');
+INSERT INTO `{$installer->getTable('m2e_e2m_cron_tasks_in_processing')}` (`instance`, `data`)
+VALUES ('Cron_Task_Completed', '{}');
 SQL;
 
 $installer->run($sql);
