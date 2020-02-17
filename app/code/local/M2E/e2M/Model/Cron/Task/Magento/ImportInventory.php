@@ -32,13 +32,10 @@ class M2E_e2M_Model_Cron_Task_Magento_ImportInventory implements M2E_e2M_Model_C
     //########################################
 
     /**
-     * @param array $data
-     *
-     * @return array
-     * @throws Zend_Db_Statement_Exception
+     * @inheritDoc
      * @throws Exception
      */
-    public function process($data) {
+    public function process($taskId, $data) {
 
         $coreHelper = Mage::helper('core');
         $resource = Mage::getSingleton('core/resource');
