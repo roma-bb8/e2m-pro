@@ -1,9 +1,13 @@
 <?php
 
+/**
+ * Class M2E_e2M_Model_Cron_Task_eBay_DownloadInventory
+ */
 class M2E_e2M_Model_Cron_Task_eBay_DownloadInventory implements M2E_e2M_Model_Cron_Task {
 
-    const MAX_DOWNLOAD_TIME = 946684800;
+    const TAG = 'ebay/download/inventory';
 
+    const MAX_DOWNLOAD_TIME = 946684800;
     const MAX_REQUESTS = 4;
     const MAX_DAYS = 118;
 
@@ -70,7 +74,12 @@ class M2E_e2M_Model_Cron_Task_eBay_DownloadInventory implements M2E_e2M_Model_Cr
             $tmpDateTime = clone $fromDateTime;
             $tmpDateTime->modify('+' . self::MAX_DAYS . ' days');
 
-            $eBayAPI->downloadInventory($eBayAccount->getToken(), $fromDateTime, $tmpDateTime);
+            $eBayAPI->downloadInventory(
+                $eBayAccount->getMode(),
+                $eBayAccount->getToken(),
+                $fromDateTime,
+                $tmpDateTime
+            );
 
             $fromDateTime = $tmpDateTime;
             $request++;
@@ -98,15 +107,12 @@ class M2E_e2M_Model_Cron_Task_eBay_DownloadInventory implements M2E_e2M_Model_Cr
 
         /** @var M2E_e2M_Helper_Progress $progressHelper */
         $progressHelper = Mage::helper('e2m/Progress');
-        $progressHelper->setProgressByTag(
-            M2E_e2M_Helper_Data::EBAY_DOWNLOAD_INVENTORY,
-            $process
-        );
+        $progressHelper->setProgressByTag(self::TAG, $process);
 
         //----------------------------------------
 
         return array(
-            'process' => $progressHelper->getProgressByTag(M2E_e2M_Helper_Data::EBAY_DOWNLOAD_INVENTORY),
+            'process' => $progressHelper->getProgressByTag(self::TAG),
             'total' => $eBayInventory->getItemsTotal(),
             'variation' => $eBayInventory->getItemsVariation(),
             'simple' => $eBayInventory->getItemsSimple()
