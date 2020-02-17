@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Class M2E_e2M_Helper_Data
+ */
 class M2E_e2M_Helper_Data extends Mage_Core_Helper_Abstract {
 
     const PREFIX = 'm2e/e2m/';
