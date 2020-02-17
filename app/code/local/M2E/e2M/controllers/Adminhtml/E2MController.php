@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Class M2E_e2M_Adminhtml_E2MController
+ */
 class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
 
     public function indexAction() {
@@ -10,12 +13,37 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
 
         $this->getLayout()->getBlock('head')->setTitle(Mage::helper('e2m')->__('eBay Data Import / eM2Pro'));
 
-        $this->getLayout()->getBlock('head')->addCss('e2m/css/main.css');
-        $this->getLayout()->getBlock('head')->addJs('e2m/callbacks.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/helper.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/settings.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/cron/task/ebay/downloadInventoryHandler.js');
+        $this->getLayout()->getBlock('head')->addCss('e2m/css/tooltip.css');
+
+        $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay/get-token.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay/send-settings.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay/start-download-inventory.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay/start-import-inventory.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay/unset-token.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/callback/magento/hide-block.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/callback/magento/show-block.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/cron/task/ebay/download-inventory-handler.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/cron/task/ebay/import-inventory-handler.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/ebay/paint-import-properties.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/change-tooltip-position.js');
         $this->getLayout()->getBlock('head')->addJs('e2m/cron.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/delete-hashed-storage.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/get-hashed-storage.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/md5.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/on-tooltip-icon-mouse-leave.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/on-tooltip-mouse-enter.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/on-tooltip-mouse-leave.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/remove-local-storage.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/set-hashed-storage.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/show-tooltip.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/utf8-encode.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/observer/init-cron.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/observer/initialize-local-storage.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/observer/setting/ebay/attribute-set.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/observer/setting/ebay/config-input.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/observer/setting/ebay/ebay-field-magento-attribute.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/observer/hide-block.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/observer/note-block.js');
 
         $this->_addContent($this->getLayout()->createBlock('e2m/adminhtml_main'));
 
@@ -23,9 +51,12 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
     }
 
     //########################################
-    //########################################
 
-    public function beforeEbayGetTokenAction() {
+    /**
+     * @return Zend_Controller_Response_Abstract
+     * @throws Zend_Controller_Response_Exception
+     */
+    public function getBeforeEbayTokenAction() {
 
         $coreHelper = Mage::helper('core');
 
@@ -45,10 +76,12 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             $eBayAccount->save();
 
             return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
-                'auth_url' => $eBayAPI->getAuthURL($this->getUrl('*/e2m/afterEbayGetToken'), $sessionID)
+                'url' => $eBayAPI->getAuthURL($this->getUrl('*/e2m/getAfterEbayToken'), $sessionID)
             )));
 
         } catch (Exception $e) {
+            Mage::helper('m2e')->logException($e);
+
             return $this->getResponse()->setHttpResponseCode(500)->setBody($coreHelper->jsonEncode(array(
                 'error' => true,
                 'message' => $e->getMessage()
@@ -56,7 +89,10 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
         }
     }
 
-    public function afterEbayGetTokenAction() {
+    /**
+     * @return M2E_e2M_Adminhtml_E2MController|Mage_Core_Controller_Varien_Action
+     */
+    public function getAfterEbayTokenAction() {
 
         try {
 
@@ -73,16 +109,24 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             $eBayAccount->setData($info);
             $eBayAccount->save();
 
+            $this->_getSession()->addSuccess(Mage::helper('e2m')->__('Save eBay token'));
+
         } catch (Exception $e) {
+            Mage::helper('m2e')->logException($e);
+
             $this->_getSession()->addError($e->getMessage());
         }
 
         return $this->_redirect('*/e2m/index');
     }
 
-    //########################################
+    //----------------------------------------
 
-    public function deleteEbayTokenAction() {
+    /**
+     * @return Zend_Controller_Response_Abstract
+     * @throws Zend_Controller_Response_Exception
+     */
+    public function unsetEbayTokenAction() {
 
         $coreHelper = Mage::helper('core');
 
@@ -127,11 +171,15 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             $eBayInventory->reloadData();
             $eBayInventory->save();
 
+            $this->_getSession()->addSuccess(Mage::helper('e2m')->__('Unset token'));
+
             return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
                 'delete' => true
             )));
 
         } catch (Exception $e) {
+            Mage::helper('m2e')->logException($e);
+
             return $this->getResponse()->setHttpResponseCode(500)->setBody($coreHelper->jsonEncode(array(
                 'error' => true,
                 'message' => $e->getMessage()
@@ -140,9 +188,39 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
     }
 
     //########################################
+
+    /**
+     * @return Zend_Controller_Response_Abstract
+     * @throws Zend_Controller_Response_Exception
+     */
+    public function getAttributesBySetIdAction() {
+
+        $coreHelper = Mage::helper('core');
+
+        try {
+
+            $setId = $coreHelper->jsonDecode($this->getRequest()->getParam('set_id'));
+            return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
+                'attributes' => Mage::helper('e2m')->getMagentoAllAttributes($setId)
+            )));
+
+        } catch (Exception $e) {
+            Mage::helper('m2e')->logException($e);
+
+            return $this->getResponse()->setHttpResponseCode(500)->setBody($coreHelper->jsonEncode(array(
+                'error' => true,
+                'message' => $e->getMessage()
+            )));
+        }
+    }
+
     //########################################
 
-    public function sendSettingsAction() {
+    /**
+     * @return Zend_Controller_Response_Abstract
+     * @throws Zend_Controller_Response_Exception
+     */
+    public function setSettingsAction() {
 
         $coreHelper = Mage::helper('core');
 
@@ -156,11 +234,15 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             $eBayConfigHelper->setSettings($settings);
             $eBayConfigHelper->save();
 
+            $this->_getSession()->addSuccess(Mage::helper('e2m')->__('Save settings'));
+
             return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
                 'settings' => $settings
             )));
 
         } catch (Exception $e) {
+            Mage::helper('m2e')->logException($e);
+
             return $this->getResponse()->setHttpResponseCode(500)->setBody($coreHelper->jsonEncode(array(
                 'error' => true,
                 'message' => $e->getMessage()
@@ -168,7 +250,6 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
         }
     }
 
-    //########################################
     //########################################
 
     /**
@@ -221,14 +302,14 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             )));
 
         } catch (Exception $e) {
+            Mage::helper('m2e')->logException($e);
+
             return $this->getResponse()->setHttpResponseCode(500)->setBody($coreHelper->jsonEncode(array(
                 'error' => true,
                 'message' => $e->getMessage()
             )));
         }
     }
-
-    //########################################
 
     /**
      * @throws Zend_Controller_Response_Exception
@@ -267,6 +348,8 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             )));
 
         } catch (Exception $e) {
+            Mage::helper('m2e')->logException($e);
+
             $this->getResponse()->setHttpResponseCode(500)->setBody($coreHelper->jsonEncode(array(
                 'error' => true,
                 'message' => $e->getMessage()
@@ -275,8 +358,11 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
     }
 
     //########################################
-    //########################################
 
+    /**
+     * @return Zend_Controller_Response_Abstract
+     * @throws Zend_Controller_Response_Exception
+     */
     public function cronAction() {
 
         session_write_close();
@@ -288,9 +374,9 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             $resource = Mage::getSingleton('core/resource');
             $connWrite = $resource->getConnection('core_write');
             $cronTasksInProcessing = $resource->getTableName('m2e_e2m_cron_tasks_in_processing');
-            $tasks = $connWrite->select()->from($resource->getTableName('m2e_e2m_cron_tasks_in_processing'))->query();
 
             $handlers = array();
+            $tasks = $connWrite->select()->from($cronTasksInProcessing)->query();
             while ($task = $tasks->fetch(PDO::FETCH_ASSOC)) {
                 if ($task['is_running']) {
                     continue;
@@ -325,9 +411,9 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
                 'run' => true,
                 'handlers' => $handlers
             )));
-        } catch (Exception $e) {
 
-            Mage::log($e->getMessage(), Zend_Log::ERR, 'e2m.log', true);
+        } catch (Exception $e) {
+            Mage::helper('m2e')->logException($e);
 
             return $this->getResponse()->setHttpResponseCode(500)->setBody($coreHelper->jsonEncode(array(
                 'run' => false,
@@ -335,6 +421,4 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             )));
         }
     }
-
-    //########################################
 }
