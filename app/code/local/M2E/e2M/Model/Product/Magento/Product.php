@@ -298,28 +298,43 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
     protected function loadProduct($product, $data, $marketplaceId) {
         switch (true) {
             case $this->eBayConfig->isProductIdentifierSKU():
-                $product->setData('store_id', $this->eBayConfig->getStoreForMarketplace($marketplaceId));
-                $product->load($product->getIdBySku($data['sku']));
+                if (!empty($data['sku'])) {
+                    $product->setData('store_id', $this->eBayConfig->getStoreForMarketplace($marketplaceId));
+                    $product->load($product->getIdBySku($data['sku']));
+                }
+
                 break;
             case $this->eBayConfig->isProductIdentifierMPN():
-                $tmp = $this->loadProductBy($data['brand_mpn']['mpn'], 'mpn');
-                $tmp !== null && $product = $tmp;
+                if (!empty($data['brand_mpn']['mpn'])) {
+                    $tmp = $this->loadProductBy($data['brand_mpn']['mpn'], 'mpn');
+                    $tmp !== null && $product = $tmp;
+                }
+
                 break;
 
             case $this->eBayConfig->isProductIdentifierUPC():
-                $tmp = $this->loadProductBy($data['upc'], 'upc');
-                $tmp !== null && $product = $tmp;
+                if (!empty($data['upc'])) {
+                    $tmp = $this->loadProductBy($data['upc'], 'upc');
+                    $tmp !== null && $product = $tmp;
+                }
+
                 break;
 
             case $this->eBayConfig->isProductIdentifierEAN():
-                $tmp = $this->loadProductBy($data['ean'], 'ean');
-                $tmp !== null && $product = $tmp;
+                if (!empty($data['ean'])) {
+                    $tmp = $this->loadProductBy($data['ean'], 'ean');
+                    $tmp !== null && $product = $tmp;
+                }
+
                 break;
 
             case $this->eBayConfig->isProductIdentifierGTIN():
-                $tmp = $this->loadProductBy($data['upc'], 'upc');
-                $tmp === null && $tmp = $this->loadProductBy($data['ean'], 'ean');
-                $tmp !== null && $product = $tmp;
+                if (!empty($data['ean'])) {
+                    $tmp = $this->loadProductBy($data['upc'], 'upc');
+                    $tmp === null && $tmp = $this->loadProductBy($data['ean'], 'ean');
+                    $tmp !== null && $product = $tmp;
+                }
+
                 break;
         }
 
