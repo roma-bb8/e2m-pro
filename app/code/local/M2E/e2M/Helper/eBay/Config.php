@@ -9,6 +9,8 @@ class M2E_e2M_Helper_eBay_Config {
     const PATH_INVENTORY_PRODUCT_IDENTIFIER = 'inventory/product_identifier';
     const VALUE_SKU_PRODUCT_IDENTIFIER = 'SKU';
     const VALUE_MPN_PRODUCT_IDENTIFIER = 'MPN';
+    const VALUE_EAN_PRODUCT_IDENTIFIER = 'EAN';
+    const VALUE_UPC_PRODUCT_IDENTIFIER = 'UPC';
     const VALUE_GTIN_PRODUCT_IDENTIFIER = 'GTIN';
 
     const PATH_INVENTORY_ACTION_FOUND = 'inventory/action_found';
@@ -19,6 +21,8 @@ class M2E_e2M_Helper_eBay_Config {
     const PATH_PRODUCT_ATTRIBUTE_SET = 'product/attribute_set';
     const PATH_PRODUCT_IMPORT_IMAGE = 'product/import/image';
     const PATH_PRODUCT_IMPORT_QTY = 'product/import/qty';
+    const PATH_PRODUCT_GENERATE_SKU = 'product/import/generate_sku';
+    const PATH_PRODUCT_DELETE_HTML = 'product/import/generate_sku';
 
     const PATH_FULL_SETTINGS = 'full';
 
@@ -48,6 +52,8 @@ class M2E_e2M_Helper_eBay_Config {
             isset($this->settings['attribute_set']) &&
             isset($this->settings['import_image']) &&
             isset($this->settings['import_qty']) &&
+            isset($this->settings['generate_sku']) &&
+            isset($this->settings['delete_html']) &&
             count($this->settings['marketplaces_stores']) === count($eBayInventoryHelper->getMarketplaces()) &&
             !empty($this->settings['fields_attributes']);
     }
@@ -130,8 +136,30 @@ class M2E_e2M_Helper_eBay_Config {
      *
      * @return $this
      */
+    public function setDeleteHtml($setting) {
+        $this->settings['delete_html'] = (bool)$setting;
+
+        return $this;
+    }
+
+    /**
+     * @param string $setting
+     *
+     * @return $this
+     */
     public function setImportQty($setting) {
         $this->settings['import_qty'] = (bool)$setting;
+
+        return $this;
+    }
+
+    /**
+     * @param string $setting
+     *
+     * @return $this
+     */
+    public function setGenerateSku($setting) {
+        $this->settings['generate_sku'] = (bool)$setting;
 
         return $this;
     }
@@ -165,10 +193,12 @@ class M2E_e2M_Helper_eBay_Config {
 
         isset($settings['marketplace-store']) && $this->setMarketplaceStore($settings['marketplace-store']);
         isset($settings['product-identifier']) && $this->setProductIdentifier($settings['product-identifier']);
-        isset($settings['attribute-set']) && $this->setAttributeSet($settings['attribute-set']);
         isset($settings['action-found']) && $this->setActionFound($settings['action-found']);
-        isset($settings['import-image']) && $this->setImportImage($settings['import-image']);
         isset($settings['import-qty']) && $this->setImportQty($settings['import-qty']);
+        isset($settings['generate-sku']) && $this->setGenerateSku($settings['generate-sku']);
+        isset($settings['import-image']) && $this->setImportImage($settings['import-image']);
+        isset($settings['delete-html']) && $this->setDeleteHtml($settings['delete-html']);
+        isset($settings['attribute-set']) && $this->setAttributeSet($settings['attribute-set']);
         isset($settings['ebay-field-magento-attribute']) && $this
             ->setEbayFieldMagentoAttribute($settings['ebay-field-magento-attribute']);
 
@@ -207,10 +237,52 @@ class M2E_e2M_Helper_eBay_Config {
     }
 
     /**
+     * @return bool
+     */
+    public function isProductIdentifierMPN() {
+        return $this->getProductIdentifier() === self::VALUE_MPN_PRODUCT_IDENTIFIER;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isProductIdentifierUPC() {
+        return $this->getProductIdentifier() === self::VALUE_UPC_PRODUCT_IDENTIFIER;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isProductIdentifierEAN() {
+        return $this->getProductIdentifier() === self::VALUE_EAN_PRODUCT_IDENTIFIER;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isProductIdentifierGTIN() {
+        return $this->getProductIdentifier() === self::VALUE_GTIN_PRODUCT_IDENTIFIER;
+    }
+
+    /**
      * @return string|null
      */
     public function getActionFound() {
         return $this->settings['action_found'];
+    }
+
+    /**
+     * @return bool
+     */
+    public function isGenerateSku() {
+        return $this->settings['generate_sku'];
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDeleteHtml() {
+        return $this->settings['delete_html'];
     }
 
     /**
@@ -262,7 +334,9 @@ class M2E_e2M_Helper_eBay_Config {
             self::PREFIX . self::PATH_FULL_SETTINGS,
             self::PREFIX . self::PATH_PRODUCT_ATTRIBUTE_SET,
             self::PREFIX . self::PATH_PRODUCT_IMPORT_IMAGE,
-            self::PREFIX . self::PATH_PRODUCT_IMPORT_QTY
+            self::PREFIX . self::PATH_PRODUCT_IMPORT_QTY,
+            self::PREFIX . self::PATH_PRODUCT_GENERATE_SKU,
+            self::PREFIX . self::PATH_PRODUCT_DELETE_HTML
         )));
 
         $connWrite->insertMultiple($this->coreConfigDataTableName, array(
@@ -297,6 +371,14 @@ class M2E_e2M_Helper_eBay_Config {
             array(
                 'path' => self::PREFIX . self::PATH_PRODUCT_IMPORT_QTY,
                 'value' => $this->coreHelper->jsonEncode($this->settings['import_qty'])
+            ),
+            array(
+                'path' => self::PREFIX . self::PATH_PRODUCT_GENERATE_SKU,
+                'value' => $this->coreHelper->jsonEncode($this->settings['generate_sku'])
+            ),
+            array(
+                'path' => self::PREFIX . self::PATH_PRODUCT_DELETE_HTML,
+                'value' => $this->coreHelper->jsonEncode($this->settings['delete_html'])
             )
         ));
 
@@ -319,7 +401,9 @@ class M2E_e2M_Helper_eBay_Config {
             'full' => false,
             'attribute_set' => false,
             'import_image' => false,
-            'import_qty' => false
+            'import_qty' => false,
+            'generate_sku' => false,
+            'delete_html' => false
         );
 
         //----------------------------------------
@@ -334,7 +418,9 @@ class M2E_e2M_Helper_eBay_Config {
                 self::PREFIX . self::PATH_FULL_SETTINGS,
                 self::PREFIX . self::PATH_PRODUCT_ATTRIBUTE_SET,
                 self::PREFIX . self::PATH_PRODUCT_IMPORT_IMAGE,
-                self::PREFIX . self::PATH_PRODUCT_IMPORT_QTY
+                self::PREFIX . self::PATH_PRODUCT_IMPORT_QTY,
+                self::PREFIX . self::PATH_PRODUCT_GENERATE_SKU,
+                self::PREFIX . self::PATH_PRODUCT_DELETE_HTML
             ))
             ->query()
             ->fetchAll(PDO::FETCH_ASSOC);
@@ -364,6 +450,12 @@ class M2E_e2M_Helper_eBay_Config {
                     continue;
                 case self::PREFIX . self::PATH_PRODUCT_IMPORT_QTY:
                     $this->settings['import_qty'] = (bool)$this->coreHelper->jsonDecode($setting['value']);
+                    continue;
+                case self::PREFIX . self::PATH_PRODUCT_GENERATE_SKU:
+                    $this->settings['generate_sku'] = (bool)$this->coreHelper->jsonDecode($setting['value']);
+                    continue;
+                case self::PREFIX . self::PATH_PRODUCT_DELETE_HTML:
+                    $this->settings['delete_html'] = (bool)$this->coreHelper->jsonDecode($setting['value']);
                     continue;
             }
         }
