@@ -23,20 +23,6 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
     //########################################
 
     /**
-     * @param string $description
-     * @param int $type
-     */
-    private function addLog($description, $type = M2E_e2M_Helper_Data::TYPE_REPORT_SUCCESS) {
-
-        /** @var M2E_e2M_Helper_Data $dataHelper */
-        $dataHelper = Mage::helper('e2m');
-
-        $dataHelper->logReport($this->taskId, $description, $type);
-    }
-
-    //########################################
-
-    /**
      * @param string $value
      * @param string $attributeCode
      *
@@ -86,6 +72,20 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
         $this->addLog('Create eBay Group in Attribute Set ID:' . $this->eBayConfig->getAttributeSet());
 
         return $this->groupId = $group->getId();
+    }
+
+    //########################################
+
+    /**
+     * @param string $description
+     * @param int $type
+     */
+    protected function addLog($description, $type = M2E_e2M_Helper_Data::TYPE_REPORT_SUCCESS) {
+
+        /** @var M2E_e2M_Helper_Data $dataHelper */
+        $dataHelper = Mage::helper('e2m');
+
+        $dataHelper->logReport($this->taskId, $description, $type);
     }
 
     //########################################
