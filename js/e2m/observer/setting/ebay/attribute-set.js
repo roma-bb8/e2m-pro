@@ -6,7 +6,7 @@
         paintImportProperties();
 
         $('attribute-set1').observe('change', function (element) {
-            new Ajax.Request(e2m.url.getAttributs, {
+            new Ajax.Request(e2m.url.getAttributesBySetId, {
                 method: 'get',
                 parameters: {
                     set_id: element.target.options[element.target.selectedIndex].value

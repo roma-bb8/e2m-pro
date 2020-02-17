@@ -53,7 +53,7 @@ function sendSettings() {
 
     //----------------------------------------
 
-    new Ajax.Request(e2m.url.settings, {
+    new Ajax.Request(e2m.url.setSettings, {
         method: 'get',
         parameters: {
             settings: JSON.stringify(settings)

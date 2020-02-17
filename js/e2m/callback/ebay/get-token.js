@@ -3,7 +3,7 @@ function getToken() {
     var accountMode = $('account-mode');
     var mode = accountMode.options[accountMode.selectedIndex].value;
 
-    new Ajax.Request(e2m.url.beforeEbayGetToken, {
+    new Ajax.Request(e2m.url.getBeforeEbayToken, {
         method: 'get',
         parameters: {
             mode: mode
