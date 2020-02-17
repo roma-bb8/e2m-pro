@@ -33,12 +33,10 @@ class M2E_e2M_Model_Cron_Task_eBay_DownloadInventory implements M2E_e2M_Model_Cr
     //########################################
 
     /**
-     * @param array $data
-     *
-     * @return array
+     * @inheritDoc
      * @throws Exception
      */
-    public function process($data) {
+    public function process($taskId, $data) {
 
         $resource = Mage::getSingleton('core/resource');
 
