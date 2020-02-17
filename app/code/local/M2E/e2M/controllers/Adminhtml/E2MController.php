@@ -66,8 +66,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
 
             /** @var M2e_e2m_Model_Api_Ebay $eBayAPI */
             $eBayAPI = Mage::getModel('e2m/Api_Ebay');
-            $eBayAPI->setMode($mode);
-            $sessionID = $eBayAPI->getSessionID();
+            $sessionID = $eBayAPI->getSessionID($mode);
 
             /** @var M2E_e2M_Helper_eBay_Account $eBayAccount */
             $eBayAccount = Mage::helper('e2m/eBay_Account');
@@ -76,7 +75,11 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             $eBayAccount->save();
 
             return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
-                'url' => $eBayAPI->getAuthURL($this->getUrl('*/e2m/getAfterEbayToken'), $sessionID)
+                'url' => $eBayAPI->getAuthURL(
+                    $eBayAccount->getMode(),
+                    $this->getUrl('*/e2m/getAfterEbayToken'),
+                    $sessionID
+                )
             )));
 
         } catch (Exception $e) {
@@ -101,9 +104,8 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
 
             /** @var M2e_e2m_Model_Api_Ebay $eBayAPI */
             $eBayAPI = Mage::getModel('e2m/Api_Ebay');
-            $eBayAPI->setMode($eBayAccount->getMode());
 
-            $info = $eBayAPI->getInfo($eBayAccount->getSessionId());
+            $info = $eBayAPI->getInfo($eBayAccount->getMode(), $eBayAccount->getSessionId());
             $info['session_id'] = false;
 
             $eBayAccount->setData($info);
@@ -289,7 +291,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
 
             /** @var M2E_e2M_Helper_Progress $progressHelper */
             $progressHelper = Mage::helper('e2m/Progress');
-            $progressHelper->setProgressByTag(M2E_e2M_Helper_Data::EBAY_DOWNLOAD_INVENTORY, 0);
+            $progressHelper->setProgressByTag(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::TAG, 0);
 
             return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
                 'message' => 'Start task of Downloading Inventory from ebay...',
@@ -337,7 +339,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
 
             /** @var M2E_e2M_Helper_Progress $progressHelper */
             $progressHelper = Mage::helper('e2m/Progress');
-            $progressHelper->setProgressByTag(M2E_e2M_Helper_Data::MAGENTO_IMPORT_INVENTORY, 0);
+            $progressHelper->setProgressByTag(M2E_e2M_Model_Cron_Task_Magento_ImportInventory::TAG, 0);
 
             $this->getResponse()->setBody($coreHelper->jsonEncode(array(
                 'message' => 'Start task of Import Inventory to Magento...',
@@ -391,7 +393,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
                     /** @var M2E_e2M_Model_Cron_Task $taskModel */
                     $taskModel = Mage::getModel('e2m/' . $task['instance']);
 
-                    $data = $taskModel->process($coreHelper->jsonDecode($task['data']));
+                    $data = $taskModel->process($task['id'], $coreHelper->jsonDecode($task['data']));
                     $instance = lcfirst(substr($task['instance'], strrpos($task['instance'], '_') + 1));
                     $handlers[] = array(
                         'handler' => $instance . 'Handler',
