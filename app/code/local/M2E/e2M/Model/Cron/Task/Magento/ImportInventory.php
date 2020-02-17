@@ -49,9 +49,11 @@ class M2E_e2M_Model_Cron_Task_Magento_ImportInventory implements M2E_e2M_Model_C
 
         /** @var M2E_e2M_Model_Product_Magento_Configurable $productMagentoConfigurable */
         $productMagentoConfigurable = Mage::getModel('e2m/Product_Magento_Configurable');
+        $productMagentoConfigurable->setTaskId($taskId);
 
         /** @var M2E_e2M_Model_Product_Magento_Simple $productMagentoSimple */
         $productMagentoSimple = Mage::getModel('e2m/Product_Magento_Simple');
+        $productMagentoSimple->setTaskId($taskId);
 
         $query = $connRead->select()
             ->from($inventoryTableName)
