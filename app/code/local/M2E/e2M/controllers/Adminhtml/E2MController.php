@@ -134,8 +134,8 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
 
             /** @var M2E_e2M_Helper_Progress $progressHelper */
             $progressHelper = Mage::helper('e2m/Progress');
-            $progressHelper->setProgressByTag(M2E_e2M_Helper_Data::EBAY_DOWNLOAD_INVENTORY, 0);
-            $progressHelper->setProgressByTag(M2E_e2M_Helper_Data::MAGENTO_IMPORT_INVENTORY, 0);
+            $progressHelper->setProgressByTag(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::TAG, 0);
+            $progressHelper->setProgressByTag(M2E_e2M_Model_Cron_Task_Magento_ImportInventory::TAG, 0);
 
             $resource = Mage::getSingleton('core/resource');
             $connWrite = $resource->getConnection('core_write');
@@ -201,7 +201,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
 
             $setId = $coreHelper->jsonDecode($this->getRequest()->getParam('set_id'));
             return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
-                'attributes' => Mage::helper('e2m')->getMagentoAllAttributes($setId)
+                'attributes' => Mage::helper('e2m')->getMagentoAttributes($setId)
             )));
 
         } catch (Exception $e) {
