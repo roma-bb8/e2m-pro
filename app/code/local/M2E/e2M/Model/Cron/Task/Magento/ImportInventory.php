@@ -2,7 +2,9 @@
 
 class M2E_e2M_Model_Cron_Task_Magento_ImportInventory implements M2E_e2M_Model_Cron_Task {
 
-    const MAX_LIMIT = 100;
+    const TAG = 'magento/import/inventory';
+
+    const MAX_LIMIT = 500;
 
     //########################################
 
@@ -45,59 +47,39 @@ class M2E_e2M_Model_Cron_Task_Magento_ImportInventory implements M2E_e2M_Model_C
 
         //----------------------------------------
 
-        /** @var M2E_e2M_Model_Product_Magento_Builder $productMagentoBuilder */
-        $productMagentoBuilder = Mage::getModel('e2m/Product_Magento_Builder');
+        /** @var M2E_e2M_Model_Product_Magento_Configurable $productMagentoConfigurable */
+        $productMagentoConfigurable = Mage::getModel('e2m/Product_Magento_Configurable');
+
+        /** @var M2E_e2M_Model_Product_Magento_Simple $productMagentoSimple */
+        $productMagentoSimple = Mage::getModel('e2m/Product_Magento_Simple');
+
         $query = $connRead->select()
             ->from($inventoryTableName)
             ->where('id > ?', $data['last_import_id'])
             ->limit(self::MAX_LIMIT)
             ->query();
 
-        $processLastImportId = $data['last_import_id'];
         while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
             $rowData = $coreHelper->jsonDecode($row['data']);
+            (bool)$row['variation'] ? $productMagentoConfigurable->process($rowData)
+                : $productMagentoSimple->process($rowData);
 
-            if (false === (bool)$row['variation']) {
-                $product = $productMagentoBuilder->buildProduct($rowData);
-                $update = empty($product->getId());
-                $product->getResource()->save($product);
-                if ($productMagentoBuilder->isImportQty() &&
-                    ($productMagentoBuilder->isActionFoundIgnore() && $update)) {
-                    $productMagentoBuilder->importQty(
-                        $product,
-                        $rowData['qty']
-                    );
-                }
-            } else {
-                $productMagentoBuilder->buildConfigurableProduct($rowData);
-            }
-
-            $processLastImportId = $row['id'];
+            $data['last_import_id'] = $row['id'];
+            $connWrite->update($cronTasksInProcessingTableName, array(
+                'data' => Mage::helper('core')->jsonEncode($data)
+            ), array('instance = ?' => 'Cron_Task_Magento_ImportInventory'));
         }
 
-        //----------------------------------------
-
-        $data['last_import_id'] = $processLastImportId;
-
-        $connWrite->update($cronTasksInProcessingTableName, array(
-            'data' => Mage::helper('core')->jsonEncode($data)
-        ), array('instance = ?' => 'Cron_Task_Magento_ImportInventory'));
-
-        //----------------------------------------
-
-        $process = $this->getProcessAsPercentage($processLastImportId);
+        $process = $this->getProcessAsPercentage($data['last_import_id']);
 
         /** @var M2E_e2M_Helper_Progress $progressHelper */
         $progressHelper = Mage::helper('e2m/Progress');
-        $progressHelper->setProgressByTag(
-            M2E_e2M_Helper_Data::MAGENTO_IMPORT_INVENTORY,
-            $process
-        );
+        $progressHelper->setProgressByTag(self::TAG, $process);
 
         //----------------------------------------
 
         return array(
-            'process' => $progressHelper->getProgressByTag(M2E_e2M_Helper_Data::MAGENTO_IMPORT_INVENTORY)
+            'process' => $progressHelper->getProgressByTag(self::TAG)
         );
     }
 }
