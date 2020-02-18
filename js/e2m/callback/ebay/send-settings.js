@@ -7,8 +7,8 @@ function sendSettings() {
     settings['marketplace-store'] = {};
     $$('.marketplace-store').forEach(function (element) {
         var value = element.options[element.selectedIndex].value;
-        if (value !== undefined) {
-            settings['marketplace-store'][element.id.toString()] = value.toString();
+        if (value) {
+            settings['marketplace-store'][element.id] = value.toString();
         }
     });
 
