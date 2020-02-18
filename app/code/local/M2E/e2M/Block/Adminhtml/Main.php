@@ -96,11 +96,11 @@ class M2E_e2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
 
                 $data = Mage::helper('core')->jsonDecode($task['data']);
                 if (isset($data['pause']) && $data['pause']) {
-                    $label = 'Pause Import inventory';
-                    $onclick = 'pauseStartDownloadInventory(this);';
-                } else {
                     $label = 'Proceed Import inventory';
-                    $onclick = 'pauseFinishDownloadInventory(this);';
+                    $onclick = 'pauseFinishImportInventory(this);';
+                } else {
+                    $label = 'Pause Import inventory';
+                    $onclick = 'pauseStartImportInventory(this);';
                 }
 
                 $button = (clone $widgetButton)->setData(array(

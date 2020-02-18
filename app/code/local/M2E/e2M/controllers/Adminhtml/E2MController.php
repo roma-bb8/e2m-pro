@@ -20,8 +20,8 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
         $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay/start-download-inventory.js');
         $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay/start-import-inventory.js');
         $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay/unset-token.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay/pause-finish-download-inventory.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay/pause-start-download-inventory.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay/pause-finish-import-inventory.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay/pause-start-import-inventory.js');
         $this->getLayout()->getBlock('head')->addJs('e2m/callback/magento/hide-block.js');
         $this->getLayout()->getBlock('head')->addJs('e2m/callback/magento/show-block.js');
         $this->getLayout()->getBlock('head')->addJs('e2m/cron/task/ebay/download-inventory-handler.js');
@@ -85,7 +85,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             )));
 
         } catch (Exception $e) {
-            Mage::helper('m2e')->logException($e);
+            Mage::helper('e2m')->logException($e);
 
             return $this->getResponse()->setHttpResponseCode(500)->setBody($coreHelper->jsonEncode(array(
                 'error' => true,
@@ -116,7 +116,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             $this->_getSession()->addSuccess(Mage::helper('e2m')->__('Save eBay token'));
 
         } catch (Exception $e) {
-            Mage::helper('m2e')->logException($e);
+            Mage::helper('e2m')->logException($e);
 
             $this->_getSession()->addError($e->getMessage());
         }
@@ -186,7 +186,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             )));
 
         } catch (Exception $e) {
-            Mage::helper('m2e')->logException($e);
+            Mage::helper('e2m')->logException($e);
 
             return $this->getResponse()->setHttpResponseCode(500)->setBody($coreHelper->jsonEncode(array(
                 'error' => true,
@@ -213,7 +213,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             )));
 
         } catch (Exception $e) {
-            Mage::helper('m2e')->logException($e);
+            Mage::helper('e2m')->logException($e);
 
             return $this->getResponse()->setHttpResponseCode(500)->setBody($coreHelper->jsonEncode(array(
                 'error' => true,
@@ -249,7 +249,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             )));
 
         } catch (Exception $e) {
-            Mage::helper('m2e')->logException($e);
+            Mage::helper('e2m')->logException($e);
 
             return $this->getResponse()->setHttpResponseCode(500)->setBody($coreHelper->jsonEncode(array(
                 'error' => true,
@@ -310,7 +310,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             )));
 
         } catch (Exception $e) {
-            Mage::helper('m2e')->logException($e);
+            Mage::helper('e2m')->logException($e);
 
             return $this->getResponse()->setHttpResponseCode(500)->setBody($coreHelper->jsonEncode(array(
                 'error' => true,
@@ -319,11 +319,13 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
         }
     }
 
+    //########################################
+
     /**
      * @return Zend_Controller_Response_Abstract
      * @throws Zend_Controller_Response_Exception
      */
-    public function pauseStartDownloadInventoryAction() {
+    public function pauseStartTaskImportInventoryAction() {
 
         $coreHelper = Mage::helper('core');
 
@@ -333,20 +335,15 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             $connWrite = $resource->getConnection('core_write');
             $cronTasksInProcessingTableName = $resource->getTableName('m2e_e2m_cron_tasks_in_processing');
             $task = $connWrite->select()->from($cronTasksInProcessingTableName, array('id', 'data'))
-                ->where('instance = ?', 'Cron_Task_eBay_DownloadInventory')->limit(1)
+                ->where('instance = ?', 'Cron_Task_Magento_ImportInventory')->limit(1)
                 ->query()->fetch(PDO::FETCH_ASSOC);
-
-            /** @var M2E_e2M_Helper_eBay_Inventory $eBayInventory */
-            $eBayInventory = Mage::helper('e2m/eBay_Inventory');
 
             if (empty($task) || empty($task['id'])) {
                 return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
-                    'message' => 'Not task of Downloading Inventory.',
+                    'message' => 'Not task of Import Inventory.',
                     'data' => array(
-                        'process' => 100,
-                        'total' => $eBayInventory->getItemsTotal(),
-                        'variation' => $eBayInventory->getItemsVariation(),
-                        'simple' => $eBayInventory->getItemsSimple()
+                        'process' => 'p',
+                        'items' => 'p'
                     )
                 )));
             }
@@ -356,20 +353,18 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
 
             $connWrite->update($cronTasksInProcessingTableName, array(
                 'data' => $coreHelper->jsonEncode($data)
-            ), array('id' => $task['id']));
+            ), array('id = ?' => $task['id']));
 
             return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
-                'message' => 'Pause task of Downloading Inventory from ebay...',
+                'message' => 'Pause task of Import Inventory from ebay...',
                 'data' => array(
-                    'process' => 'p 0',
-                    'total' => $eBayInventory->getItemsTotal(),
-                    'variation' => $eBayInventory->getItemsVariation(),
-                    'simple' => $eBayInventory->getItemsSimple()
+                    'process' => 'p',
+                    'items' => 'p'
                 )
             )));
 
         } catch (Exception $e) {
-            Mage::helper('m2e')->logException($e);
+            Mage::helper('e2m')->logException($e);
 
             return $this->getResponse()->setHttpResponseCode(500)->setBody($coreHelper->jsonEncode(array(
                 'error' => true,
@@ -382,7 +377,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
      * @return Zend_Controller_Response_Abstract
      * @throws Zend_Controller_Response_Exception
      */
-    public function pauseFinishDownloadInventoryAction() {
+    public function pauseFinishTaskImportInventoryAction() {
 
         $coreHelper = Mage::helper('core');
 
@@ -392,7 +387,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             $connWrite = $resource->getConnection('core_write');
             $cronTasksInProcessingTableName = $resource->getTableName('m2e_e2m_cron_tasks_in_processing');
             $task = $connWrite->select()->from($cronTasksInProcessingTableName, array('id', 'data'))
-                ->where('instance = ?', 'Cron_Task_eBay_DownloadInventory')->limit(1)
+                ->where('instance = ?', 'Cron_Task_Magento_ImportInventory')->limit(1)
                 ->query()->fetch(PDO::FETCH_ASSOC);
 
             /** @var M2E_e2M_Helper_eBay_Inventory $eBayInventory */
@@ -400,7 +395,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
 
             if (empty($task) || empty($task['id'])) {
                 return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
-                    'message' => 'Not task of Downloading Inventory.',
+                    'message' => 'Not task of Import Inventory.',
                     'data' => array(
                         'process' => 0,
                         'total' => $eBayInventory->getItemsTotal(),
@@ -415,20 +410,18 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
 
             $connWrite->update($cronTasksInProcessingTableName, array(
                 'data' => $coreHelper->jsonEncode($data)
-            ), array('id' => $task['id']));
+            ), array('id = ?' => $task['id']));
 
             return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
-                'message' => 'Pause task of Downloading Inventory from ebay...',
+                'message' => 'Pause task of Import Inventory from ebay...',
                 'data' => array(
                     'process' => 'p',
-                    'total' => $eBayInventory->getItemsTotal(),
-                    'variation' => $eBayInventory->getItemsVariation(),
-                    'simple' => $eBayInventory->getItemsSimple()
+                    'items' => 'p'
                 )
             )));
 
         } catch (Exception $e) {
-            Mage::helper('m2e')->logException($e);
+            Mage::helper('e2m')->logException($e);
 
             return $this->getResponse()->setHttpResponseCode(500)->setBody($coreHelper->jsonEncode(array(
                 'error' => true,
@@ -465,7 +458,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             $progressHelper = Mage::helper('e2m/Progress');
             $progressHelper->setProgressByTag(M2E_e2M_Model_Cron_Task_Magento_ImportInventory::TAG, 0);
 
-            $this->getResponse()->setBody($coreHelper->jsonEncode(array(
+            return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
                 'message' => 'Start task of Import Inventory to Magento...',
                 'data' => array(
                     'process' => 0,
@@ -474,9 +467,9 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             )));
 
         } catch (Exception $e) {
-            Mage::helper('m2e')->logException($e);
+            Mage::helper('e2m')->logException($e);
 
-            $this->getResponse()->setHttpResponseCode(500)->setBody($coreHelper->jsonEncode(array(
+            return $this->getResponse()->setHttpResponseCode(500)->setBody($coreHelper->jsonEncode(array(
                 'error' => true,
                 'message' => $e->getMessage()
             )));
@@ -539,7 +532,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             )));
 
         } catch (Exception $e) {
-            Mage::helper('m2e')->logException($e);
+            Mage::helper('e2m')->logException($e);
 
             return $this->getResponse()->setHttpResponseCode(500)->setBody($coreHelper->jsonEncode(array(
                 'run' => false,

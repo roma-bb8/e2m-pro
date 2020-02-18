@@ -116,6 +116,7 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
             $this->addLog('Add new value: ' . $option . ' in Attribute: ' . $attribute->getName());
 
         } catch (Exception $e) {
+            Mage::helper('e2m')->logException($e);
 
             $this->addLog('Not add value: ' . $option . ' in Attribute: ' . $attribute->getName());
 
@@ -173,7 +174,7 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
             $this->addLog('Create new Attribute: "' . $title . '" in Attribute Set ID: "' . $this->eBayConfig->getAttributeSet() . '"');
 
         } catch (Exception $e) {
-            Mage::helper('m2e')->logException($e);
+            Mage::helper('e2m')->logException($e);
 
             $this->addLog('Not create new Attribute: ' . $title, M2E_e2M_Helper_Data::TYPE_REPORT_ERROR);
 
@@ -248,7 +249,7 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
             ));
 
         } catch (Exception $e) {
-            Mage::helper('m2e')->logException($e);
+            Mage::helper('e2m')->logException($e);
 
             $this->addLog('Not Import Images for SKU:' . $product->getSku(), M2E_e2M_Helper_Data::TYPE_REPORT_WARNING);
         }
@@ -282,7 +283,7 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
             $stockItem->save();
 
         } catch (Exception $e) {
-            Mage::helper('m2e')->logException($e);
+            Mage::helper('e2m')->logException($e);
 
             $this->addLog('Not Import Qty for SKU:' . $product->getSku(), M2E_e2M_Helper_Data::TYPE_REPORT_WARNING);
         }

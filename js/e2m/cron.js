@@ -6,6 +6,9 @@ function cron() {
                 visibility: 'hidden'
             });
         },
+        onComplete: function(transport) {
+            console.log(transport);
+        },
         onSuccess: function (transport) {
             var response = JSON.parse(transport.responseText);
             console.log(response);

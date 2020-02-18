@@ -1,5 +1,5 @@
-function pauseStartDownloadInventory() {
-    new Ajax.Request(e2m.url.pauseStartDownloadInventory, {
+function pauseFinishImportInventory() {
+    new Ajax.Request(e2m.url.pauseFinishTaskImportInventory, {
         method: 'get',
         onSuccess: function () {
             window.location.reload();

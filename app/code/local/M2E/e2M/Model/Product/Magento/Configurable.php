@@ -27,8 +27,10 @@ class M2E_e2M_Model_Product_Magento_Configurable extends M2E_e2M_Model_Product_M
                 ->setData('store_id', $configProduct->getStoreId())
                 ->load($configProduct->getId());
 
-        } elseif (self::TYPE === $configProduct->getData('type_id')) {
+        } elseif (self::TYPE !== $configProduct->getData('type_id')) {
             $this->addLog('Skip update sku: ' . $configProduct->getSku() . ' because type product not configurable', M2E_e2M_Helper_Data::TYPE_REPORT_ERROR);
+
+            return $configProduct;
         }
 
         //----------------------------------------
@@ -116,6 +118,7 @@ class M2E_e2M_Model_Product_Magento_Configurable extends M2E_e2M_Model_Product_M
                 $set[$configurableAttributesDatum['attribute_code']]
             );
         }
+        unset($configurableAttributesDatum);
 
         $configurableProductsData = array();
         foreach ($childProducts as $childProductId => $childProductPrice) {
@@ -125,7 +128,14 @@ class M2E_e2M_Model_Product_Magento_Configurable extends M2E_e2M_Model_Product_M
         $configProduct->setData('configurable_products_data', $configurableProductsData);
         $configProduct->setData('configurable_attributes_data', $configurableAttributesData);
         $configProduct->setData('can_save_configurable_attributes', true);
-        $configProduct->save();
+
+        try {
+            $configProduct->save();
+        } catch (Exception $e) {
+            Mage::helper('e2m')->logException($e);
+
+            throw $e;
+        }
 
         //----------------------------------------
 
