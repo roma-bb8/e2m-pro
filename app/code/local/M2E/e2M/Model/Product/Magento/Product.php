@@ -18,20 +18,22 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
     private $groupId;
 
     /** @var int $taskId */
-    private $taskId;
+    protected $taskId;
 
     //########################################
 
     /**
      * @param string $value
      * @param string $attributeCode
+     * @param int $marketplaceId
      *
      * @return Mage_Catalog_Model_Product
      */
-    private function loadProductBy($value, $attributeCode) {
+    private function loadProductBy($value, $attributeCode, $marketplaceId) {
 
         $products = Mage::getResourceModel('catalog/product_collection');
         $products->addAttributeToSelect('*');
+        $products->addStoreFilter($this->eBayConfig->getStoreForMarketplace($marketplaceId));
         $products->addAttributeToFilter($attributeCode, $value);
         $products->setCurPage(1)->setPageSize(1);
         $products->load();
@@ -185,21 +187,21 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
 
     /**
      * @param Mage_Catalog_Model_Product $product
-     * @param array $images
+     * @param array $data
      *
      * @return Mage_Catalog_Model_Product
      */
-    protected function importImage($product, $images) {
+    protected function importImage($product, $data) {
 
         try {
 
-            if (empty($images)) {
+            if (empty($data['image_urls'])) {
                 return $product;
             }
 
             $tempMediaPath = Mage::getSingleton('catalog/product_media_config')->getBaseTmpMediaPath();
             $files = array();
-            foreach ($images['urls'] as $url) {
+            foreach ($data['image_urls'] as $url) {
                 $ext = strtolower(substr($url, (strripos($url, '.'))));
                 !in_array($ext, array('.png', '.jpg', '.jpeg')) && $ext = '.jpg';
                 $fileName = md5($url) . $ext;
@@ -265,7 +267,7 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
 
         try {
 
-            $qty = (int)$data['total'];
+            $qty = (int)$data['qty_total'];
 
             /** @var Mage_CatalogInventory_Model_Stock_Item $stockItem */
             $stockItem = Mage::getModel('cataloginventory/stock_item');
@@ -298,43 +300,47 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
     protected function loadProduct($product, $data, $marketplaceId) {
         switch (true) {
             case $this->eBayConfig->isProductIdentifierSKU():
-                if (!empty($data['sku'])) {
+                if (!empty($data['identifiers_sku'])) {
                     $product->setData('store_id', $this->eBayConfig->getStoreForMarketplace($marketplaceId));
-                    $product->load($product->getIdBySku($data['sku']));
+                    $product->load($product->getIdBySku($data['identifiers_sku']));
                 }
 
                 break;
             case $this->eBayConfig->isProductIdentifierMPN():
-                if (!empty($data['brand_mpn']['mpn'])) {
-                    $tmp = $this->loadProductBy($data['brand_mpn']['mpn'], 'mpn');
+                if (!empty($data['identifiers_brand_mpn_mpn'])) {
+                    $tmp = $this->loadProductBy($data['identifiers_brand_mpn_mpn'], 'mpn', $marketplaceId);
                     $tmp !== null && $product = $tmp;
                 }
 
                 break;
 
             case $this->eBayConfig->isProductIdentifierUPC():
-                if (!empty($data['upc'])) {
-                    $tmp = $this->loadProductBy($data['upc'], 'upc');
+                if (!empty($data['identifiers_upc'])) {
+                    $tmp = $this->loadProductBy($data['identifiers_upc'], 'upc', $marketplaceId);
                     $tmp !== null && $product = $tmp;
                 }
 
                 break;
 
             case $this->eBayConfig->isProductIdentifierEAN():
-                if (!empty($data['ean'])) {
-                    $tmp = $this->loadProductBy($data['ean'], 'ean');
+                if (!empty($data['identifiers_ean'])) {
+                    $tmp = $this->loadProductBy($data['identifiers_ean'], 'ean', $marketplaceId);
                     $tmp !== null && $product = $tmp;
                 }
 
                 break;
 
             case $this->eBayConfig->isProductIdentifierGTIN():
-                if (!empty($data['ean'])) {
-                    $tmp = $this->loadProductBy($data['upc'], 'upc');
-                    $tmp === null && $tmp = $this->loadProductBy($data['ean'], 'ean');
-                    $tmp !== null && $product = $tmp;
+                $tmp = null;
+                if (!empty($data['identifiers_upc'])) {
+                    $tmp = $this->loadProductBy($data['upc'], 'upc', $marketplaceId);
                 }
 
+                if (!empty($data['identifiers_ean']) && $tmp === null) {
+                    $tmp = $this->loadProductBy($data['ean'], 'ean', $marketplaceId);
+                }
+
+                $tmp !== null && $product = $tmp;
                 break;
         }
 
@@ -371,9 +377,10 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
 
     /**
      * @param array $data
+     * @param bool $save
      *
      * @return Mage_Catalog_Model_Product
      * @throws Exception
      */
-    abstract public function process($data);
+    abstract public function process($data, $save = true);
 }

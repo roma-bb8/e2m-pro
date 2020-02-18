@@ -107,25 +107,25 @@ class M2E_e2M_Model_Parser_eBay_Item extends Mage_Core_Helper_Abstract {
     private function getIdentifiers(SimpleXMLElement $item) {
         $identifiers = array();
 
-        $identifiers['item_id'] = isset($item->ItemID) ? (double)$item->ItemID : null;
-        $identifiers['sku'] = isset($item->SKU) ? (string)$item->SKU : null;
+        $identifiers['identifiers_item_id'] = isset($item->ItemID) ? (double)$item->ItemID : null;
+        $identifiers['identifiers_sku'] = isset($item->SKU) ? (string)$item->SKU : null;
         if (!isset($item->ProductListingDetails)) {
-            $identifiers['ean'] = null;
-            $identifiers['upc'] = null;
-            $identifiers['isbn'] = null;
-            $identifiers['epid'] = null;
-            $identifiers['brand_mpn']['brand'] = null;
-            $identifiers['brand_mpn']['mpn'] = null;
+            $identifiers['identifiers_ean'] = null;
+            $identifiers['identifiers_upc'] = null;
+            $identifiers['identifiers_isbn'] = null;
+            $identifiers['identifiers_epid'] = null;
+            $identifiers['identifiers_brand_mpn_brand'] = null;
+            $identifiers['identifiers_brand_mpn_mpn'] = null;
 
             return $identifiers;
         }
 
-        $identifiers['ean'] = isset($item->ProductListingDetails->EAN) ? (string)$item->ProductListingDetails->EAN : null;
-        $identifiers['upc'] = isset($item->ProductListingDetails->UPC) ? (string)$item->ProductListingDetails->UPC : null;
-        $identifiers['isbn'] = isset($item->ProductListingDetails->ISBN) ? (string)$item->ProductListingDetails->ISBN : null;
-        $identifiers['epid'] = isset($item->ProductListingDetails->ProductReferenceID) ? (string)$item->ProductListingDetails->ProductReferenceID : null;
-        $identifiers['brand_mpn']['brand'] = isset($item->ProductListingDetails->BrandMPN->Brand) ? (string)$item->ProductListingDetails->BrandMPN->Brand : null;
-        $identifiers['brand_mpn']['mpn'] = isset($item->ProductListingDetails->BrandMPN->MPN) ? (string)$item->ProductListingDetails->BrandMPN->MPN : null;
+        $identifiers['identifiers_ean'] = isset($item->ProductListingDetails->EAN) ? (string)$item->ProductListingDetails->EAN : null;
+        $identifiers['identifiers_upc'] = isset($item->ProductListingDetails->UPC) ? (string)$item->ProductListingDetails->UPC : null;
+        $identifiers['identifiers_isbn'] = isset($item->ProductListingDetails->ISBN) ? (string)$item->ProductListingDetails->ISBN : null;
+        $identifiers['identifiers_epid'] = isset($item->ProductListingDetails->ProductReferenceID) ? (string)$item->ProductListingDetails->ProductReferenceID : null;
+        $identifiers['identifiers_brand_mpn_brand'] = isset($item->ProductListingDetails->BrandMPN->Brand) ? (string)$item->ProductListingDetails->BrandMPN->Brand : null;
+        $identifiers['identifiers_brand_mpn_mpn'] = isset($item->ProductListingDetails->BrandMPN->MPN) ? (string)$item->ProductListingDetails->BrandMPN->MPN : null;
 
         return $identifiers;
     }
@@ -138,26 +138,26 @@ class M2E_e2M_Model_Parser_eBay_Item extends Mage_Core_Helper_Abstract {
     private function getPrice(SimpleXMLElement $item) {
         $price = array();
 
-        $price['currency'] = isset($item->Currency) ? (string)$item->Currency : null;
-        $price['start'] = isset($item->StartPrice) ? (float)$item->StartPrice : null;
-        $price['buy_it_now'] = isset($item->BuyItNowPrice) ? (float)$item->BuyItNowPrice : null;
+        $price['price_currency'] = isset($item->Currency) ? (string)$item->Currency : null;
+        $price['price_start'] = isset($item->StartPrice) ? (float)$item->StartPrice : null;
+        $price['price_buy_it_now'] = isset($item->BuyItNowPrice) ? (float)$item->BuyItNowPrice : null;
 
         if (isset($item->SellingStatus)) {
-            $price['current'] = isset($item->ProductListingDetails->EAN) ? (float)$item->SellingStatus->CurrentPrice : null;
-            $price['original'] = isset($item->ProductListingDetails->EAN) ? (float)$item->SellingStatus->OriginalPrice : null;
+            $price['price_current'] = isset($item->ProductListingDetails->EAN) ? (float)$item->SellingStatus->CurrentPrice : null;
+            $price['price_original'] = isset($item->ProductListingDetails->EAN) ? (float)$item->SellingStatus->OriginalPrice : null;
         } else {
-            $price['current'] = null;
-            $price['original'] = null;
+            $price['price_current'] = null;
+            $price['price_original'] = null;
         }
 
         if (isset($item->DiscountPriceInfo)) {
-            $price['map']['value'] = isset($item->ProductListingDetails->EAN) ? (float)$item->DiscountPriceInfo->MinimumAdvertisedPrice : null;
-            $price['map']['exposure'] = isset($item->ProductListingDetails->EAN) ? (string)$item->DiscountPriceInfo->MinimumAdvertisedPriceExposure : null;
-            $price['stp']['value'] = isset($item->ProductListingDetails->EAN) ? (float)$item->DiscountPriceInfo->OriginalRetailPrice : null;
+            $price['price_map_value'] = isset($item->ProductListingDetails->EAN) ? (float)$item->DiscountPriceInfo->MinimumAdvertisedPrice : null;
+            $price['price_map_exposure'] = isset($item->ProductListingDetails->EAN) ? (string)$item->DiscountPriceInfo->MinimumAdvertisedPriceExposure : null;
+            $price['price_stp_value'] = isset($item->ProductListingDetails->EAN) ? (float)$item->DiscountPriceInfo->OriginalRetailPrice : null;
         } else {
-            $price['map']['value'] = null;
-            $price['map']['exposure'] = null;
-            $price['stp']['value'] = null;
+            $price['price_map_value'] = null;
+            $price['price_map_exposure'] = null;
+            $price['price_stp_value'] = null;
         }
 
         return $price;
@@ -171,7 +171,7 @@ class M2E_e2M_Model_Parser_eBay_Item extends Mage_Core_Helper_Abstract {
     private function getQty(SimpleXMLElement $item) {
         $qty = array();
 
-        $qty['total'] = isset($item->Quantity) ? (int)$item->Quantity : null;
+        $qty['qty_total'] = isset($item->Quantity) ? (int)$item->Quantity : null;
 
         return $qty;
     }
@@ -184,9 +184,9 @@ class M2E_e2M_Model_Parser_eBay_Item extends Mage_Core_Helper_Abstract {
     private function getDescription(SimpleXMLElement $item) {
         $description = array();
 
-        $description['title'] = isset($item->Title) ? (string)$item->Title : null;
-        $description['subtitle'] = isset($item->SubTitle) ? (string)$item->SubTitle : null;
-        $description['description'] = isset($item->Description) ? (string)$item->Description : null;
+        $description['description_title'] = isset($item->Title) ? (string)$item->Title : null;
+        $description['description_subtitle'] = isset($item->SubTitle) ? (string)$item->SubTitle : null;
+        $description['description_description'] = isset($item->Description) ? (string)$item->Description : null;
 
         return $description;
     }
@@ -200,19 +200,19 @@ class M2E_e2M_Model_Parser_eBay_Item extends Mage_Core_Helper_Abstract {
         $images = array();
 
         if (!isset($item->PictureDetails)) {
-            $images['gallery_type'];
-            $images['photo_display'];
-            $images['urls'] = array();
+            $images['images_gallery_type'];
+            $images['images_photo_display'];
+            $images['images_urls'] = array();
 
             return $images;
         }
 
-        $images['gallery_type'] = isset($item->PictureDetails->GalleryType) ? (string)$item->PictureDetails->GalleryType : null;
-        $images['photo_display'] = isset($item->PictureDetails->PhotoDisplay) ? (string)$item->PictureDetails->PhotoDisplay : null;
-        $images['urls'] = array();
+        $images['images_gallery_type'] = isset($item->PictureDetails->GalleryType) ? (string)$item->PictureDetails->GalleryType : null;
+        $images['images_photo_display'] = isset($item->PictureDetails->PhotoDisplay) ? (string)$item->PictureDetails->PhotoDisplay : null;
+        $images['images_urls'] = array();
         if (isset($item->PictureDetails->PictureURL)) {
             foreach ($item->PictureDetails->PictureURL as $pictureURL) {
-                $images['urls'][] = (string)$pictureURL;
+                $images['images_urls'][] = (string)$pictureURL;
             }
         }
 
@@ -227,9 +227,9 @@ class M2E_e2M_Model_Parser_eBay_Item extends Mage_Core_Helper_Abstract {
     private function getCondition(SimpleXMLElement $item) {
         $condition = array();
 
-        $condition['type'] = isset($item->ConditionID) ? (string)$item->ConditionID : null;
-        $condition['name'] = isset($item->ConditionDisplayName) ? (string)$item->ConditionDisplayName : null;
-        $condition['description'] = isset($item->ConditionDescription) ? (string)$item->ConditionDescription : null;
+        $condition['condition_type'] = isset($item->ConditionID) ? (string)$item->ConditionID : null;
+        $condition['condition_name'] = isset($item->ConditionDisplayName) ? (string)$item->ConditionDisplayName : null;
+        $condition['condition_description'] = isset($item->ConditionDescription) ? (string)$item->ConditionDescription : null;
 
         return $condition;
     }
@@ -243,19 +243,19 @@ class M2E_e2M_Model_Parser_eBay_Item extends Mage_Core_Helper_Abstract {
         $categories = array();
 
         if (isset($item->PrimaryCategory)) {
-            $categories['primary']['id'] = isset($item->PrimaryCategory->CategoryID) ? (string)$item->PrimaryCategory->CategoryID : null;
-            $categories['primary']['name'] = isset($item->PrimaryCategory->CategoryName) ? (string)$item->PrimaryCategory->CategoryName : null;
+            $categories['categories_primary_id'] = isset($item->PrimaryCategory->CategoryID) ? (string)$item->PrimaryCategory->CategoryID : null;
+            $categories['categories_primary_name'] = isset($item->PrimaryCategory->CategoryName) ? (string)$item->PrimaryCategory->CategoryName : null;
         } else {
-            $categories['primary']['id'] = null;
-            $categories['primary']['name'] = null;
+            $categories['categories_primary_id'] = null;
+            $categories['categories_primary_name'] = null;
         }
 
         if (isset($item->SecondaryCategory)) {
-            $categories['secondary']['id'] = isset($item->SecondaryCategory->CategoryID) ? (string)$item->SecondaryCategory->CategoryID : null;
-            $categories['secondary']['name'] = isset($item->SecondaryCategory->CategoryName) ? (string)$item->SecondaryCategory->CategoryName : null;
+            $categories['categories_secondary_id'] = isset($item->SecondaryCategory->CategoryID) ? (string)$item->SecondaryCategory->CategoryID : null;
+            $categories['categories_secondary_name'] = isset($item->SecondaryCategory->CategoryName) ? (string)$item->SecondaryCategory->CategoryName : null;
         } else {
-            $categories['secondary']['id'] = null;
-            $categories['secondary']['name'] = null;
+            $categories['categories_secondary_id'] = null;
+            $categories['categories_secondary_name'] = null;
         }
 
         return $categories;
@@ -271,19 +271,19 @@ class M2E_e2M_Model_Parser_eBay_Item extends Mage_Core_Helper_Abstract {
 
         if (!isset($item->Storefront)) {
 
-            $store['categories']['primary']['id'] = null;
-            $store['categories']['primary']['name'] = null;
-            $store['categories']['secondary']['id'] = null;
-            $store['categories']['secondary']['name'] = null;
+            $store['store_categories_primary_id'] = null;
+            $store['store_categories_primary_name'] = null;
+            $store['store_categories_secondary_id'] = null;
+            $store['store_categories_secondary_name'] = null;
 
             return $store;
         }
 
-        $store['categories']['primary']['id'] = isset($item->Storefront->StoreCategoryID) ? (string)$item->Storefront->StoreCategoryID : null;
-        $store['categories']['primary']['name'] = isset($item->Storefront->StoreCategoryName) ? (string)$item->Storefront->StoreCategoryName : null;
-        $store['categories']['secondary']['id'] = isset($item->Storefront->StoreCategory2ID) ? (string)$item->Storefront->StoreCategory2ID : null;
-        $store['categories']['secondary']['name'] = isset($item->Storefront->StoreCategory2Name) ? (string)$item->Storefront->StoreCategory2Name : null;
-        $store['url'] = isset($item->Storefront->StoreURL) ? (string)$item->Storefront->StoreURL : null;
+        $store['store_categories_primary_id'] = isset($item->Storefront->StoreCategoryID) ? (string)$item->Storefront->StoreCategoryID : null;
+        $store['store_categories_primary_name'] = isset($item->Storefront->StoreCategoryName) ? (string)$item->Storefront->StoreCategoryName : null;
+        $store['store_categories_secondary_id'] = isset($item->Storefront->StoreCategory2ID) ? (string)$item->Storefront->StoreCategory2ID : null;
+        $store['store_categories_secondary_name'] = isset($item->Storefront->StoreCategory2Name) ? (string)$item->Storefront->StoreCategory2Name : null;
+        $store['store_url'] = isset($item->Storefront->StoreURL) ? (string)$item->Storefront->StoreURL : null;
 
         return $store;
     }
@@ -296,21 +296,21 @@ class M2E_e2M_Model_Parser_eBay_Item extends Mage_Core_Helper_Abstract {
     private function getShipping(SimpleXMLElement $item) {
         $shippingData = array();
 
-        $shippingData['dispatch_time'] = isset($item->DispatchTimeMax) ? (int)$item->DispatchTimeMax : null;
+        $shippingData['shipping_dispatch_time'] = isset($item->DispatchTimeMax) ? (int)$item->DispatchTimeMax : null;
         if (!isset($item->ShippingPackageDetails)) {
-            $shippingData['package']['dimensions']['depth'] = null;
-            $shippingData['package']['dimensions']['length'] = null;
-            $shippingData['package']['dimensions']['width'] = null;
+            $shippingData['shipping_package_dimensions_depth'] = null;
+            $shippingData['shipping_package_dimensions_length'] = null;
+            $shippingData['shipping_package_dimensions_width'] = null;
         } else {
-            $shippingData['package']['dimensions']['depth'] = isset($item->ShippingPackageDetails->PackageDepth) ? (int)$item->ShippingPackageDetails->PackageDepth : null;
-            $shippingData['package']['dimensions']['length'] = isset($item->ShippingPackageDetails->PackageLength) ? (int)$item->ShippingPackageDetails->PackageLength : null;
-            $shippingData['package']['dimensions']['width'] = isset($item->ShippingPackageDetails->PackageWidth) ? (int)$item->ShippingPackageDetails->PackageWidth : null;
+            $shippingData['shipping_package_dimensions_depth'] = isset($item->ShippingPackageDetails->PackageDepth) ? (int)$item->ShippingPackageDetails->PackageDepth : null;
+            $shippingData['shipping_package_dimensions_length'] = isset($item->ShippingPackageDetails->PackageLength) ? (int)$item->ShippingPackageDetails->PackageLength : null;
+            $shippingData['shipping_package_dimensions_width'] = isset($item->ShippingPackageDetails->PackageWidth) ? (int)$item->ShippingPackageDetails->PackageWidth : null;
         }
 
         if (!isset($item->UnitInfo)) {
-            $shippingData['package']['dimensions']['unit_type'] = null;
+            $shippingData['shipping_package_dimensions_unit_type'] = null;
         } else {
-            $shippingData['package']['dimensions']['unit_type'] = isset($item->UnitInfo->UnitType) ? (string)$item->UnitInfo->UnitType : null;
+            $shippingData['shipping_package_dimensions_unit_type'] = isset($item->UnitInfo->UnitType) ? (string)$item->UnitInfo->UnitType : null;
         }
 
         return $shippingData;
@@ -378,7 +378,9 @@ class M2E_e2M_Model_Parser_eBay_Item extends Mage_Core_Helper_Abstract {
             $variations[] = $tempVariation;
         }
 
-        return $variations;
+        return array(
+            'variations' => $variations
+        );
     }
 
     /**
@@ -405,7 +407,9 @@ class M2E_e2M_Model_Parser_eBay_Item extends Mage_Core_Helper_Abstract {
             );
         }
 
-        return $specifics;
+        return array(
+            'specifics' => $specifics
+        );
     }
 
     //########################################
@@ -422,23 +426,22 @@ class M2E_e2M_Model_Parser_eBay_Item extends Mage_Core_Helper_Abstract {
         //----------------------------------------
 
         $eBayItemInfo['marketplace_id'] = $this->getMarketplace($item);
-        $eBayItemInfo['identifiers'] = $this->getIdentifiers($item);
-        $eBayItemInfo['price'] = $this->getPrice($item);
-        $eBayItemInfo['qty'] = $this->getQty($item);
-        $eBayItemInfo['description'] = $this->getDescription($item);
-        $eBayItemInfo['images'] = $this->getImages($item);
-        $eBayItemInfo['condition'] = $this->getCondition($item);
-        $eBayItemInfo['categories'] = $this->getCategories($item);
-        $eBayItemInfo['store'] = $this->getStore($item);
-        $eBayItemInfo['shipping'] = $this->getShipping($item);
-        $eBayItemInfo['variations'] = $this->getVariations($item);
-        $eBayItemInfo['item_specifics'] = $this->getSpecifics($item);
+        $eBayItemInfo = array_merge(
+            $eBayItemInfo,
+            $this->getIdentifiers($item),
+            $this->getPrice($item),
+            $this->getQty($item),
+            $this->getDescription($item),
+            $this->getImages($item),
+            $this->getCondition($item),
+            $this->getCategories($item),
+            $this->getStore($item),
+            $this->getShipping($item),
+            $this->getVariations($item),
+            $this->getSpecifics($item)
+        );
 
         //----------------------------------------
-
-        if ($eBayItemInfo['format']['type'] === false) {
-            return false;
-        }
 
         return $eBayItemInfo;
     }

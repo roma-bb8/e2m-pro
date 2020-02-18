@@ -67,42 +67,42 @@ class M2E_e2M_Helper_eBay_Inventory {
     );
 
     private $eBayFields = array(
-        'identifiers][item_id' => 'Item ID',
-        'identifiers][sku' => 'SKU',
-        'identifiers][ean' => 'EAN',
-        'identifiers][upc' => 'UPC',
-        'identifiers][isbn' => 'ISBN',
-        'identifiers][epid' => 'EPID',
-        'identifiers][brand_mpn][mpn' => '(Brand) MPN',
-        'identifiers][brand_mpn][brand' => '(Brand) Brand',
+        'identifiers_item_id' => 'Item ID',
+        'identifiers_sku' => 'SKU',
+        'identifiers_ean' => 'EAN',
+        'identifiers_upc' => 'UPC',
+        'identifiers_isbn' => 'ISBN',
+        'identifiers_epid' => 'EPID',
+        'identifiers_brand_mpn_mpn' => '(Brand) MPN',
+        'identifiers_brand_mpn_brand' => '(Brand) Brand',
 
         'marketplace_id' => '(Site) Marketplace ID',
-        'categories][primary][id' => '(Category) Primary ID',
-        'categories][secondary][id' => '(Category) Secondary ID',
-        'store][categories][primary][id' => '(Store) Category ID',
-        'store][categories][secondary][id' => '(Store) Category 2 ID',
+        'categories_primary_id' => '(Category) Primary ID',
+        'categories_secondary_id' => '(Category) Secondary ID',
+        'store_categories_primary_id' => '(Store) Category ID',
+        'store_categories_secondary_id' => '(Store) Category 2 ID',
 
-        'description][title' => 'Title',
-        'description][subtitle' => 'SubTitle',
-        'description][description' => 'Description',
+        'description_title' => 'Title',
+        'description_subtitle' => 'SubTitle',
+        'description_description' => 'Description',
 
-        'price][start' => 'Start Price',
-        'price][current' => 'Current Price',
-        'price][buy_it_now' => 'Buy It Now Price',
-        'price][original' => 'Original Price',
-        'price][map][value' => '(DPI) Minimum Advertised Price',
-        'price][map][exposure' => '(DPI) Minimum Advertised Price Exposure',
-        'price][stp][value' => '(Discount Price Info) Original Retail Price',
+        'price_start' => 'Start Price',
+        'price_current' => 'Current Price',
+        'price_buy_it_now' => 'Buy It Now Price',
+        'price_original' => 'Original Price',
+        'price_map_value' => '(DPI) Minimum Advertised Price',
+        'price_map_exposure' => '(DPI) Minimum Advertised Price Exposure',
+        'price_stp_value' => '(Discount Price Info) Original Retail Price',
 
-        'qty][total' => 'Quantity',
+        'qty_total' => 'Quantity',
 
-        'shipping][dispatch_time' => 'Dispatch Time',
-        'shipping][package][dimensions][depth' => '(Dimensions) Depth',
-        'shipping][package][dimensions][length' => '(Dimensions) Length',
-        'shipping][package][dimensions][width' => '(Dimensions) Width',
-        'shipping][package][dimensions][unit_type' => 'Unit Type',
+        'shipping_dispatch_time' => 'Dispatch Time',
+        'shipping_package_dimensions_depth' => '(Dimensions) Depth',
+        'shipping_package_dimensions_length' => '(Dimensions) Length',
+        'shipping_package_dimensions_width' => '(Dimensions) Width',
+        'shipping_package_dimensions_unit_type' => 'Unit Type',
 
-        'condition][type' => 'Condition ID'
+        'condition_type' => 'Condition ID'
     );
 
     /** @var Mage_Core_Model_Resource $resource */

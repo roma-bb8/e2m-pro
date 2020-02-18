@@ -275,7 +275,7 @@ XML;
 
             $items = array();
             foreach ($response->ItemArray->Item as $xmlItem) {
-                $item = $parser->parseItem($xmlItem);
+                $item = $parser->process($xmlItem);
                 $items[$item['identifiers']['item_id']] = $item;
             }
 
