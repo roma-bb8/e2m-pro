@@ -156,7 +156,7 @@
                         <td class="value" style="width: auto">
                             <select id="<?php echo $marketplaceId; ?>" class="marketplace-store config-input">
                                 <option value="">-- Please Select --</option>
-                                <option value="<?php echo M2E_e2M_Helper_eBay_Config::SKIP ?>" <?php if ($this->getConfigHelper()->getStoreForMarketplace($marketplaceId) === M2E_e2M_Helper_eBay_Config::SKIP) echo ' selected="selected"'; ?>>Skip</option>
+                                <option value="<?php echo M2E_e2M_Helper_eBay_Config::SKIP ?>" <?php if ($this->getConfigHelper()->isSkipStore($marketplaceId)) echo ' selected="selected"'; ?>>Skip</option>
                                 <?php foreach ($this->getDataHelper()->getMagentoStores() as $id => $store): ?>
                                     <option value="<?php echo $id; ?>" <?php if ($this->getConfigHelper()->getStoreForMarketplace($marketplaceId) === $id) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__($store); ?></option>
                                 <?php endforeach; ?>
@@ -182,7 +182,6 @@
                     </td>
                     <td class="value" style="width: auto">
                         <select id="inventory-settings-product-identifier" class="config-input">
-                            <option value="">-- Please Select --</option>
                             <option value="<?php echo M2E_e2M_Helper_eBay_Config::VALUE_SKU_PRODUCT_IDENTIFIER; ?>" <?php if ($this->getConfigHelper()->isProductIdentifierSKU()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('SKU'); ?></option>
                             <option value="<?php echo M2E_e2M_Helper_eBay_Config::VALUE_MPN_PRODUCT_IDENTIFIER; ?>" <?php if ($this->getConfigHelper()->isProductIdentifierMPN()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('MPN'); ?></option>
                             <option value="<?php echo M2E_e2M_Helper_eBay_Config::VALUE_UPC_PRODUCT_IDENTIFIER; ?>" <?php if ($this->getConfigHelper()->isProductIdentifierUPC()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('UPC'); ?></option>
@@ -201,7 +200,6 @@
                     </td>
                     <td class="value" style="width: auto">
                         <select id="inventory-settings-action-found" class="config-input">
-                            <option value="">-- Please Select --</option>
                             <option value="<?php echo M2E_e2M_Helper_eBay_Config::VALUE_IGNORE_ACTION_FOUND; ?>" <?php if (M2E_e2M_Helper_eBay_Config::VALUE_IGNORE_ACTION_FOUND === $this->getConfigHelper()->getActionFound()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Ignore'); ?></option>
                             <option value="<?php echo M2E_e2M_Helper_eBay_Config::VALUE_UPDATE_ACTION_FOUND; ?>" <?php if (M2E_e2M_Helper_eBay_Config::VALUE_UPDATE_ACTION_FOUND === $this->getConfigHelper()->getActionFound()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Update'); ?></option>
                         </select>

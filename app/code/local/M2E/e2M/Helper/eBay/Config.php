@@ -27,7 +27,7 @@ class M2E_e2M_Helper_eBay_Config {
 
     const PATH_FULL_SETTINGS = 'full';
 
-    const SKIP = 'skip';
+    const SKIP = -1;
 
     //########################################
 

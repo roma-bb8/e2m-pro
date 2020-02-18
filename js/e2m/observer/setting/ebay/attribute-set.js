@@ -33,7 +33,7 @@
 
                     for (var [code, title] of Object.entries(e2m.magentoAttributes)) {
                         var option = document.createElement('option');
-                        option.id = code;
+                        option.value = code;
                         option.text = title.toString();
                         magentoAttribute.add(option);
                     }

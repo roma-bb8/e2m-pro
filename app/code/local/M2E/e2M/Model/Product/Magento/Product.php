@@ -333,11 +333,11 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
             case $this->eBayConfig->isProductIdentifierGTIN():
                 $tmp = null;
                 if (!empty($data['identifiers_upc'])) {
-                    $tmp = $this->loadProductBy($data['upc'], 'upc', $marketplaceId);
+                    $tmp = $this->loadProductBy($data['upc'], 'gtin', $marketplaceId);
                 }
 
                 if (!empty($data['identifiers_ean']) && $tmp === null) {
-                    $tmp = $this->loadProductBy($data['ean'], 'ean', $marketplaceId);
+                    $tmp = $this->loadProductBy($data['ean'], 'gtin', $marketplaceId);
                 }
 
                 $tmp !== null && $product = $tmp;
