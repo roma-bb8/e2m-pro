@@ -20,10 +20,10 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
         $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay/start-download-inventory.js');
         $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay/start-import-inventory.js');
         $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay/unset-token.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay/pause-finish-download-inventory.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay/pause-start-download-inventory.js');
         $this->getLayout()->getBlock('head')->addJs('e2m/callback/magento/hide-block.js');
         $this->getLayout()->getBlock('head')->addJs('e2m/callback/magento/show-block.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/callback/magento/pause-finish-download-inventory.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/callback/magento/pause-start-download-inventory.js');
         $this->getLayout()->getBlock('head')->addJs('e2m/cron/task/ebay/download-inventory-handler.js');
         $this->getLayout()->getBlock('head')->addJs('e2m/cron/task/ebay/import-inventory-handler.js');
         $this->getLayout()->getBlock('head')->addJs('e2m/ebay/paint-import-properties.js');
