@@ -14,24 +14,20 @@
 
     e2m.url.skin = '<?php echo $this->getSkinUrl('e2m') ?>';
     e2m.url.cron = '<?php echo $this->getUrl('*/e2m/cron') ?>';
-    e2m.url.beforeEbayGetToken = '<?php echo $this->getUrl('*/e2m/beforeEbayGetToken') ?>';
-    e2m.url.unsetEbayToken = '<?php echo $this->getUrl('*/e2m/deleteEbayToken') ?>';
-    e2m.url.settings = '<?php echo $this->getUrl('*/e2m/sendSettings') ?>';
-    e2m.url.getAttributs = '<?php echo $this->getUrl('*/e2m/getAttributsBySet') ?>';
+    e2m.url.getBeforeEbayToken = '<?php echo $this->getUrl('*/e2m/getBeforeEbayToken') ?>';
+    e2m.url.unsetEbayToken = '<?php echo $this->getUrl('*/e2m/unsetEbayToken') ?>';
+    e2m.url.setSettings = '<?php echo $this->getUrl('*/e2m/setSettings') ?>';
+    e2m.url.getAttributesBySetId = '<?php echo $this->getUrl('*/e2m/getAttributesBySetId') ?>';
     e2m.url.startTaskDownloadInventory = '<?php echo $this->getUrl('*/e2m/startTaskDownloadInventory') ?>';
     e2m.url.startTaskImportInventory = '<?php echo $this->getUrl('*/e2m/startTaskImportInventory') ?>';
 
     //----------------------------------------
 
-    e2m.magentoAttributes = JSON.parse('<?php echo str_replace("'", '', $this->getCoreHelper()->jsonEncode($this->getDataHelper()->getMagentoAllAttributes($this->getConfigHelper()->getAttributeSet()))) ?>');
-    e2m.eBayFields = JSON.parse('<?php echo $this->getCoreHelper()->jsonEncode($this->getDataHelper()->getEbayAllFields()) ?>');
+    e2m.magentoAttributes = JSON.parse('<?php echo str_replace("'", '', $this->getCoreHelper()->jsonEncode($this->getDataHelper()->getMagentoAttributes($this->getConfigHelper()->getAttributeSet()))) ?>');
+    e2m.eBayFields = JSON.parse('<?php echo $this->getCoreHelper()->jsonEncode($this->getInventoryHelper()->getEbayFields()) ?>');
 
     e2m.attributes = JSON.parse('<?php if (empty($this->getConfigHelper()->getEbayFieldMagentoAttribute())) { echo '{}'; } else { echo str_replace("'", '', $this->getCoreHelper()->jsonEncode($this->getConfigHelper()->getEbayFieldMagentoAttribute())); } ?>');
 </script>
-
-<!-- Duck,Duck,Duck  _       _    -->
-<!--               >(.)__  <(.)__ -->
-<!--                (___/   (___/ -->
 
 <div class="content-header">
     <table cellspacing="0">
@@ -41,7 +37,7 @@
                 <?php if (!empty($this->getAccountHelper()->getUserId())): ?>
                     <div style="float: right">
                         <label><?php echo $this->getDataHelper()->__('eBay User ID'); ?>&nbsp;</label>
-                        <span>(<a target="_blank" href="<?php echo $this->getDataHelper()->getMemberUrl($this->getAccountHelper()->getUserId(), $this->getAccountHelper()->getMode()); ?>"><?php echo $this->escapeHtml($this->getAccountHelper()->getUserId()); ?></a>)</span>
+                        <span>(<a target="_blank" href="<?php echo $this->getAccountHelper()->getAccountUrl(); ?>"><?php echo $this->escapeHtml($this->getAccountHelper()->getUserId()); ?></a>)</span>
                         <span><?php echo $this->getChildHtml('logout_button'); ?></span>
                     </div>
                 <?php endif; ?>
@@ -121,16 +117,21 @@
                             <?php echo $this->getChildHtml('start_download_inventory_button'); ?>
                         </td>
                         <td class="value block-download-inventory-progress" style="width: auto">
-                            <span id="download-inventory-progress"><?php echo $this->escapeHtml($this->getProgressHelper()->getProgressByTag(M2E_e2M_Helper_Data::EBAY_DOWNLOAD_INVENTORY)); ?></span>%
+                            <span id="download-inventory-progress"><?php echo $this->escapeHtml($this->getProgressHelper()->getProgressByTag(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::TAG)); ?></span>%
                         </td>
                     </tr>
-                    <?php if ($this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Helper_Data::EBAY_DOWNLOAD_INVENTORY)): ?>
+                    <?php if ($this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::TAG)): ?>
                         <tr>
                             <td class="label">
                                 <?php echo $this->getChildHtml('start_import_inventory_button'); ?>
                             </td>
                             <td class="value block-import-inventory-progress" style="width: auto">
-                                <span id="import-inventory-progress"><?php echo $this->escapeHtml($this->getProgressHelper()->getProgressByTag(M2E_e2M_Helper_Data::MAGENTO_IMPORT_INVENTORY)); ?></span>%
+                                <span id="import-inventory-progress"><?php echo $this->escapeHtml($this->getProgressHelper()->getProgressByTag(M2E_e2M_Model_Cron_Task_Magento_ImportInventory::TAG)); ?></span>%
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="label">
+                                <?php echo $this->getChildHtml('pause_download_inventory_button'); ?>
                             </td>
                         </tr>
                     <?php endif; ?>
@@ -140,7 +141,7 @@
     </div>
 <?php endif; ?>
 
-<?php if ($this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Helper_Data::EBAY_DOWNLOAD_INVENTORY)): ?>
+<?php if ($this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::TAG)): ?>
     <div class="entry-edit">
         <div class="entry-edit-head">
             <h4><?php echo $this->getDataHelper()->__('Marketplace settings'); ?></h4>
@@ -150,11 +151,12 @@
                 <?php foreach ($this->getInventoryHelper()->getMarketplaces() as $marketplaceId): ?>
                     <tr>
                         <td class="label">
-                            <label for="<?php echo $marketplaceId; ?>"><?php echo $this->getDataHelper()->__($this->getDataHelper()->getMarketplaceTitle($marketplaceId)); ?></label>
+                            <label for="<?php echo $marketplaceId; ?>"><?php echo $this->getDataHelper()->__($this->getInventoryHelper()->getMarketplaceTitle($marketplaceId)); ?></label>
                         </td>
                         <td class="value" style="width: auto">
                             <select id="<?php echo $marketplaceId; ?>" class="marketplace-store config-input">
                                 <option>-- Please Select --</option>
+                                <option value="<?php echo M2E_e2M_Helper_eBay_Config::SKIP ?>" <?php if ($this->getConfigHelper()->getStoreForMarketplace($marketplaceId) === M2E_e2M_Helper_eBay_Config::SKIP) echo ' selected="selected"'; ?>>-- Skip --</option>
                                 <?php foreach ($this->getDataHelper()->getMagentoStores() as $id => $store): ?>
                                     <option value="<?php echo $id; ?>" <?php if ($this->getConfigHelper()->getStoreForMarketplace($marketplaceId) === $id) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__($store); ?></option>
                                 <?php endforeach; ?>
@@ -167,7 +169,7 @@
     </div>
 <?php endif; ?>
 
-<?php if ($this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Helper_Data::EBAY_DOWNLOAD_INVENTORY)): ?>
+<?php if ($this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::TAG)): ?>
     <div class="entry-edit">
         <div class="entry-edit-head">
             <h4><?php echo $this->getDataHelper()->__('Inventory settings'); ?></h4>
@@ -181,9 +183,11 @@
                     <td class="value" style="width: auto">
                         <select id="inventory-settings-product-identifier" class="config-input">
                             <option>-- Please Select --</option>
-                            <option value="<?php echo M2E_e2M_Helper_eBay_Config::VALUE_SKU_PRODUCT_IDENTIFIER; ?>" <?php if (M2E_e2M_Helper_eBay_Config::VALUE_SKU_PRODUCT_IDENTIFIER === $this->getConfigHelper()->getProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('SKU'); ?></option>
-                            <option value="<?php echo M2E_e2M_Helper_eBay_Config::VALUE_MPN_PRODUCT_IDENTIFIER; ?>" <?php if (M2E_e2M_Helper_eBay_Config::VALUE_MPN_PRODUCT_IDENTIFIER === $this->getConfigHelper()->getProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('MPN'); ?></option>
-                            <option value="<?php echo M2E_e2M_Helper_eBay_Config::VALUE_GTIN_PRODUCT_IDENTIFIER; ?>" <?php if (M2E_e2M_Helper_eBay_Config::VALUE_GTIN_PRODUCT_IDENTIFIER === $this->getConfigHelper()->getProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('GTIN'); ?></option>
+                            <option value="<?php echo M2E_e2M_Helper_eBay_Config::VALUE_SKU_PRODUCT_IDENTIFIER; ?>" <?php if ($this->getConfigHelper()->isProductIdentifierSKU()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('SKU'); ?></option>
+                            <option value="<?php echo M2E_e2M_Helper_eBay_Config::VALUE_MPN_PRODUCT_IDENTIFIER; ?>" <?php if ($this->getConfigHelper()->isProductIdentifierMPN()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('MPN'); ?></option>
+                            <option value="<?php echo M2E_e2M_Helper_eBay_Config::VALUE_UPC_PRODUCT_IDENTIFIER; ?>" <?php if ($this->getConfigHelper()->isProductIdentifierUPC()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('UPC'); ?></option>
+                            <option value="<?php echo M2E_e2M_Helper_eBay_Config::VALUE_EAN_PRODUCT_IDENTIFIER; ?>" <?php if ($this->getConfigHelper()->isProductIdentifierEAN()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('EAN'); ?></option>
+                            <option value="<?php echo M2E_e2M_Helper_eBay_Config::VALUE_GTIN_PRODUCT_IDENTIFIER; ?>" <?php if ($this->getConfigHelper()->isProductIdentifierGTIN()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('GTIN'); ?></option>
                         </select>
                         <p class="note">
                                 <span><?php echo Mage::helper('e2m')->__('Product identifier on different marketplaces'); ?>
@@ -227,7 +231,7 @@
     </div>
 <?php endif; ?>
 
-<?php if ($this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Helper_Data::EBAY_DOWNLOAD_INVENTORY)): ?>
+<?php if ($this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::TAG)): ?>
     <div class="entry-edit">
         <div class="entry-edit-head">
             <h4><?php echo $this->getDataHelper()->__('Product settings'); ?></h4>
@@ -305,7 +309,7 @@
                     <td class="value" style="width: auto">
                         <select id="ebay-field" class="ebay-field-magento-attribute config-input">
                             <option></option>
-                            <?php foreach ($this->getDataHelper()->getEbayAllFields() as $code => $title): ?>
+                            <?php foreach ($this->getInventoryHelper()->getEbayFields() as $code => $title): ?>
                                 <option value="<?php echo $code; ?>"><?php echo $this->getDataHelper()->__($title); ?></option>
                             <?php endforeach; ?>
                         </select>
@@ -318,7 +322,7 @@
                     <td class="value" style="width: auto">
                         <select id="magento-attribute" class="ebay-field-magento-attribute config-input">
                             <option></option>
-                            <?php foreach ($this->getDataHelper()->getMagentoAllAttributes($this->getConfigHelper()->getAttributeSet()) as $code => $title): ?>
+                            <?php foreach ($this->getDataHelper()->getMagentoAttributes($this->getConfigHelper()->getAttributeSet()) as $code => $title): ?>
                                 <option value="<?php echo $code; ?>"><?php echo $this->getDataHelper()->__($title); ?></option>
                             <?php endforeach; ?>
                         </select>
@@ -357,6 +361,6 @@
     </div>
 <?php endif; ?>
 
-<div <?php if ($this->getConfigHelper()->isFull()): ?> style="display: none" <?php endif; ?> class="config-button">
+<div <?php if (!$this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::TAG) || $this->getConfigHelper()->isFull()): ?> style="display: none" <?php endif; ?> class="config-button">
     <?php echo $this->getChildHtml('send_settings_button'); ?>
 </div>

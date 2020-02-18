@@ -54,7 +54,9 @@ class M2E_e2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
             ->where('instance = ?', 'Cron_Task_eBay_DownloadInventory')->query()->fetchColumn();
 
         switch (true) {
-            case $this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Helper_Data::EBAY_DOWNLOAD_INVENTORY):
+            case $this->getProgressHelper()->isCompletedProgressByTag(
+                M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::TAG
+            ):
                 $label = 'Reload inventory (completed)';
                 $disabled = false;
                 break;
@@ -79,9 +81,10 @@ class M2E_e2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
 
         //----------------------------------------
 
-        $id = $resource->getConnection('core_read')->select()
-            ->from($resource->getTableName('m2e_e2m_cron_tasks_in_processing'), 'id')
-            ->where('instance = ?', 'Cron_Task_Magento_ImportInventory')->query()->fetchColumn();
+        $task = $resource->getConnection('core_read')->select()
+            ->from($resource->getTableName('m2e_e2m_cron_tasks_in_processing'), array('id', 'data'))
+            ->where('instance = ?', 'Cron_Task_Magento_ImportInventory')->limit(1)
+            ->query()->fetch(PDO::FETCH_ASSOC);
 
         switch (true) {
             case !$this->getConfigHelper()->isFull():
@@ -89,12 +92,30 @@ class M2E_e2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
                 $disabled = true;
                 break;
 
-            case !empty($id):
+            case !empty($task['id']):
+
+                $data = Mage::helper('core')->jsonDecode($task['data']);
+                if (isset($data['pause']) && $data['pause']) {
+                    $label = 'Pause Import inventory';
+                    $onclick = 'pauseStartDownloadInventory(this);';
+                } else {
+                    $label = 'Proceed Import inventory';
+                    $onclick = 'pauseFinishDownloadInventory(this);';
+                }
+
+                $button = (clone $widgetButton)->setData(array(
+                    'label' => $this->getDataHelper()->__($label),
+                    'onclick' => $onclick
+                ));
+                $this->setChild('pause_download_inventory_button', $button);
+
                 $label = 'Import inventory (in progress...)';
                 $disabled = true;
                 break;
 
-            case $this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Helper_Data::MAGENTO_IMPORT_INVENTORY):
+            case $this->getProgressHelper()->isCompletedProgressByTag(
+                M2E_e2M_Model_Cron_Task_Magento_ImportInventory::TAG
+            ):
                 $label = 'Reimport inventory (completed)';
                 $disabled = false;
                 break;

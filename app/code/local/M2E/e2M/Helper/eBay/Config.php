@@ -17,14 +17,17 @@ class M2E_e2M_Helper_eBay_Config {
     const VALUE_IGNORE_ACTION_FOUND = 'IGNORE';
     const VALUE_UPDATE_ACTION_FOUND = 'UPDATE';
 
-    const PATH_PRODUCT_FIELDS_ATTRIBUTES_MAP = 'product/fields_attributes/map';
-    const PATH_PRODUCT_ATTRIBUTE_SET = 'product/attribute_set';
-    const PATH_PRODUCT_IMPORT_IMAGE = 'product/import/image';
     const PATH_PRODUCT_IMPORT_QTY = 'product/import/qty';
-    const PATH_PRODUCT_GENERATE_SKU = 'product/import/generate_sku';
-    const PATH_PRODUCT_DELETE_HTML = 'product/import/generate_sku';
+
+    const PATH_PRODUCT_GENERATE_SKU = 'product/generate_sku';
+    const PATH_PRODUCT_IMPORT_IMAGE = 'product/import/image';
+    const PATH_PRODUCT_DELETE_HTML = 'product/delete_html';
+    const PATH_PRODUCT_ATTRIBUTE_SET = 'product/attribute_set';
+    const PATH_PRODUCT_FIELDS_ATTRIBUTES_MAP = 'product/fields_attributes/map';
 
     const PATH_FULL_SETTINGS = 'full';
+
+    const SKIP = 'skip';
 
     //########################################
 
@@ -210,16 +213,25 @@ class M2E_e2M_Helper_eBay_Config {
     //########################################
 
     /**
-     * @param null $marketplaceId
+     * @param int $marketplaceId
      *
      * @return int
      */
-    public function getStoreForMarketplace($marketplaceId = null) {
+    public function getStoreForMarketplace($marketplaceId) {
         if (isset($this->settings['marketplaces_stores'][$marketplaceId])) {
             return (int)$this->settings['marketplaces_stores'][$marketplaceId];
         }
 
         return null;
+    }
+
+    /**
+     * @param int $marketplaceId
+     *
+     * @return int
+     */
+    public function isSkipStore($marketplaceId) {
+        return $this->getStoreForMarketplace($marketplaceId) === self::SKIP;
     }
 
     /**

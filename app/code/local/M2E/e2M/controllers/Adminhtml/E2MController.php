@@ -163,6 +163,10 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
                 'marketplace-store' => array(),
                 'product-identifier' => M2E_e2M_Helper_eBay_Config::VALUE_SKU_PRODUCT_IDENTIFIER,
                 'action-found' => M2E_e2M_Helper_eBay_Config::VALUE_IGNORE_ACTION_FOUND,
+                'import-qty' => false,
+                'generate-sku' => false,
+                'import-image' => false,
+                'delete-html' => false,
                 'attribute-set' => null,
                 'ebay-field-magento-attribute' => array()
             ));
@@ -297,6 +301,124 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
                 'message' => 'Start task of Downloading Inventory from ebay...',
                 'data' => array(
                     'process' => 0,
+                    'total' => $eBayInventory->getItemsTotal(),
+                    'variation' => $eBayInventory->getItemsVariation(),
+                    'simple' => $eBayInventory->getItemsSimple()
+                )
+            )));
+
+        } catch (Exception $e) {
+            Mage::helper('m2e')->logException($e);
+
+            return $this->getResponse()->setHttpResponseCode(500)->setBody($coreHelper->jsonEncode(array(
+                'error' => true,
+                'message' => $e->getMessage()
+            )));
+        }
+    }
+
+    /**
+     * @return Zend_Controller_Response_Abstract
+     * @throws Zend_Controller_Response_Exception
+     */
+    public function pauseStartDownloadInventoryAction() {
+
+        $coreHelper = Mage::helper('core');
+
+        try {
+
+            $resource = Mage::getSingleton('core/resource');
+            $connWrite = $resource->getConnection('core_write');
+            $cronTasksInProcessingTableName = $resource->getTableName('m2e_e2m_cron_tasks_in_processing');
+            $task = $connWrite->select()->from($cronTasksInProcessingTableName, array('id', 'data'))
+                ->where('instance = ?', 'Cron_Task_eBay_DownloadInventory')->limit(1)
+                ->query()->fetch(PDO::FETCH_ASSOC);
+
+            /** @var M2E_e2M_Helper_eBay_Inventory $eBayInventory */
+            $eBayInventory = Mage::helper('e2m/eBay_Inventory');
+
+            if (empty($task) || empty($task['id'])) {
+                return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
+                    'message' => 'Not task of Downloading Inventory.',
+                    'data' => array(
+                        'process' => 100,
+                        'total' => $eBayInventory->getItemsTotal(),
+                        'variation' => $eBayInventory->getItemsVariation(),
+                        'simple' => $eBayInventory->getItemsSimple()
+                    )
+                )));
+            }
+
+            $data = $coreHelper->jsonDecode($task['data']);
+            $data['pause'] = true;
+
+            $connWrite->update($cronTasksInProcessingTableName, array(
+                'data' => $coreHelper->jsonEncode($data)
+            ), array('id' => $task['id']));
+
+            return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
+                'message' => 'Pause task of Downloading Inventory from ebay...',
+                'data' => array(
+                    'process' => 'p 0',
+                    'total' => $eBayInventory->getItemsTotal(),
+                    'variation' => $eBayInventory->getItemsVariation(),
+                    'simple' => $eBayInventory->getItemsSimple()
+                )
+            )));
+
+        } catch (Exception $e) {
+            Mage::helper('m2e')->logException($e);
+
+            return $this->getResponse()->setHttpResponseCode(500)->setBody($coreHelper->jsonEncode(array(
+                'error' => true,
+                'message' => $e->getMessage()
+            )));
+        }
+    }
+
+    /**
+     * @return Zend_Controller_Response_Abstract
+     * @throws Zend_Controller_Response_Exception
+     */
+    public function pauseFinishDownloadInventoryAction() {
+
+        $coreHelper = Mage::helper('core');
+
+        try {
+
+            $resource = Mage::getSingleton('core/resource');
+            $connWrite = $resource->getConnection('core_write');
+            $cronTasksInProcessingTableName = $resource->getTableName('m2e_e2m_cron_tasks_in_processing');
+            $task = $connWrite->select()->from($cronTasksInProcessingTableName, array('id', 'data'))
+                ->where('instance = ?', 'Cron_Task_eBay_DownloadInventory')->limit(1)
+                ->query()->fetch(PDO::FETCH_ASSOC);
+
+            /** @var M2E_e2M_Helper_eBay_Inventory $eBayInventory */
+            $eBayInventory = Mage::helper('e2m/eBay_Inventory');
+
+            if (empty($task) || empty($task['id'])) {
+                return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
+                    'message' => 'Not task of Downloading Inventory.',
+                    'data' => array(
+                        'process' => 0,
+                        'total' => $eBayInventory->getItemsTotal(),
+                        'variation' => $eBayInventory->getItemsVariation(),
+                        'simple' => $eBayInventory->getItemsSimple()
+                    )
+                )));
+            }
+
+            $data = $coreHelper->jsonDecode($task['data']);
+            $data['pause'] = false;
+
+            $connWrite->update($cronTasksInProcessingTableName, array(
+                'data' => $coreHelper->jsonEncode($data)
+            ), array('id' => $task['id']));
+
+            return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
+                'message' => 'Pause task of Downloading Inventory from ebay...',
+                'data' => array(
+                    'process' => 'p',
                     'total' => $eBayInventory->getItemsTotal(),
                     'variation' => $eBayInventory->getItemsVariation(),
                     'simple' => $eBayInventory->getItemsSimple()

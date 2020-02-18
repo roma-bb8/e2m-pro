@@ -5,7 +5,12 @@
 
         paintImportProperties();
 
-        $('attribute-set1').observe('change', function (element) {
+        var attributeSet1 = $('attribute-set1');
+        if (attributeSet1 === null) {
+            return;
+        }
+
+        attributeSet1.observe('change', function (element) {
             new Ajax.Request(e2m.url.getAttributesBySetId, {
                 method: 'get',
                 parameters: {

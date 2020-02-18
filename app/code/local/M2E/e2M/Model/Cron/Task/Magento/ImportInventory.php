@@ -37,6 +37,14 @@ class M2E_e2M_Model_Cron_Task_Magento_ImportInventory implements M2E_e2M_Model_C
      */
     public function process($taskId, $data) {
 
+        /** @var M2E_e2M_Helper_Progress $progressHelper */
+        $progressHelper = Mage::helper('e2m/Progress');
+        if (isset($data['pause']) && $data['pause']) {
+            return array(
+                'process' => 'p ' . $progressHelper->getProgressByTag(self::TAG)
+            );
+        }
+
         $coreHelper = Mage::helper('core');
         $resource = Mage::getSingleton('core/resource');
 
@@ -61,8 +69,14 @@ class M2E_e2M_Model_Cron_Task_Magento_ImportInventory implements M2E_e2M_Model_C
             ->limit(self::MAX_LIMIT)
             ->query();
 
+        /** @var M2E_e2M_Helper_eBay_Config $eBayConfigHelper */
+        $eBayConfigHelper = Mage::helper('e2m/eBay_Config');
         while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
             $rowData = $coreHelper->jsonDecode($row['data']);
+            if ($eBayConfigHelper->isSkipStore($rowData['marketplace_id'])) {
+                continue;
+            }
+
             (bool)$row['variation'] ? $productMagentoConfigurable->process($rowData)
                 : $productMagentoSimple->process($rowData);
 
@@ -73,9 +87,6 @@ class M2E_e2M_Model_Cron_Task_Magento_ImportInventory implements M2E_e2M_Model_C
         }
 
         $process = $this->getProcessAsPercentage($data['last_import_id']);
-
-        /** @var M2E_e2M_Helper_Progress $progressHelper */
-        $progressHelper = Mage::helper('e2m/Progress');
         $progressHelper->setProgressByTag(self::TAG, $process);
 
         //----------------------------------------
