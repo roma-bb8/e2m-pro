@@ -381,7 +381,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             }
 
             $connWrite->update($cronTasksInProcessingTableName, array(
-                'pause' => 1
+                'pause' => true
             ), array('id = ?' => $taskId));
 
             return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
@@ -435,7 +435,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             }
 
             $connWrite->update($cronTasksInProcessingTableName, array(
-                'pause' => 0
+                'pause' => false
             ), array('id = ?' => $taskId));
 
             return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
