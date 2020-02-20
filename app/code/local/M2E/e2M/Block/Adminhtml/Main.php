@@ -82,10 +82,11 @@ class M2E_e2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
         //----------------------------------------
 
         $task = $resource->getConnection('core_read')->select()
-            ->from($resource->getTableName('m2e_e2m_cron_tasks_in_processing'), array('id', 'data'))
+            ->from($resource->getTableName('m2e_e2m_cron_tasks_in_processing'), array('id', 'pause'))
             ->where('instance = ?', 'Cron_Task_Magento_ImportInventory')->limit(1)
             ->query()->fetch(PDO::FETCH_ASSOC);
 
+        $disabledPause = true;
         switch (true) {
             case !$this->getConfigHelper()->isFull():
                 $label = 'Import inventory (look for settings)';
@@ -93,24 +94,9 @@ class M2E_e2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
                 break;
 
             case !empty($task['id']):
-
-                $data = Mage::helper('core')->jsonDecode($task['data']);
-                if (isset($data['pause']) && $data['pause']) {
-                    $label = 'Proceed Import inventory';
-                    $onclick = 'pauseFinishImportInventory(this);';
-                } else {
-                    $label = 'Pause Import inventory';
-                    $onclick = 'pauseStartImportInventory(this);';
-                }
-
-                $button = (clone $widgetButton)->setData(array(
-                    'label' => $this->getDataHelper()->__($label),
-                    'onclick' => $onclick
-                ));
-                $this->setChild('pause_download_inventory_button', $button);
-
                 $label = 'Import inventory (in progress...)';
                 $disabled = true;
+                $disabledPause = false;
                 break;
 
             case $this->getProgressHelper()->isCompletedProgressByTag(
@@ -128,10 +114,25 @@ class M2E_e2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
 
         $button = (clone $widgetButton)->setData(array(
             'label' => Mage::helper('e2m')->__($label),
-            'onclick' => 'startImportInventory();',
+            'onclick' => 'startImportInventory(this);',
             'disabled' => $disabled
         ));
         $this->setChild('start_import_inventory_button', $button);
+
+        if (!$task['pause']) {
+            $label = 'Pause Import inventory';
+            $onclick = 'pauseStartImportInventory(this);';
+        } else {
+            $label = 'Proceed Import inventory';
+            $onclick = 'pauseFinishImportInventory(this);';
+        }
+
+        $button = (clone $widgetButton)->setData(array(
+            'label' => $this->getDataHelper()->__($label),
+            'onclick' => $onclick,
+            'disabled' => $disabledPause
+        ));
+        $this->setChild('pause_download_inventory_button', $button);
     }
 
     //########################################

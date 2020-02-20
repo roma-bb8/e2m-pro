@@ -59,7 +59,8 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
 
         $groups = Mage::getModel('eav/entity_attribute_group')->getResourceCollection()
             ->addFilter('attribute_group_name', 'eBay')
-            ->addFilter('attribute_set_id', $this->eBayConfig->getAttributeSet());
+            ->addFilter('attribute_set_id', $this->eBayConfig->getAttributeSet())
+            ->getItems();
 
         $group = array_shift($groups);
         if ($group) {
@@ -74,6 +75,28 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
         $this->addLog('Create eBay Group in Attribute Set ID:' . $this->eBayConfig->getAttributeSet());
 
         return $this->groupId = $group->getId();
+    }
+
+    /***
+     * @param Mage_Eav_Model_Entity_Attribute_Abstract $attribute
+     *
+     * @return bool
+     * @throws Exception
+     */
+    protected function checkAssignedAttributes($attribute) {
+
+        $attributeGroupId = $attribute->getData('attribute_group_id');
+        if ($attributeGroupId) {
+            return false;
+        }
+
+        $attribute->setData('attribute_set_id', $this->eBayConfig->getAttributeSet());
+        $attribute->setData('attribute_group_id', $this->loadEbayGroup());
+        $attribute->save();
+
+        $this->addLog('add attribute: "' . $attribute->getName() . '" to eBay Group');
+
+        return true;
     }
 
     //########################################
@@ -103,22 +126,26 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
     protected function addAttributeValue($attribute, $option, $storeId) {
 
         $optionId = Mage::getModel('eav/entity_attribute_source_table')
-            ->setAttribute($attribute)->getOptionId($option);
+            ->setAttribute($attribute)
+            ->getOptionId($option);
         if ($optionId) {
             return $optionId;
         }
 
         try {
 
-            $attribute->setData('option', array('value' => array('option' => array($storeId => $option))));
+            $attribute->setData('option', array('value' => array('option' => array(
+                Mage_Core_Model_App::ADMIN_STORE_ID => $option,
+                $storeId => $option
+            ))));
             $attribute->save();
 
-            $this->addLog('Add new value: ' . $option . ' in Attribute: ' . $attribute->getName());
+            $this->addLog('Add new value: "' . $option . '" in Attribute: "' . $attribute->getName() . '"');
 
         } catch (Exception $e) {
             Mage::helper('e2m')->logException($e);
 
-            $this->addLog('Not add value: ' . $option . ' in Attribute: ' . $attribute->getName());
+            $this->addLog('Not add value: "' . $option . '" in Attribute: "' . $attribute->getName() . '"');
 
             return null;
         }
@@ -131,10 +158,11 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
     /**
      * @param string $code
      * @param string $title
+     * @param int $storeId
      *
      * @return null|Mage_Eav_Model_Entity_Attribute_Abstract
      */
-    protected function createAttribute($code, $title) {
+    protected function createAttribute($code, $title, $storeId) {
 
         try {
 
@@ -160,7 +188,7 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
                 'is_visible_on_front' => '0',
                 'used_in_product_listing' => '0',
                 'used_for_sort_by' => '0',
-                'frontend_label' => array(Mage_Core_Model_App::ADMIN_STORE_ID => $title),
+                'frontend_label' => array(Mage_Core_Model_App::ADMIN_STORE_ID => $title, $storeId => $title),
                 'type' => 'varchar',
                 'backend_type' => 'varchar',
                 'backend' => 'eav/entity_attribute_backend_array'
@@ -196,13 +224,13 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
 
         try {
 
-            if (empty($data['image_urls'])) {
+            if (empty($data['images_urls'])) {
                 return $product;
             }
 
             $tempMediaPath = Mage::getSingleton('catalog/product_media_config')->getBaseTmpMediaPath();
             $files = array();
-            foreach ($data['image_urls'] as $url) {
+            foreach ($data['images_urls'] as $url) {
                 $ext = strtolower(substr($url, (strripos($url, '.'))));
                 !in_array($ext, array('.png', '.jpg', '.jpeg')) && $ext = '.jpg';
                 $fileName = md5($url) . $ext;

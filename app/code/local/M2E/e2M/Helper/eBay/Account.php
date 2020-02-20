@@ -239,19 +239,19 @@ class M2E_e2M_Helper_eBay_Account {
             switch ($row['path']) {
                 case self::PREFIX . self::MODE:
                     $this->data['mode'] = (int)$row['value'];
-                    continue;
+                    break;
                 case self::PREFIX . self::SESSION_ID:
                     $this->data['session_id'] = $row['value'];
-                    continue;
+                    break;
                 case self::PREFIX . self::TOKEN:
                     $this->data['token'] = $row['value'];
-                    continue;
+                    break;
                 case self::PREFIX . self::EXPIRATION_TIME:
                     $this->data['expiration_time'] = $row['value'];
-                    continue;
+                    break;
                 case self::PREFIX . self::USER_ID:
                     $this->data['user_id'] = $row['value'];
-                    continue;
+                    break;
             }
         }
     }

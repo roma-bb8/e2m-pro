@@ -127,12 +127,12 @@
                             <td class="label">
                                 <?php echo $this->getChildHtml('start_import_inventory_button'); ?>
                             </td>
-                            <td class="value block-import-inventory-progress" style="width: auto">
+                            <td class="value" style="width: auto">
                                 <span id="import-inventory-progress"><?php echo $this->escapeHtml($this->getProgressHelper()->getProgressByTag(M2E_e2M_Model_Cron_Task_Magento_ImportInventory::TAG)); ?></span>%
                             </td>
                         </tr>
                         <tr>
-                            <td class="label">
+                            <td id="pause-download-inventory-button" class="label">
                                 <?php echo $this->getChildHtml('pause_download_inventory_button'); ?>
                             </td>
                         </tr>
@@ -308,7 +308,7 @@
                     </td>
                     <td class="value" style="width: auto">
                         <select id="ebay-field" class="ebay-field-magento-attribute config-input">
-                            <option></option>
+                            <option value=""></option>
                             <?php foreach ($this->getInventoryHelper()->getEbayFields() as $code => $title): ?>
                                 <option value="<?php echo $code; ?>"><?php echo $this->getDataHelper()->__($title); ?></option>
                             <?php endforeach; ?>
@@ -321,7 +321,7 @@
                     </td>
                     <td class="value" style="width: auto">
                         <select id="magento-attribute" class="ebay-field-magento-attribute config-input">
-                            <option></option>
+                            <option value=""></option>
                             <?php foreach ($this->getDataHelper()->getMagentoAttributes($this->getConfigHelper()->getAttributeSet()) as $code => $title): ?>
                                 <option value="<?php echo $code; ?>"><?php echo $this->getDataHelper()->__($title); ?></option>
                             <?php endforeach; ?>

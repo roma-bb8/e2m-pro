@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS `{$installer->getTable('m2e_e2m_cron_tasks_in_processing')}
 CREATE TABLE `{$installer->getTable('m2e_e2m_cron_tasks_in_processing')}` (
   `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
   `is_running` BOOL NOT NULL DEFAULT FALSE,
+  `pause` TINYINT(5) NOT NULL DEFAULT 0,
   `instance` VARCHAR(255) NOT NULL,
   `data` TEXT DEFAULT NULL,
   `updated` TIMESTAMP DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,

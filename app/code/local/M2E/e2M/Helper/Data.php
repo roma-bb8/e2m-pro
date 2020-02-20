@@ -122,6 +122,7 @@ class M2E_e2M_Helper_Data extends Mage_Core_Helper_Abstract {
 
         $type = get_class($e);
         $exceptionInfo = <<<EXCEPTION
+
 -------------------------------- EXCEPTION INFO ----------------------------------
 Type: {$type}
 File: {$e->getFile()}

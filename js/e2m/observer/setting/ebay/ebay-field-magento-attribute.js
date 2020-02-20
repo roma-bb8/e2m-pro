@@ -14,13 +14,13 @@
             var magentoAttributeValue = magentoAttribute.options[magentoAttribute.selectedIndex].value;
             if (!magentoAttributeValue) {
                 delete e2m.attributes[ebayFieldValue];
-                return;
+            } else {
+
+                e2m.attributes[ebayFieldValue] = magentoAttributeValue;
+
+                $('magento-attribute').selectedIndex = 0;
+                $('ebay-field').selectedIndex = 0;
             }
-
-            e2m.attributes[ebayFieldValue] = magentoAttributeValue;
-
-            $('magento-attribute').selectedIndex = 0;
-            $('ebay-field').selectedIndex = 0;
 
             paintImportProperties();
         });

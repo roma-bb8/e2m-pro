@@ -441,34 +441,34 @@ class M2E_e2M_Helper_eBay_Config {
             switch ($setting['path']) {
                 case self::PREFIX . self::PATH_MARKETPLACE_TO_STORE_MAP:
                     $this->settings['marketplaces_stores'] = $this->coreHelper->jsonDecode($setting['value']);
-                    continue;
+                    break;
                 case self::PREFIX . self::PATH_INVENTORY_PRODUCT_IDENTIFIER:
                     $this->settings['product_identifier'] = $setting['value'];
-                    continue;
+                    break;
                 case self::PREFIX . self::PATH_INVENTORY_ACTION_FOUND:
                     $this->settings['action_found'] = $setting['value'];
-                    continue;
+                    break;
                 case self::PREFIX . self::PATH_PRODUCT_FIELDS_ATTRIBUTES_MAP:
                     $this->settings['fields_attributes'] = $this->coreHelper->jsonDecode($setting['value']);
-                    continue;
+                    break;
                 case self::PREFIX . self::PATH_FULL_SETTINGS:
                     $this->settings['full'] = $this->coreHelper->jsonDecode($setting['value']);
-                    continue;
+                    break;
                 case self::PREFIX . self::PATH_PRODUCT_ATTRIBUTE_SET:
                     $this->settings['attribute_set'] = $setting['value'];
-                    continue;
+                    break;
                 case self::PREFIX . self::PATH_PRODUCT_IMPORT_IMAGE:
                     $this->settings['import_image'] = (bool)$this->coreHelper->jsonDecode($setting['value']);
-                    continue;
+                    break;
                 case self::PREFIX . self::PATH_PRODUCT_IMPORT_QTY:
                     $this->settings['import_qty'] = (bool)$this->coreHelper->jsonDecode($setting['value']);
-                    continue;
+                    break;
                 case self::PREFIX . self::PATH_PRODUCT_GENERATE_SKU:
                     $this->settings['generate_sku'] = (bool)$this->coreHelper->jsonDecode($setting['value']);
-                    continue;
+                    break;
                 case self::PREFIX . self::PATH_PRODUCT_DELETE_HTML:
                     $this->settings['delete_html'] = (bool)$this->coreHelper->jsonDecode($setting['value']);
-                    continue;
+                    break;
             }
         }
     }

@@ -5,6 +5,38 @@
  */
 class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
 
+    /**
+     * M2E_e2M_Adminhtml_E2MController constructor.
+     *
+     * @param Zend_Controller_Request_Abstract $request
+     * @param Zend_Controller_Response_Abstract $response
+     * @param array $invokeArgs
+     */
+    public function __construct(
+        Zend_Controller_Request_Abstract $request,
+        Zend_Controller_Response_Abstract $response,
+        array $invokeArgs = array()) {
+
+        register_shutdown_function(function () {
+            $error = error_get_last();
+            if (strpos($error['message'], 'deprecated')) {
+                return;
+            }
+
+            if (strpos($error['message'], 'Too few arguments')) {
+                return;
+            }
+
+            /** @var M2E_e2M_Helper_Data $dataHelper */
+            $dataHelper = Mage::helper('e2m');
+            $dataHelper->logException(new Exception(
+                "Error: {$error['message']}\nFile: {$error['file']}\nLine: {$error['line']}"
+            ));
+        });
+
+        parent::__construct($request, $response, $invokeArgs);
+    }
+
     public function indexAction() {
 
         $this->loadLayout();
@@ -334,11 +366,11 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             $resource = Mage::getSingleton('core/resource');
             $connWrite = $resource->getConnection('core_write');
             $cronTasksInProcessingTableName = $resource->getTableName('m2e_e2m_cron_tasks_in_processing');
-            $task = $connWrite->select()->from($cronTasksInProcessingTableName, array('id', 'data'))
+            $taskId = $connWrite->select()->from($cronTasksInProcessingTableName, array('id'))
                 ->where('instance = ?', 'Cron_Task_Magento_ImportInventory')->limit(1)
-                ->query()->fetch(PDO::FETCH_ASSOC);
+                ->query()->fetchColumn();
 
-            if (empty($task) || empty($task['id'])) {
+            if (empty($taskId)) {
                 return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
                     'message' => 'Not task of Import Inventory.',
                     'data' => array(
@@ -348,12 +380,9 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
                 )));
             }
 
-            $data = $coreHelper->jsonDecode($task['data']);
-            $data['pause'] = true;
-
             $connWrite->update($cronTasksInProcessingTableName, array(
-                'data' => $coreHelper->jsonEncode($data)
-            ), array('id = ?' => $task['id']));
+                'pause' => 1
+            ), array('id = ?' => $taskId));
 
             return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
                 'message' => 'Pause task of Import Inventory from ebay...',
@@ -386,14 +415,14 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             $resource = Mage::getSingleton('core/resource');
             $connWrite = $resource->getConnection('core_write');
             $cronTasksInProcessingTableName = $resource->getTableName('m2e_e2m_cron_tasks_in_processing');
-            $task = $connWrite->select()->from($cronTasksInProcessingTableName, array('id', 'data'))
+            $taskId = $connWrite->select()->from($cronTasksInProcessingTableName, array('id'))
                 ->where('instance = ?', 'Cron_Task_Magento_ImportInventory')->limit(1)
-                ->query()->fetch(PDO::FETCH_ASSOC);
+                ->query()->fetchColumn();
 
             /** @var M2E_e2M_Helper_eBay_Inventory $eBayInventory */
             $eBayInventory = Mage::helper('e2m/eBay_Inventory');
 
-            if (empty($task) || empty($task['id'])) {
+            if (empty($taskId)) {
                 return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
                     'message' => 'Not task of Import Inventory.',
                     'data' => array(
@@ -405,12 +434,9 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
                 )));
             }
 
-            $data = $coreHelper->jsonDecode($task['data']);
-            $data['pause'] = false;
-
             $connWrite->update($cronTasksInProcessingTableName, array(
-                'data' => $coreHelper->jsonEncode($data)
-            ), array('id = ?' => $task['id']));
+                'pause' => 0
+            ), array('id = ?' => $taskId));
 
             return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
                 'message' => 'Pause task of Import Inventory from ebay...',
@@ -497,7 +523,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             $handlers = array();
             $tasks = $connWrite->select()->from($cronTasksInProcessing)->query();
             while ($task = $tasks->fetch(PDO::FETCH_ASSOC)) {
-                if ($task['is_running']) {
+                if ($task['is_running'] || $task['pause']) {
                     continue;
                 }
 

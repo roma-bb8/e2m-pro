@@ -3,10 +3,12 @@ function startImportInventory(element) {
         method: 'get',
         onSuccess: function (transport) {
 
-            $$('.block-import-inventory-progress')[0].show();
-
             var response = JSON.parse(transport.responseText);
             importInventoryHandler(response.data);
+
+            var button = $('pause-download-inventory-button').children[0];
+            button.removeClassName('disabled');
+            button.removeAttribute('disabled');
 
             element.addClassName('disabled');
             element.innerHTML = 'Import inventory (in progress...)';

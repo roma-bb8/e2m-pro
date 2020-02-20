@@ -269,16 +269,16 @@ class M2E_e2M_Helper_eBay_Inventory {
             switch ($row['path']) {
                 case self::PREFIX . self::PATH_ITEMS_COUNT_TOTAL:
                     $this->inventory['items']['count']['total'] = (int)$row['value'];
-                    continue;
+                    break;
                 case self::PREFIX . self::PATH_ITEMS_COUNT_VARIATION:
                     $this->inventory['items']['count']['variation'] = (int)$row['value'];
-                    continue;
+                    break;
                 case self::PREFIX . self::PATH_ITEMS_COUNT_SIMPLE:
                     $this->inventory['items']['count']['simple'] = (int)$row['value'];
-                    continue;
+                    break;
                 case self::PREFIX . self::PATH_MARKETPLACES:
                     $this->inventory['marketplaces'] = $this->coreHelper->jsonDecode($row['value']);
-                    continue;
+                    break;
             }
         }
     }

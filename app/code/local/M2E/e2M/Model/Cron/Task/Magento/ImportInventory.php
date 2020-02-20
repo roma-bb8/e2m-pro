@@ -7,7 +7,7 @@ class M2E_e2M_Model_Cron_Task_Magento_ImportInventory implements M2E_e2M_Model_C
 
     const TAG = 'magento/import/inventory';
 
-    const MAX_LIMIT = 500;
+    const MAX_LIMIT = 20;
 
     //########################################
 
@@ -36,14 +36,6 @@ class M2E_e2M_Model_Cron_Task_Magento_ImportInventory implements M2E_e2M_Model_C
      * @throws Exception
      */
     public function process($taskId, $data) {
-
-        /** @var M2E_e2M_Helper_Progress $progressHelper */
-        $progressHelper = Mage::helper('e2m/Progress');
-        if (isset($data['pause']) && $data['pause']) {
-            return array(
-                'process' => 'p ' . $progressHelper->getProgressByTag(self::TAG)
-            );
-        }
 
         $coreHelper = Mage::helper('core');
         $resource = Mage::getSingleton('core/resource');
@@ -85,6 +77,9 @@ class M2E_e2M_Model_Cron_Task_Magento_ImportInventory implements M2E_e2M_Model_C
                 'data' => Mage::helper('core')->jsonEncode($data)
             ), array('instance = ?' => 'Cron_Task_Magento_ImportInventory'));
         }
+
+        /** @var M2E_e2M_Helper_Progress $progressHelper */
+        $progressHelper = Mage::helper('e2m/Progress');
 
         $process = $this->getProcessAsPercentage($data['last_import_id']);
         $progressHelper->setProgressByTag(self::TAG, $process);
