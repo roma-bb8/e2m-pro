@@ -18,29 +18,6 @@ class M2E_e2M_Model_Product_Magento_Configurable extends M2E_e2M_Model_Product_M
         $productMagentoSimple = Mage::getModel('e2m/Product_Magento_Simple');
         $productMagentoSimple->setTaskId($this->taskId);
 
-        $configProduct = $productMagentoSimple->process($data, false);
-        if ($configProduct->getEntityId() && $this->eBayConfig->isActionFoundIgnore()) {
-            $this->addLog('Skip update sku: ' . $configProduct->getSku(), M2E_e2M_Helper_Data::TYPE_REPORT_WARNING);
-
-            if ($this->eBayConfig->isImportQty()) {
-                $configProduct = $this->importQty($configProduct, $data);
-            }
-
-            return $configProduct;
-        }
-
-        $isNew = !$configProduct->getEntityId();
-        if ($isNew) {
-            $configProduct->setData('type_id', self::TYPE);
-            $configProduct->save();
-        } elseif (self::TYPE !== $configProduct->getData('type_id')) {
-            $this->addLog('Skip update sku: ' . $configProduct->getSku() . ' because type product not configurable', M2E_e2M_Helper_Data::TYPE_REPORT_ERROR);
-
-            return $configProduct;
-        }
-
-        //----------------------------------------
-
         /** @var Mage_Catalog_Model_Product_Action $updater */
         $updater = Mage::getSingleton('catalog/product_action');
 
@@ -82,9 +59,6 @@ class M2E_e2M_Model_Product_Magento_Configurable extends M2E_e2M_Model_Product_M
                 $this->checkAssignedAttributes($attribute);
 
                 $optionId = $this->addAttributeValue($attribute, $specific, $storeId);
-                if ($optionId === null) {
-                    //TODO
-                }
 
                 $updater->updateAttributes(array($childProduct->getId()), array(
                     $attributeCode => $optionId
@@ -119,18 +93,62 @@ class M2E_e2M_Model_Product_Magento_Configurable extends M2E_e2M_Model_Product_M
 
         //----------------------------------------
 
-        /** @var Mage_Catalog_Model_Product $configProduct */
-        $configProduct = (clone $this->product)
-            ->setData('attribute_set_id', $this->eBayConfig->getAttributeSet())
-            ->setData('store_id', $configProduct->getStoreId())
-            ->load($configProduct->getId());
+        $configProduct = $productMagentoSimple->process($data, false);
+        if ($configProduct->getEntityId() && $this->eBayConfig->isActionFoundIgnore()) {
+            $this->addLog('Skip update sku: ' . $configProduct->getSku(), M2E_e2M_Helper_Data::TYPE_REPORT_WARNING);
 
-        $configProduct->getTypeInstance()->setUsedProductAttributeIds(array_keys($attributes));
+            if ($this->eBayConfig->isImportQty()) {
+                $configProduct = $this->importQty($configProduct, $data);
+            }
+
+            return $configProduct;
+        } elseif ($configProduct->getEntityId()) {
+            $configProduct->save();
+            $this->addLog('Update data sku: ' . $configProduct->getSku(), M2E_e2M_Helper_Data::TYPE_REPORT_WARNING);
+
+            if ($this->eBayConfig->isImportQty()) {
+                $configProduct = $this->importQty($configProduct, $data);
+            }
+
+            return $configProduct;
+        }
+
+        $configProduct->setData('type_id', self::TYPE);
+
+        /**
+         ** Dirty hack **
+         *      by realtime cache attributes
+         * app/code/core/Mage/Eav/Model/Config.php:450
+         * getEntityAttributeCodes:463
+         */
+        Mage::unregister('_singleton/eav/config');
+        if (!$configProduct->getEntityId()) {
+            $configProduct->getTypeInstance()->getUsedProductAttributeIds(array_keys($attributes));
+        }
+
         $configurableAttributesData = $configProduct->getTypeInstance()->getConfigurableAttributesAsArray();
         foreach ($configurableAttributesData as &$configurableAttributesDatum) {
-            $configurableAttributesDatum['values'] = $set[$configurableAttributesDatum['attribute_code']];
+            $configurableAttributesDatum['values'] = array_merge(
+                $configurableAttributesDatum['values'],
+
+            );
+            unset($set[$configurableAttributesDatum['attribute_code']]);
         }
         unset($configurableAttributesDatum);
+
+        foreach ($set as $code => $item) {
+            $configurableAttributesData[] = array(
+                'id' => null,
+                'label' => $item[0]['label'],
+                'use_default' => null,
+                'position' => '0',
+                'values' => $item,
+                'attribute_id' => $item[0]['attribute_id'],
+                'attribute_code' => $code,
+                'attribute_label' => $item[0]['label'],
+                'store_label' => $item[0]['label'],
+            );
+        }
 
         $configurableProductsData = array();
         foreach ($childProducts as $childProductId => $childProductPrice) {
@@ -140,7 +158,13 @@ class M2E_e2M_Model_Product_Magento_Configurable extends M2E_e2M_Model_Product_M
         $configProduct->setData('configurable_products_data', $configurableProductsData);
         $configProduct->setData('configurable_attributes_data', $configurableAttributesData);
         $configProduct->setData('can_save_configurable_attributes', true);
+
+        $action = $configProduct->getId() ? 'Update' : 'Create';
+
         $configProduct->save();
+
+        $this->addLog($action . ' config product: "' . $configProduct->getSku() .
+            '" eBay Item Id: ' . $data['identifiers_item_id']);
 
         //----------------------------------------
 
