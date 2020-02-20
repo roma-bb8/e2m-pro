@@ -130,7 +130,7 @@ class M2E_e2M_Model_Product_Magento_Configurable extends M2E_e2M_Model_Product_M
         foreach ($configurableAttributesData as &$configurableAttributesDatum) {
             $configurableAttributesDatum['values'] = array_merge(
                 $configurableAttributesDatum['values'],
-
+                $set[$configurableAttributesDatum['attribute_code']]
             );
             unset($set[$configurableAttributesDatum['attribute_code']]);
         }
