@@ -128,27 +128,9 @@ class M2E_e2M_Model_Product_Magento_Configurable extends M2E_e2M_Model_Product_M
 
         $configurableAttributesData = $configProduct->getTypeInstance()->getConfigurableAttributesAsArray();
         foreach ($configurableAttributesData as &$configurableAttributesDatum) {
-            $configurableAttributesDatum['values'] = array_merge(
-                $configurableAttributesDatum['values'],
-                $set[$configurableAttributesDatum['attribute_code']]
-            );
-            unset($set[$configurableAttributesDatum['attribute_code']]);
+            $configurableAttributesDatum['values'] = $set[$configurableAttributesDatum['attribute_code']];
         }
         unset($configurableAttributesDatum);
-
-        foreach ($set as $code => $item) {
-            $configurableAttributesData[] = array(
-                'id' => null,
-                'label' => $item[0]['label'],
-                'use_default' => null,
-                'position' => '0',
-                'values' => $item,
-                'attribute_id' => $item[0]['attribute_id'],
-                'attribute_code' => $code,
-                'attribute_label' => $item[0]['label'],
-                'store_label' => $item[0]['label'],
-            );
-        }
 
         $configurableProductsData = array();
         foreach ($childProducts as $childProductId => $childProductPrice) {
@@ -158,12 +140,9 @@ class M2E_e2M_Model_Product_Magento_Configurable extends M2E_e2M_Model_Product_M
         $configProduct->setData('configurable_products_data', $configurableProductsData);
         $configProduct->setData('configurable_attributes_data', $configurableAttributesData);
         $configProduct->setData('can_save_configurable_attributes', true);
-
-        $action = $configProduct->getId() ? 'Update' : 'Create';
-
         $configProduct->save();
 
-        $this->addLog($action . ' config product: "' . $configProduct->getSku() .
+        $this->addLog('Create config product: "' . $configProduct->getSku() .
             '" eBay Item Id: ' . $data['identifiers_item_id']);
 
         //----------------------------------------

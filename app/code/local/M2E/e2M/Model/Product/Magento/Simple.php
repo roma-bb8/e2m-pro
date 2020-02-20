@@ -55,14 +55,18 @@ class M2E_e2M_Model_Product_Magento_Simple extends M2E_e2M_Model_Product_Magento
 
         //---------------------------------------
 
-        if ($this->eBayConfig->isImportImage()) {
+        if (!$product->getId() && $this->eBayConfig->isImportImage()) {
             $product = $this->importImage($product, $data);
+        } else {
+            $product = $this->updateImage($product, $data);
         }
 
         if ($save) {
+            $action = $product->getId() ? 'Update' : 'Create';
             $product->save();
 
-            $this->addLog('Create product: "' . $product->getSku() . '" eBay Item Id: ' . $data['identifiers_item_id']);
+            $this->addLog($action . ' product: "' . $product->getSku() .
+                '" eBay Item Id: ' . $data['identifiers_item_id']);
         }
 
         if ($save && $this->eBayConfig->isImportQty()) {

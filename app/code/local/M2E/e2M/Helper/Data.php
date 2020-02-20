@@ -62,11 +62,12 @@ class M2E_e2M_Helper_Data extends Mage_Core_Helper_Abstract {
 
     /**
      * @param int $setId
+     * @param bool $reload
      *
      * @return array
      */
-    public function getMagentoAttributes($setId) {
-        if (!empty($this->magentoAttributes[$setId])) {
+    public function getMagentoAttributes($setId, $reload = false) {
+        if (!empty($this->magentoAttributes[$setId]) && !$reload) {
             return $this->magentoAttributes[$setId];
         }
 

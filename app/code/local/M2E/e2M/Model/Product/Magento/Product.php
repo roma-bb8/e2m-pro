@@ -20,6 +20,9 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
     /** @var int $taskId */
     protected $taskId;
 
+    /** @var array $attributeSetTmp */
+    private $attributeSetTmp = array();
+
     //########################################
 
     /**
@@ -85,9 +88,28 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
      */
     protected function checkAssignedAttributes($attribute) {
 
-        $attributeGroupId = $attribute->getData('attribute_group_id');
-        if ($attributeGroupId) {
-            return false;
+        $attributeCode = $attribute->getData('attribute_code');
+        if (isset($this->attributeSetTmp[$attributeCode])) {
+            return true;
+        }
+
+        /** @var M2E_e2M_Helper_Data $dataHelper */
+        $dataHelper = Mage::helper('e2m');
+
+        $attributes = $dataHelper->getMagentoAttributes($this->eBayConfig->getAttributeSet());
+        foreach ($attributes as $code => $item) {
+            if ($code === $attributeCode) {
+                $this->attributeSetTmp[$attributeCode] = true;
+                return true;
+            }
+        }
+
+        $attributes = $dataHelper->getMagentoAttributes($this->eBayConfig->getAttributeSet(), true);
+        foreach ($attributes as $code => $item) {
+            if ($code === $attributeCode) {
+                $this->attributeSetTmp[$attributeCode] = true;
+                return true;
+            }
         }
 
         $attribute->setData('attribute_set_id', $this->eBayConfig->getAttributeSet());
@@ -96,7 +118,7 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
 
         $this->addLog('add attribute: "' . $attribute->getName() . '" to eBay Group');
 
-        return true;
+        return false;
     }
 
     //########################################
@@ -280,6 +302,46 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
             Mage::helper('e2m')->logException($e);
 
             $this->addLog('Not Import Images for SKU:' . $product->getSku(), M2E_e2M_Helper_Data::TYPE_REPORT_WARNING);
+        }
+
+        return $product;
+    }
+
+    /**
+     * @param Mage_Catalog_Model_Product $product
+     * @param array $data
+     *
+     * @return Mage_Catalog_Model_Product
+     */
+    protected function updateImage($product, $data) {
+
+        $galleryImages = $product->getData('media_gallery');
+        if (!isset($galleryImages['images']) || !is_array($galleryImages['images'])) {
+            return $this->importImage($product, $data);
+        }
+
+        $imagesURLs = array();
+        $importURLs = array();
+        foreach ($data['images_urls'] as $index => $url) {
+            $ext = strtolower(substr($url, (strripos($url, '.'))));
+            !in_array($ext, array('.png', '.jpg', '.jpeg')) && $ext = '.jpg';
+            $imagesURLs[$index] = md5($url) . $ext;
+        }
+
+        foreach ($galleryImages['images'] as $galleryImage) {
+            if (!isset($galleryImage['file'])) {
+                continue;
+            }
+
+            if (!$i = array_search($galleryImage['file'], $imagesURLs)) {
+                continue;
+            }
+
+            $importURLs[] = $data['images_urls'][$i];
+        }
+
+        if (!empty($importURLs)) {
+            return $this->importImage($product, array('images_urls' => $importURLs));
         }
 
         return $product;
