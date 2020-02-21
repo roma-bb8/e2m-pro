@@ -62,11 +62,31 @@ class M2E_e2M_Block_Adminhtml_Log_Grid extends Mage_Adminhtml_Block_Widget_Grid 
             'align' => 'left',
             'width' => '*',
             'sortable' => false,
-            'type' => 'text',
-            'index' => 'type'
+            'type' => 'options',
+            'index' => 'type',
+            'options' => array(
+                M2E_e2M_Helper_Data::TYPE_REPORT_SUCCESS => Mage::helper('e2m')->__('Success'),
+                M2E_e2M_Helper_Data::TYPE_REPORT_WARNING => Mage::helper('e2m')->__('Warning'),
+                M2E_e2M_Helper_Data::TYPE_REPORT_ERROR => Mage::helper('e2m')->__('Error')
+            ),
+            'frame_callback' => array($this, 'callbackColumnStatus')
         ));
 
         return parent::_prepareColumns();
+    }
+
+    //########################################
+
+    public function callbackColumnStatus($value, $row, $column, $isExport) {
+        $type = $row->getData('type');
+        $statusColors = array(
+            M2E_e2M_Helper_Data::TYPE_REPORT_SUCCESS => 'green',
+            M2E_e2M_Helper_Data::TYPE_REPORT_WARNING => 'yellow',
+            M2E_e2M_Helper_Data::TYPE_REPORT_ERROR => 'red'
+        );
+
+        $color = isset($statusColors[$type]) ? $statusColors[$type] : 'black';
+        return '<span style="color: ' . $color . ';">' . $value . '</span>';
     }
 
     //########################################

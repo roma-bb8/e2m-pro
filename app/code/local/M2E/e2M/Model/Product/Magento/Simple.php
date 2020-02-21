@@ -39,6 +39,12 @@ class M2E_e2M_Model_Product_Magento_Simple extends M2E_e2M_Model_Product_Magento
             $product->setData('visibility', Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE);
             $product->setData('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
             $product->setData('tax_class_id', 0);
+        } else {
+            $product->setData('store_id', $storeId);
+            $product->setData('website_ids', array_unique(array_merge(
+                $product->getData('website_ids') ?: array(),
+                Mage::app()->getStore($storeId)->getWebsiteId()
+            )));
         }
 
         if ($this->eBayConfig->isDeleteHtml()) {
@@ -48,7 +54,7 @@ class M2E_e2M_Model_Product_Magento_Simple extends M2E_e2M_Model_Product_Magento
         }
 
         $fieldsAttributes = $this->eBayConfig->getEbayFieldMagentoAttribute();
-        foreach ($fieldsAttributes as $eBayField => $magentoAttribute) {
+        foreach ($fieldsAttributes as $magentoAttribute => $eBayField) {
             if (empty($data[$eBayField])) {
                 continue;
             }

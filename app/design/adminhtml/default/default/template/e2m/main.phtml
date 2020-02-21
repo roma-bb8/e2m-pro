@@ -239,21 +239,6 @@
                         </p>
                     </td>
                 </tr>
-
-
-                <tr>
-                    <td class="label">
-                        <label for="ebay-field"><?php echo $this->getDataHelper()->__('eBay fields'); ?>:</label>
-                    </td>
-                    <td class="value" style="width: auto">
-                        <select id="ebay-field" class="ebay-field-magento-attribute config-input">
-                            <option value=""></option>
-                            <?php foreach ($this->getInventoryHelper()->getEbayFields() as $code => $title): ?>
-                                <option value="<?php echo $code; ?>"><?php echo $this->getDataHelper()->__($title); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </td>
-                </tr>
                 <tr>
                     <td class="label">
                         <label for="magento-attribute"><?php echo $this->getDataHelper()->__('Magento attributes'); ?>:</label>
@@ -262,6 +247,19 @@
                         <select id="magento-attribute" class="ebay-field-magento-attribute config-input">
                             <option value=""></option>
                             <?php foreach ($this->getDataHelper()->getMagentoAttributes($this->getConfigHelper()->getAttributeSet()) as $code => $title): ?>
+                                <option value="<?php echo $code; ?>"><?php echo $this->getDataHelper()->__($title); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        <label for="ebay-field"><?php echo $this->getDataHelper()->__('eBay fields'); ?>:</label>
+                    </td>
+                    <td class="value" style="width: auto">
+                        <select id="ebay-field" class="ebay-field-magento-attribute config-input">
+                            <option value=""></option>
+                            <?php foreach ($this->getInventoryHelper()->getEbayFields() as $code => $title): ?>
                                 <option value="<?php echo $code; ?>"><?php echo $this->getDataHelper()->__($title); ?></option>
                             <?php endforeach; ?>
                         </select>

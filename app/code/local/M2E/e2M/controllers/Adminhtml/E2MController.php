@@ -319,13 +319,17 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             $fromDatetime = clone $toDateTime;
             $fromDatetime->setTimestamp(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::MAX_DOWNLOAD_TIME);
 
-            $connWrite->insert($cronTasksInProcessingTableName, array(
+            $id = $connWrite->insert($cronTasksInProcessingTableName, array(
                 'instance' => 'Cron_Task_eBay_DownloadInventory',
                 'data' => $coreHelper->jsonEncode(array(
                     'from' => $fromDatetime->getTimestamp(),
                     'to' => $toDateTime->getTimestamp()
                 ))
             ));
+
+            Mage::helper('e2m')->logReport($id, 'Start task of Downloading Inventory from eBay...',
+                M2E_e2M_Helper_Data::TYPE_REPORT_SUCCESS
+            );
 
             /** @var M2E_e2M_Helper_Progress $progressHelper */
             $progressHelper = Mage::helper('e2m/Progress');
@@ -384,6 +388,10 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
                 'pause' => true
             ), array('id = ?' => $taskId));
 
+            Mage::helper('e2m')->logReport($taskId, 'Pause task of Import Inventory from Magento!',
+                M2E_e2M_Helper_Data::TYPE_REPORT_SUCCESS
+            );
+
             return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
                 'message' => 'Pause task of Import Inventory from ebay...',
                 'data' => array(
@@ -438,6 +446,10 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
                 'pause' => false
             ), array('id = ?' => $taskId));
 
+            Mage::helper('e2m')->logReport($taskId, 'Proceed task of Import Inventory from Magento...',
+                M2E_e2M_Helper_Data::TYPE_REPORT_SUCCESS
+            );
+
             return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
                 'message' => 'Pause task of Import Inventory from ebay...',
                 'data' => array(
@@ -473,12 +485,16 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
                 'instance = ?' => 'Cron_Task_Magento_ImportInventory'
             ));
 
-            $connWrite->insert($cronTasksInProcessingTableName, array(
+            $id = $connWrite->insert($cronTasksInProcessingTableName, array(
                 'instance' => 'Cron_Task_Magento_ImportInventory',
                 'data' => $coreHelper->jsonEncode(array(
                     'last_import_id' => 0
                 ))
             ));
+
+            Mage::helper('e2m')->logReport($id, 'Start task of Import Inventory from Magento...',
+                M2E_e2M_Helper_Data::TYPE_REPORT_SUCCESS
+            );
 
             /** @var M2E_e2M_Helper_Progress $progressHelper */
             $progressHelper = Mage::helper('e2m/Progress');

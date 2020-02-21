@@ -104,7 +104,7 @@ class M2E_e2M_Model_Product_Magento_Configurable extends M2E_e2M_Model_Product_M
             return $configProduct;
         } elseif ($configProduct->getEntityId()) {
             $configProduct->save();
-            $this->addLog('Update data sku: ' . $configProduct->getSku(), M2E_e2M_Helper_Data::TYPE_REPORT_WARNING);
+            $this->addLog('Update sets skip sku: ' . $configProduct->getSku(), M2E_e2M_Helper_Data::TYPE_REPORT_WARNING);
 
             if ($this->eBayConfig->isImportQty()) {
                 $configProduct = $this->importQty($configProduct, $data);
