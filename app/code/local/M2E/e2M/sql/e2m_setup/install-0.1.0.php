@@ -13,7 +13,7 @@ CREATE TABLE `{$installer->getTable('m2e_e2m_cron_tasks_in_processing')}` (
   `pause` BOOL NOT NULL DEFAULT FALSE,
   `instance` VARCHAR(255) NOT NULL,
   `data` TEXT DEFAULT NULL,
-  `updated` TIMESTAMP DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `updated` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY (`instance`)
@@ -26,7 +26,7 @@ CREATE TABLE `{$installer->getTable('m2e_e2m_inventory_ebay')}` (
   `item_id` DECIMAL(20) UNSIGNED NOT NULL,
   `variation` BOOL NOT NULL DEFAULT FALSE,
   `data` TEXT DEFAULT NULL,
-  `updated` TIMESTAMP DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `updated` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   INDEX `marketplace_id` (`marketplace_id`),
