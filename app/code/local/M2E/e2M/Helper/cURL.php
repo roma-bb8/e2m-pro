@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Class M2E_e2M_Helper_cURL
+ * Class M2E_E2M_Helper_cURL
  */
-class M2E_e2M_Helper_cURL {
+class M2E_E2M_Helper_cURL {
 
     /** @var string $url */
     private $url;

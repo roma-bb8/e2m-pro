@@ -1,28 +1,28 @@
 <?xml version="1.0"?>
 <config>
     <modules>
-        <M2E_e2M>
+        <M2E_E2M>
             <version>0.1.0</version>
-        </M2E_e2M>
+        </M2E_E2M>
     </modules>
     <global>
         <blocks>
             <e2m>
-                <class>M2E_e2M_Block</class>
+                <class>M2E_E2M_Block</class>
             </e2m>
         </blocks>
         <helpers>
             <e2m>
-                <class>M2E_e2M_Helper</class>
+                <class>M2E_E2M_Helper</class>
             </e2m>
         </helpers>
         <models>
             <e2m>
-                <class>M2E_e2M_Model</class>
+                <class>M2E_E2M_Model</class>
                 <resourceModel>e2m_resource</resourceModel>
             </e2m>
             <e2m_resource>
-                <class>M2E_e2M_Model_Resource</class>
+                <class>M2E_E2M_Model_Resource</class>
                 <entities>
                     <log>
                         <table>m2e_e2m_log</table>
@@ -33,7 +33,7 @@
         <resources>
             <e2m_setup>
                 <setup>
-                    <module>M2E_e2M</module>
+                    <module>M2E_E2M</module>
                 </setup>
             </e2m_setup>
         </resources>
@@ -52,7 +52,7 @@
             <adminhtml>
                 <args>
                     <modules>
-                        <e2m after="Mage_Adminhtml">M2E_e2M_Adminhtml</e2m>
+                        <e2m after="Mage_Adminhtml">M2E_E2M_Adminhtml</e2m>
                     </modules>
                 </args>
             </adminhtml>

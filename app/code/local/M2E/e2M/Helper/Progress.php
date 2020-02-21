@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Class M2E_e2M_Helper_Progress
+ * Class M2E_E2M_Helper_Progress
  */
-class M2E_e2M_Helper_Progress {
+class M2E_E2M_Helper_Progress {
 
     const POSTFIX = '/progress';
 
@@ -29,11 +29,11 @@ class M2E_e2M_Helper_Progress {
         $coreConfigDataTableName = $resource->getTableName('core_config_data');
 
         $connWrite->delete($coreConfigDataTableName, array(
-            'path = ?' => M2E_e2M_Helper_Data::PREFIX . $tag . M2E_e2M_Helper_Progress::POSTFIX
+            'path = ?' => M2E_E2M_Helper_Data::PREFIX . $tag . M2E_E2M_Helper_Progress::POSTFIX
         ));
 
         $connWrite->insert($coreConfigDataTableName, array(
-            'path' => M2E_e2M_Helper_Data::PREFIX . $tag . M2E_e2M_Helper_Progress::POSTFIX,
+            'path' => M2E_E2M_Helper_Data::PREFIX . $tag . M2E_E2M_Helper_Progress::POSTFIX,
             'value' => $this->progress[$tag]
         ));
 
@@ -54,7 +54,7 @@ class M2E_e2M_Helper_Progress {
         $resource = Mage::getSingleton('core/resource');
         $this->progress[$tag] = (int)$resource->getConnection('core_read')->select()
             ->from($resource->getTableName('core_config_data'), 'value')
-            ->where('path = ?', M2E_e2M_Helper_Data::PREFIX . $tag . M2E_e2M_Helper_Progress::POSTFIX)
+            ->where('path = ?', M2E_E2M_Helper_Data::PREFIX . $tag . M2E_E2M_Helper_Progress::POSTFIX)
             ->query()->fetchColumn();
 
         return $this->progress[$tag];

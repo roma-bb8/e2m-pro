@@ -1,11 +1,11 @@
 <?php
 
 /**
- * Class M2E_e2M_Model_Product_Magento_Product
+ * Class M2E_E2M_Model_Product_Magento_Product
  */
-abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abstract {
+abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abstract {
 
-    /** @var M2E_e2M_Helper_eBay_Config $eBayConfig */
+    /** @var M2E_E2M_Helper_eBay_Config $eBayConfig */
     protected $eBayConfig;
 
     /** @var Mage_Catalog_Model_Product $product */
@@ -93,7 +93,7 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
             return true;
         }
 
-        /** @var M2E_e2M_Helper_Data $dataHelper */
+        /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
 
         $attributes = $dataHelper->getMagentoAttributes($this->eBayConfig->getAttributeSet());
@@ -127,9 +127,9 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
      * @param string $description
      * @param int $type
      */
-    protected function addLog($description, $type = M2E_e2M_Helper_Data::TYPE_REPORT_SUCCESS) {
+    protected function addLog($description, $type = M2E_E2M_Helper_Data::TYPE_REPORT_SUCCESS) {
 
-        /** @var M2E_e2M_Helper_Data $dataHelper */
+        /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
 
         $dataHelper->logReport($this->taskId, $description, $type);
@@ -216,7 +216,7 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
             Mage::helper('e2m')->logException($e);
 
             $this->addLog('Not update title name in Attribute: "' . $attribute->getName() . '" in Store: "' . $attribute->getStoreId() . '"',
-                M2E_e2M_Helper_Data::TYPE_REPORT_ERROR);
+                M2E_E2M_Helper_Data::TYPE_REPORT_ERROR);
         }
 
         return $attribute;
@@ -271,7 +271,7 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
         } catch (Exception $e) {
             Mage::helper('e2m')->logException($e);
 
-            $this->addLog('Not create new Attribute: ' . $title, M2E_e2M_Helper_Data::TYPE_REPORT_ERROR);
+            $this->addLog('Not create new Attribute: ' . $title, M2E_E2M_Helper_Data::TYPE_REPORT_ERROR);
 
             return null;
         }
@@ -346,7 +346,7 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
         } catch (Exception $e) {
             Mage::helper('e2m')->logException($e);
 
-            $this->addLog('Not Import Images for SKU:' . $product->getSku(), M2E_e2M_Helper_Data::TYPE_REPORT_WARNING);
+            $this->addLog('Not Import Images for SKU:' . $product->getSku(), M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
         }
 
         return $product;
@@ -420,7 +420,7 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
         } catch (Exception $e) {
             Mage::helper('e2m')->logException($e);
 
-            $this->addLog('Not Import Qty for SKU:' . $product->getSku(), M2E_e2M_Helper_Data::TYPE_REPORT_WARNING);
+            $this->addLog('Not Import Qty for SKU:' . $product->getSku(), M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
         }
 
         return $product;

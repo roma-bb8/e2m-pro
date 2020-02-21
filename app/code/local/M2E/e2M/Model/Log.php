@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Class M2E_e2M_Model_Log
+ * Class M2E_E2M_Model_Log
  */
-class M2E_e2M_Model_Log extends Mage_Core_Model_Abstract {
+class M2E_E2M_Model_Log extends Mage_Core_Model_Abstract {
 
     /**
      * @inheritDoc

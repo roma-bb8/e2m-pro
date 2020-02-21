@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Class M2E_e2M_Block_Adminhtml__Log_Grid
+ * Class M2E_E2M_Block_Adminhtml__Log_Grid
  */
-class M2E_e2M_Block_Adminhtml_Log_Grid extends Mage_Adminhtml_Block_Widget_Grid {
+class M2E_E2M_Block_Adminhtml_Log_Grid extends Mage_Adminhtml_Block_Widget_Grid {
     //########################################
 
     public function __construct() {
@@ -65,9 +65,9 @@ class M2E_e2M_Block_Adminhtml_Log_Grid extends Mage_Adminhtml_Block_Widget_Grid 
             'type' => 'options',
             'index' => 'type',
             'options' => array(
-                M2E_e2M_Helper_Data::TYPE_REPORT_SUCCESS => Mage::helper('e2m')->__('Success'),
-                M2E_e2M_Helper_Data::TYPE_REPORT_WARNING => Mage::helper('e2m')->__('Warning'),
-                M2E_e2M_Helper_Data::TYPE_REPORT_ERROR => Mage::helper('e2m')->__('Error')
+                M2E_E2M_Helper_Data::TYPE_REPORT_SUCCESS => Mage::helper('e2m')->__('Success'),
+                M2E_E2M_Helper_Data::TYPE_REPORT_WARNING => Mage::helper('e2m')->__('Warning'),
+                M2E_E2M_Helper_Data::TYPE_REPORT_ERROR => Mage::helper('e2m')->__('Error')
             ),
             'frame_callback' => array($this, 'callbackColumnStatus')
         ));
@@ -80,9 +80,9 @@ class M2E_e2M_Block_Adminhtml_Log_Grid extends Mage_Adminhtml_Block_Widget_Grid 
     public function callbackColumnStatus($value, $row, $column, $isExport) {
         $type = $row->getData('type');
         $statusColors = array(
-            M2E_e2M_Helper_Data::TYPE_REPORT_SUCCESS => 'green',
-            M2E_e2M_Helper_Data::TYPE_REPORT_WARNING => 'orange',
-            M2E_e2M_Helper_Data::TYPE_REPORT_ERROR => 'red'
+            M2E_E2M_Helper_Data::TYPE_REPORT_SUCCESS => 'green',
+            M2E_E2M_Helper_Data::TYPE_REPORT_WARNING => 'orange',
+            M2E_E2M_Helper_Data::TYPE_REPORT_ERROR => 'red'
         );
 
         $color = isset($statusColors[$type]) ? $statusColors[$type] : 'black';

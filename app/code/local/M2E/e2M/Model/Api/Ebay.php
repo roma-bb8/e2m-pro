@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Class M2E_e2M_Model_Api_Ebay
+ * Class M2E_E2M_Model_Api_Ebay
  */
-class M2E_e2M_Model_Api_Ebay {
+class M2E_E2M_Model_Api_Ebay {
 
     const MAX_PAGE_NUMBER = 50;
 
@@ -38,7 +38,7 @@ class M2E_e2M_Model_Api_Ebay {
     private function getURL($mode) {
 
         $url = self::API_ENDPOINT;
-        if ($mode === M2E_e2M_Helper_eBay_Account::MODE_SANDBOX) {
+        if ($mode === M2E_E2M_Helper_eBay_Account::MODE_SANDBOX) {
             $url = self::API_SANDBOX_ENDPOINT;
         }
 
@@ -46,11 +46,11 @@ class M2E_e2M_Model_Api_Ebay {
     }
 
     /**
-     * @return M2E_e2M_Helper_cURL
+     * @return M2E_E2M_Helper_cURL
      */
     private function getCURLHelper() {
 
-        /** @var M2E_e2M_Helper_cURL $cURLHelper */
+        /** @var M2E_E2M_Helper_cURL $cURLHelper */
         $cURLHelper = Mage::helper('e2m/cURL');
 
         return $cURLHelper;
@@ -95,7 +95,7 @@ class M2E_e2M_Model_Api_Ebay {
     public function getAuthURL($mode, $backURL, $sessionID) {
 
         $url = self::AUTH_ENDPOINT;
-        if ($mode === M2E_e2M_Helper_eBay_Account::MODE_SANDBOX) {
+        if ($mode === M2E_E2M_Helper_eBay_Account::MODE_SANDBOX) {
             $url = self::AUTH_SANDBOX_ENDPOINT;
         }
 
@@ -231,7 +231,7 @@ XML;
 
         //----------------------------------------
 
-        /** @var M2E_e2M_Model_Parser_eBay_Item $parser */
+        /** @var M2E_E2M_Model_Parser_eBay_Item $parser */
         $parser = Mage::getModel('e2m/Parser_eBay_Item');
         $coreHelper = Mage::helper('core');
 

@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Class M2E_e2M_Model_Product_Magento_Simple
+ * Class M2E_E2M_Model_Product_Magento_Simple
  */
-class M2E_e2M_Model_Product_Magento_Simple extends M2E_e2M_Model_Product_Magento_Product {
+class M2E_E2M_Model_Product_Magento_Simple extends M2E_E2M_Model_Product_Magento_Product {
 
     const TYPE = 'simple';
 
@@ -22,7 +22,7 @@ class M2E_e2M_Model_Product_Magento_Simple extends M2E_e2M_Model_Product_Magento
         $product = clone $this->product;
         $product = $this->loadProduct($product, $data, $storeId);
         if ($product->getEntityId() && $this->eBayConfig->isActionFoundIgnore()) {
-            $this->addLog('Skip update sku: ' . $product->getSku(), M2E_e2M_Helper_Data::TYPE_REPORT_WARNING);
+            $this->addLog('Skip update sku: ' . $product->getSku(), M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
 
             if ($save && $this->eBayConfig->isImportQty()) {
                 $product = $this->importQty($product, $data);

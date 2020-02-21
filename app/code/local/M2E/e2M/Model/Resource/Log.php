@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Class M2E_e2M_Model_Resource_Log
+ * Class M2E_E2M_Model_Resource_Log
  */
-class M2E_e2M_Model_Resource_Log extends Mage_Core_Model_Resource_Db_Abstract {
+class M2E_E2M_Model_Resource_Log extends Mage_Core_Model_Resource_Db_Abstract {
 
     /**
      * @inheritDoc

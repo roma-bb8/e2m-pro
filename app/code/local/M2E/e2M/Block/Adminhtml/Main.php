@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Class M2E_e2M_Block_Adminhtml_Main
+ * Class M2E_E2M_Block_Adminhtml_Main
  */
-class M2E_e2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
+class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
 
     /**
      * @inheritDoc
@@ -55,7 +55,7 @@ class M2E_e2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
 
         switch (true) {
             case $this->getProgressHelper()->isCompletedProgressByTag(
-                M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::TAG
+                M2E_E2M_Model_Cron_Task_eBay_DownloadInventory::TAG
             ):
                 $label = 'Reload inventory (completed)';
                 $disabled = false;
@@ -100,7 +100,7 @@ class M2E_e2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
                 break;
 
             case $this->getProgressHelper()->isCompletedProgressByTag(
-                M2E_e2M_Model_Cron_Task_Magento_ImportInventory::TAG
+                M2E_E2M_Model_Cron_Task_Magento_ImportInventory::TAG
             ):
                 $label = 'Reimport inventory (completed)';
                 $disabled = false;
@@ -140,11 +140,11 @@ class M2E_e2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
     //########################################
 
     /**
-     * @return M2E_e2M_Helper_Data
+     * @return M2E_E2M_Helper_Data
      */
     public function getDataHelper() {
 
-        /** @var M2E_e2M_Helper_Data $dataHelper */
+        /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
 
         return $dataHelper;
@@ -162,44 +162,44 @@ class M2E_e2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
     }
 
     /**
-     * @return M2E_e2M_Helper_eBay_Config
+     * @return M2E_E2M_Helper_eBay_Config
      */
     public function getConfigHelper() {
 
-        /** @var M2E_e2M_Helper_eBay_Config $eBayConfigHelper */
+        /** @var M2E_E2M_Helper_eBay_Config $eBayConfigHelper */
         $eBayConfigHelper = Mage::helper('e2m/eBay_Config');
 
         return $eBayConfigHelper;
     }
 
     /**
-     * @return M2E_e2M_Helper_eBay_Inventory
+     * @return M2E_E2M_Helper_eBay_Inventory
      */
     public function getInventoryHelper() {
 
-        /** @var M2E_e2M_Helper_eBay_Inventory $eBayInventoryHelper */
+        /** @var M2E_E2M_Helper_eBay_Inventory $eBayInventoryHelper */
         $eBayInventoryHelper = Mage::helper('e2m/eBay_Inventory');
 
         return $eBayInventoryHelper;
     }
 
     /**
-     * @return M2E_e2M_Helper_eBay_Account
+     * @return M2E_E2M_Helper_eBay_Account
      */
     public function getAccountHelper() {
 
-        /** @var M2E_e2M_Helper_eBay_Account $eBayAccountHelper */
+        /** @var M2E_E2M_Helper_eBay_Account $eBayAccountHelper */
         $eBayAccountHelper = Mage::helper('e2m/eBay_Account');
 
         return $eBayAccountHelper;
     }
 
     /**
-     * @return M2E_e2M_Helper_Progress
+     * @return M2E_E2M_Helper_Progress
      */
     public function getProgressHelper() {
 
-        /** @var M2E_e2M_Helper_Progress $progressHelper */
+        /** @var M2E_E2M_Helper_Progress $progressHelper */
         $progressHelper = Mage::helper('e2m/Progress');
 
         return $progressHelper;

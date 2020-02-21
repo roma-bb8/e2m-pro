@@ -1,12 +1,12 @@
 <?php
 
 /**
- * Class M2E_e2M_Adminhtml_E2MController
+ * Class M2E_E2M_Adminhtml_E2MController
  */
-class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
+class M2E_E2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
 
     /**
-     * M2E_e2M_Adminhtml_E2MController constructor.
+     * M2E_E2M_Adminhtml_E2MController constructor.
      *
      * @param Zend_Controller_Request_Abstract $request
      * @param Zend_Controller_Response_Abstract $response
@@ -27,7 +27,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
                 return;
             }
 
-            /** @var M2E_e2M_Helper_Data $dataHelper */
+            /** @var M2E_E2M_Helper_Data $dataHelper */
             $dataHelper = Mage::helper('e2m');
             $dataHelper->logException(new Exception(
                 "Error: {$error['message']}\nFile: {$error['file']}\nLine: {$error['line']}"
@@ -102,7 +102,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             $eBayAPI = Mage::getModel('e2m/Api_Ebay');
             $sessionID = $eBayAPI->getSessionID($mode);
 
-            /** @var M2E_e2M_Helper_eBay_Account $eBayAccount */
+            /** @var M2E_E2M_Helper_eBay_Account $eBayAccount */
             $eBayAccount = Mage::helper('e2m/eBay_Account');
             $eBayAccount->setMode($mode);
             $eBayAccount->setSessionId($sessionID);
@@ -127,13 +127,13 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
     }
 
     /**
-     * @return M2E_e2M_Adminhtml_E2MController|Mage_Core_Controller_Varien_Action
+     * @return M2E_E2M_Adminhtml_E2MController|Mage_Core_Controller_Varien_Action
      */
     public function getAfterEbayTokenAction() {
 
         try {
 
-            /** @var M2E_e2M_Helper_eBay_Account $eBayAccount */
+            /** @var M2E_E2M_Helper_eBay_Account $eBayAccount */
             $eBayAccount = Mage::helper('e2m/eBay_Account');
 
             /** @var M2e_e2m_Model_Api_Ebay $eBayAPI */
@@ -168,10 +168,10 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
 
         try {
 
-            /** @var M2E_e2M_Helper_Progress $progressHelper */
+            /** @var M2E_E2M_Helper_Progress $progressHelper */
             $progressHelper = Mage::helper('e2m/Progress');
-            $progressHelper->setProgressByTag(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::TAG, 0);
-            $progressHelper->setProgressByTag(M2E_e2M_Model_Cron_Task_Magento_ImportInventory::TAG, 0);
+            $progressHelper->setProgressByTag(M2E_E2M_Model_Cron_Task_eBay_DownloadInventory::TAG, 0);
+            $progressHelper->setProgressByTag(M2E_E2M_Model_Cron_Task_Magento_ImportInventory::TAG, 0);
 
             $resource = Mage::getSingleton('core/resource');
             $connWrite = $resource->getConnection('core_write');
@@ -180,7 +180,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             ));
             $connWrite->truncateTable($resource->getTableName('m2e_e2m_inventory_ebay'));
 
-            /** @var M2E_e2M_Helper_eBay_Account $eBayAccount */
+            /** @var M2E_E2M_Helper_eBay_Account $eBayAccount */
             $eBayAccount = Mage::helper('e2m/eBay_Account');
             $eBayAccount->setData(array(
                 'mode' => 0,
@@ -191,12 +191,12 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             ));
             $eBayAccount->save();
 
-            /** @var M2E_e2M_Helper_eBay_Config $eBayConfig */
+            /** @var M2E_E2M_Helper_eBay_Config $eBayConfig */
             $eBayConfig = Mage::helper('e2m/eBay_Config');
             $eBayConfig->setSettings(array(
                 'marketplace-store' => array(),
-                'product-identifier' => M2E_e2M_Helper_eBay_Config::VALUE_SKU_PRODUCT_IDENTIFIER,
-                'action-found' => M2E_e2M_Helper_eBay_Config::VALUE_IGNORE_ACTION_FOUND,
+                'product-identifier' => M2E_E2M_Helper_eBay_Config::VALUE_SKU_PRODUCT_IDENTIFIER,
+                'action-found' => M2E_E2M_Helper_eBay_Config::VALUE_IGNORE_ACTION_FOUND,
                 'import-qty' => false,
                 'generate-sku' => false,
                 'import-image' => false,
@@ -206,7 +206,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             ));
             $eBayConfig->save();
 
-            /** @var M2E_e2M_Helper_eBay_Inventory $eBayInventory */
+            /** @var M2E_E2M_Helper_eBay_Inventory $eBayInventory */
             $eBayInventory = Mage::helper('e2m/eBay_Inventory');
             $eBayInventory->reloadData();
             $eBayInventory->save();
@@ -268,7 +268,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
 
             $settings = $coreHelper->jsonDecode($this->getRequest()->getParam('settings'));
 
-            /** @var M2E_e2M_Helper_eBay_Config $eBayConfigHelper */
+            /** @var M2E_E2M_Helper_eBay_Config $eBayConfigHelper */
             $eBayConfigHelper = Mage::helper('e2m/eBay_Config');
 
             $eBayConfigHelper->setSettings($settings);
@@ -310,7 +310,7 @@ class M2E_e2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
                 'instance = ?' => 'Cron_Task_eBay_DownloadInventory'
             ));
 
-            /** @var M2E_e2M_Helper_eBay_Inventory $eBayInventory */
+            /** @var M2E_E2M_Helper_eBay_Inventory $eBayInventory */
             $eBayInventory = Mage::helper('e2m/eBay_Inventory');
             $eBayInventory->save();
 

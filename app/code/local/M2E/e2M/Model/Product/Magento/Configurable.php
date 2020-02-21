@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Class M2E_e2M_Model_Product_Magento_Configurable
+ * Class M2E_E2M_Model_Product_Magento_Configurable
  */
-class M2E_e2M_Model_Product_Magento_Configurable extends M2E_e2M_Model_Product_Magento_Product {
+class M2E_E2M_Model_Product_Magento_Configurable extends M2E_E2M_Model_Product_Magento_Product {
 
     const TYPE = 'configurable';
 
@@ -14,7 +14,7 @@ class M2E_e2M_Model_Product_Magento_Configurable extends M2E_e2M_Model_Product_M
      */
     public function process($data, $save = true) {
 
-        /** @var M2E_e2M_Model_Product_Magento_Simple $productMagentoSimple */
+        /** @var M2E_E2M_Model_Product_Magento_Simple $productMagentoSimple */
         $productMagentoSimple = Mage::getModel('e2m/Product_Magento_Simple');
         $productMagentoSimple->setTaskId($this->taskId);
 
@@ -97,7 +97,7 @@ class M2E_e2M_Model_Product_Magento_Configurable extends M2E_e2M_Model_Product_M
 
         $configProduct = $productMagentoSimple->process($data, false);
         if ($configProduct->getEntityId() && $this->eBayConfig->isActionFoundIgnore()) {
-            $this->addLog('Skip update sku: ' . $configProduct->getSku(), M2E_e2M_Helper_Data::TYPE_REPORT_WARNING);
+            $this->addLog('Skip update sku: ' . $configProduct->getSku(), M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
 
             if ($this->eBayConfig->isImportQty()) {
                 $configProduct = $this->importQty($configProduct, $data);
@@ -106,7 +106,7 @@ class M2E_e2M_Model_Product_Magento_Configurable extends M2E_e2M_Model_Product_M
             return $configProduct;
         } elseif ($configProduct->getEntityId()) {
             $configProduct->save();
-            $this->addLog('Update sets skip sku: ' . $configProduct->getSku(), M2E_e2M_Helper_Data::TYPE_REPORT_WARNING);
+            $this->addLog('Update sets skip sku: ' . $configProduct->getSku(), M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
 
             if ($this->eBayConfig->isImportQty()) {
                 $configProduct = $this->importQty($configProduct, $data);
