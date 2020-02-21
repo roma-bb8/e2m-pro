@@ -81,7 +81,7 @@ class M2E_e2M_Block_Adminhtml_Log_Grid extends Mage_Adminhtml_Block_Widget_Grid 
         $type = $row->getData('type');
         $statusColors = array(
             M2E_e2M_Helper_Data::TYPE_REPORT_SUCCESS => 'green',
-            M2E_e2M_Helper_Data::TYPE_REPORT_WARNING => 'yellow',
+            M2E_e2M_Helper_Data::TYPE_REPORT_WARNING => 'orange',
             M2E_e2M_Helper_Data::TYPE_REPORT_ERROR => 'red'
         );
 
