@@ -317,7 +317,7 @@ class M2E_E2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             $toDateTime = new DateTime('now', new DateTimeZone('UTC'));
 
             $fromDatetime = clone $toDateTime;
-            $fromDatetime->setTimestamp(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::MAX_DOWNLOAD_TIME);
+            $fromDatetime->setTimestamp(M2E_E2M_Model_Cron_Task_eBay_DownloadInventory::MAX_DOWNLOAD_TIME);
 
             $id = $connWrite->insert($cronTasksInProcessingTableName, array(
                 'instance' => 'Cron_Task_eBay_DownloadInventory',
@@ -328,12 +328,12 @@ class M2E_E2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             ));
 
             Mage::helper('e2m')->logReport($id, 'Start task of Downloading Inventory from eBay...',
-                M2E_e2M_Helper_Data::TYPE_REPORT_SUCCESS
+                M2E_E2M_Helper_Data::TYPE_REPORT_SUCCESS
             );
 
-            /** @var M2E_e2M_Helper_Progress $progressHelper */
+            /** @var M2E_E2M_Helper_Progress $progressHelper */
             $progressHelper = Mage::helper('e2m/Progress');
-            $progressHelper->setProgressByTag(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::TAG, 0);
+            $progressHelper->setProgressByTag(M2E_E2M_Model_Cron_Task_eBay_DownloadInventory::TAG, 0);
 
             return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
                 'message' => 'Start task of Downloading Inventory from ebay...',
@@ -389,7 +389,7 @@ class M2E_E2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             ), array('id = ?' => $taskId));
 
             Mage::helper('e2m')->logReport($taskId, 'Pause task of Import Inventory from Magento!',
-                M2E_e2M_Helper_Data::TYPE_REPORT_SUCCESS
+                M2E_E2M_Helper_Data::TYPE_REPORT_SUCCESS
             );
 
             return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
@@ -427,7 +427,7 @@ class M2E_E2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
                 ->where('instance = ?', 'Cron_Task_Magento_ImportInventory')->limit(1)
                 ->query()->fetchColumn();
 
-            /** @var M2E_e2M_Helper_eBay_Inventory $eBayInventory */
+            /** @var M2E_E2M_Helper_eBay_Inventory $eBayInventory */
             $eBayInventory = Mage::helper('e2m/eBay_Inventory');
 
             if (empty($taskId)) {
@@ -447,7 +447,7 @@ class M2E_E2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             ), array('id = ?' => $taskId));
 
             Mage::helper('e2m')->logReport($taskId, 'Proceed task of Import Inventory from Magento...',
-                M2E_e2M_Helper_Data::TYPE_REPORT_SUCCESS
+                M2E_E2M_Helper_Data::TYPE_REPORT_SUCCESS
             );
 
             return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
@@ -493,12 +493,12 @@ class M2E_E2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
             ));
 
             Mage::helper('e2m')->logReport($id, 'Start task of Import Inventory from Magento...',
-                M2E_e2M_Helper_Data::TYPE_REPORT_SUCCESS
+                M2E_E2M_Helper_Data::TYPE_REPORT_SUCCESS
             );
 
-            /** @var M2E_e2M_Helper_Progress $progressHelper */
+            /** @var M2E_E2M_Helper_Progress $progressHelper */
             $progressHelper = Mage::helper('e2m/Progress');
-            $progressHelper->setProgressByTag(M2E_e2M_Model_Cron_Task_Magento_ImportInventory::TAG, 0);
+            $progressHelper->setProgressByTag(M2E_E2M_Model_Cron_Task_Magento_ImportInventory::TAG, 0);
 
             return $this->getResponse()->setBody($coreHelper->jsonEncode(array(
                 'message' => 'Start task of Import Inventory to Magento...',
@@ -549,7 +549,7 @@ class M2E_E2M_Adminhtml_E2MController extends Mage_Adminhtml_Controller_Action {
 
                 try {
 
-                    /** @var M2E_e2M_Model_Cron_Task $taskModel */
+                    /** @var M2E_E2M_Model_Cron_Task $taskModel */
                     $taskModel = Mage::getModel('e2m/' . $task['instance']);
 
                     $data = $taskModel->process($task['id'], $coreHelper->jsonDecode($task['data']));

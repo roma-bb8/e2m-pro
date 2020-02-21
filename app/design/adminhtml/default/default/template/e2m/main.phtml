@@ -1,4 +1,4 @@
-<?php /** @var M2E_e2M_Block_Adminhtml_Main $this */ ?>
+<?php /** @var M2E_E2M_Block_Adminhtml_Main $this */ ?>
 
 <script type="text/javascript">
 
@@ -63,8 +63,8 @@
                         </td>
                         <td class="value" style="width: auto">
                             <select id="account-mode">
-                                <option value="<?php echo M2E_e2M_Helper_eBay_Account::MODE_SANDBOX; ?>" <?php if ($this->getAccountHelper()->getMode() === M2E_e2M_Helper_eBay_Account::MODE_SANDBOX): echo ' selected="selected"'; endif; ?>><?php echo $this->getDataHelper()->__('Sandbox (Test)'); ?></option>
-                                <option value="<?php echo M2E_e2M_Helper_eBay_Account::MODE_PRODUCTION; ?>" <?php if ($this->getAccountHelper()->getMode() === M2E_e2M_Helper_eBay_Account::MODE_PRODUCTION): echo ' selected="selected"'; endif; ?>><?php echo $this->getDataHelper()->__('Production (Live)'); ?></option>
+                                <option value="<?php echo M2E_E2M_Helper_eBay_Account::MODE_SANDBOX; ?>" <?php if ($this->getAccountHelper()->getMode() === M2E_E2M_Helper_eBay_Account::MODE_SANDBOX): echo ' selected="selected"'; endif; ?>><?php echo $this->getDataHelper()->__('Sandbox (Test)'); ?></option>
+                                <option value="<?php echo M2E_E2M_Helper_eBay_Account::MODE_PRODUCTION; ?>" <?php if ($this->getAccountHelper()->getMode() === M2E_E2M_Helper_eBay_Account::MODE_PRODUCTION): echo ' selected="selected"'; endif; ?>><?php echo $this->getDataHelper()->__('Production (Live)'); ?></option>
                             </select>
                         </td>
                     </tr>
@@ -82,7 +82,7 @@
     </div>
 <?php endif; ?>
 
-<?php if ($this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::TAG)): ?>
+<?php if ($this->getProgressHelper()->isCompletedProgressByTag(M2E_E2M_Model_Cron_Task_eBay_DownloadInventory::TAG)): ?>
     <div class="entry-edit">
         <div class="entry-edit-head">
             <h4><?php echo $this->getDataHelper()->__('Marketplace settings'); ?></h4>
@@ -97,7 +97,7 @@
                         <td class="value" style="width: auto">
                             <select id="<?php echo $marketplaceId; ?>" class="marketplace-store config-input">
                                 <option value="">-- Please Select --</option>
-                                <option value="<?php echo M2E_e2M_Helper_eBay_Config::SKIP ?>" <?php if ($this->getConfigHelper()->isSkipStore($marketplaceId)) echo ' selected="selected"'; ?>>Skip</option>
+                                <option value="<?php echo M2E_E2M_Helper_eBay_Config::SKIP ?>" <?php if ($this->getConfigHelper()->isSkipStore($marketplaceId)) echo ' selected="selected"'; ?>>Skip</option>
                                 <?php foreach ($this->getDataHelper()->getMagentoStores() as $id => $store): ?>
                                     <option value="<?php echo $id; ?>" <?php if ($this->getConfigHelper()->getStoreForMarketplace($marketplaceId) === $id) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__($store); ?></option>
                                 <?php endforeach; ?>
@@ -110,7 +110,7 @@
     </div>
 <?php endif; ?>
 
-<?php if ($this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::TAG)): ?>
+<?php if ($this->getProgressHelper()->isCompletedProgressByTag(M2E_E2M_Model_Cron_Task_eBay_DownloadInventory::TAG)): ?>
     <div class="entry-edit">
         <div class="entry-edit-head">
             <h4><?php echo $this->getDataHelper()->__('Inventory settings'); ?></h4>

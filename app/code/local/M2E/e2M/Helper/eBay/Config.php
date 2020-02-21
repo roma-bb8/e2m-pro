@@ -1,8 +1,8 @@
 <?php
 
-class M2E_e2M_Helper_eBay_Config {
+class M2E_E2M_Helper_eBay_Config {
 
-    const PREFIX = M2E_e2M_Helper_Data::PREFIX . 'settings/';
+    const PREFIX = M2E_E2M_Helper_Data::PREFIX . 'settings/';
 
     const PATH_MARKETPLACE_TO_STORE_MAP = 'marketplaces/stores/map';
 
@@ -46,7 +46,7 @@ class M2E_e2M_Helper_eBay_Config {
 
     public function setFull() {
 
-        /** @var M2E_e2M_Helper_eBay_Inventory $eBayInventoryHelper */
+        /** @var M2E_E2M_Helper_eBay_Inventory $eBayInventoryHelper */
         $eBayInventoryHelper = Mage::helper('e2m/eBay_Inventory');
 
         $this->settings['full'] =
@@ -407,8 +407,8 @@ class M2E_e2M_Helper_eBay_Config {
 
         $this->settings = array(
             'marketplaces_stores' => array(),
-            'product_identifier' => M2E_e2M_Helper_eBay_Config::VALUE_SKU_PRODUCT_IDENTIFIER,
-            'action_found' => M2E_e2M_Helper_eBay_Config::VALUE_IGNORE_ACTION_FOUND,
+            'product_identifier' => M2E_E2M_Helper_eBay_Config::VALUE_SKU_PRODUCT_IDENTIFIER,
+            'action_found' => M2E_E2M_Helper_eBay_Config::VALUE_IGNORE_ACTION_FOUND,
             'fields_attributes' => array(),
             'full' => false,
             'attribute_set' => false,

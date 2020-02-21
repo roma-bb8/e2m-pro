@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Class M2E_e2M_Model_Cron_Task_Magento_ImportInventory
+ * Class M2E_E2M_Model_Cron_Task_Magento_ImportInventory
  */
-class M2E_e2M_Model_Cron_Task_Magento_ImportInventory implements M2E_e2M_Model_Cron_Task {
+class M2E_E2M_Model_Cron_Task_Magento_ImportInventory implements M2E_E2M_Model_Cron_Task {
 
     const TAG = 'magento/import/inventory';
 
@@ -47,11 +47,11 @@ class M2E_e2M_Model_Cron_Task_Magento_ImportInventory implements M2E_e2M_Model_C
 
         //----------------------------------------
 
-        /** @var M2E_e2M_Model_Product_Magento_Configurable $productMagentoConfigurable */
+        /** @var M2E_E2M_Model_Product_Magento_Configurable $productMagentoConfigurable */
         $productMagentoConfigurable = Mage::getModel('e2m/Product_Magento_Configurable');
         $productMagentoConfigurable->setTaskId($taskId);
 
-        /** @var M2E_e2M_Model_Product_Magento_Simple $productMagentoSimple */
+        /** @var M2E_E2M_Model_Product_Magento_Simple $productMagentoSimple */
         $productMagentoSimple = Mage::getModel('e2m/Product_Magento_Simple');
         $productMagentoSimple->setTaskId($taskId);
 
@@ -61,17 +61,17 @@ class M2E_e2M_Model_Cron_Task_Magento_ImportInventory implements M2E_e2M_Model_C
             ->limit(self::MAX_LIMIT)
             ->query();
 
-        /** @var M2E_e2M_Helper_Data $dataHelper */
+        /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
 
-        /** @var M2E_e2M_Helper_eBay_Config $eBayConfigHelper */
+        /** @var M2E_E2M_Helper_eBay_Config $eBayConfigHelper */
         $eBayConfigHelper = Mage::helper('e2m/eBay_Config');
         while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
             $rowData = $coreHelper->jsonDecode($row['data']);
             if ($eBayConfigHelper->isSkipStore($rowData['marketplace_id'])) {
                 $dataHelper->logReport(
                     $row['id'], 'Skip marketplace eBay item: ' . $rowData['identifiers_item_id'],
-                    M2E_e2M_Helper_Data::TYPE_REPORT_WARNING
+                    M2E_E2M_Helper_Data::TYPE_REPORT_WARNING
                 );
 
                 continue;
@@ -86,7 +86,7 @@ class M2E_e2M_Model_Cron_Task_Magento_ImportInventory implements M2E_e2M_Model_C
             ), array('instance = ?' => 'Cron_Task_Magento_ImportInventory'));
         }
 
-        /** @var M2E_e2M_Helper_Progress $progressHelper */
+        /** @var M2E_E2M_Helper_Progress $progressHelper */
         $progressHelper = Mage::helper('e2m/Progress');
 
         $process = $this->getProcessAsPercentage($data['last_import_id']);

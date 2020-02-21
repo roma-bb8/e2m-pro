@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Class M2E_e2M_Model_Parser_eBay_Item
+ * Class M2E_E2M_Model_Parser_eBay_Item
  */
-class M2E_e2M_Model_Parser_eBay_Item extends Mage_Core_Model_Abstract {
+class M2E_E2M_Model_Parser_eBay_Item extends Mage_Core_Model_Abstract {
 
     const MARKETPLACE_CUSTOM_CODE_ID = 'custom_code';
     const MARKETPLACE_US_ID = 0;

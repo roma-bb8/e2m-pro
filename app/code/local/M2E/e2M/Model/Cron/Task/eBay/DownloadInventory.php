@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Class M2E_e2M_Model_Cron_Task_eBay_DownloadInventory
+ * Class M2E_E2M_Model_Cron_Task_eBay_DownloadInventory
  */
-class M2E_e2M_Model_Cron_Task_eBay_DownloadInventory implements M2E_e2M_Model_Cron_Task {
+class M2E_E2M_Model_Cron_Task_eBay_DownloadInventory implements M2E_E2M_Model_Cron_Task {
 
     const TAG = 'ebay/download/inventory';
 
@@ -45,7 +45,7 @@ class M2E_e2M_Model_Cron_Task_eBay_DownloadInventory implements M2E_e2M_Model_Cr
 
         //----------------------------------------
 
-        /** @var M2E_e2M_Helper_eBay_Account $eBayAccount */
+        /** @var M2E_E2M_Helper_eBay_Account $eBayAccount */
         $eBayAccount = Mage::helper('e2m/eBay_Account');
         if (empty($eBayAccount->getToken())) {
             throw new Exception('eBay Token empty.');
@@ -63,7 +63,7 @@ class M2E_e2M_Model_Cron_Task_eBay_DownloadInventory implements M2E_e2M_Model_Cr
 
         //----------------------------------------
 
-        /** @var M2E_e2M_Model_Api_Ebay $eBayAPI */
+        /** @var M2E_E2M_Model_Api_Ebay $eBayAPI */
         $eBayAPI = Mage::getModel('e2m/Api_Ebay');
 
         $request = 0;
