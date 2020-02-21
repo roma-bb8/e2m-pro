@@ -55,7 +55,9 @@ class M2E_e2M_Model_Product_Magento_Configurable extends M2E_e2M_Model_Product_M
                 if ($attribute && !$attribute->getId()) {
                     $attribute = $this->createAttribute($attributeCode, $title, $storeId);
                 }
+
                 $attribute->setData('store_id', $storeId);
+                $this->updateTitleAttribute($attribute, $title, $storeId);
                 $this->checkAssignedAttributes($attribute);
 
                 $optionId = $this->addAttributeValue($attribute, $specific, $storeId);

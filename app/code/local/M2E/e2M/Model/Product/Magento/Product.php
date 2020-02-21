@@ -178,6 +178,51 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
     }
 
     /**
+     * @param Mage_Eav_Model_Entity_Attribute_Abstract $attribute
+     * @param string $title
+     * @param int $storeId
+     *
+     * @return Mage_Eav_Model_Entity_Attribute_Abstract
+     */
+    protected function updateTitleAttribute($attribute, $title, $storeId) {
+
+        try {
+
+            $frontendLabels = $attribute->getData('frontend_label');
+            if (is_array($frontendLabels)) {
+                if ($frontendLabels[$storeId] == $title) {
+                    return $attribute;
+                }
+
+                $frontendLabels[$storeId] = $title;
+            } else {
+                if ($frontendLabels == $title) {
+                    return $attribute;
+                }
+
+                $frontendLabels = array(
+                    Mage_Core_Model_App::ADMIN_STORE_ID => $attribute->getData('frontend_label')
+                );
+
+                $frontendLabels[$storeId] = $title;
+            }
+
+            $attribute->setData('frontend_label', $frontendLabels);
+            $attribute->save();
+
+            $this->addLog('Update title name in Attribute: "' . $attribute->getName() . '" in Store: "' . $attribute->getStoreId() . '"');
+
+        } catch (Exception $e) {
+            Mage::helper('e2m')->logException($e);
+
+            $this->addLog('Not update title name in Attribute: "' . $attribute->getName() . '" in Store: "' . $attribute->getStoreId() . '"',
+                M2E_e2M_Helper_Data::TYPE_REPORT_ERROR);
+        }
+
+        return $attribute;
+    }
+
+    /**
      * @param string $code
      * @param string $title
      * @param int $storeId
