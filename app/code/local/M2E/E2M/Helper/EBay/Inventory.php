@@ -3,7 +3,7 @@
 /**
  * Class M2E_E2M_Helper_eBay_Inventory
  */
-class M2E_E2M_Helper_eBay_Inventory {
+class M2E_E2M_Helper_EBay_Inventory {
 
     const PREFIX = M2E_E2M_Helper_Data::PREFIX . 'inventory/';
 

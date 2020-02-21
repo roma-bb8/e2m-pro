@@ -1,6 +1,6 @@
 <?php
 
-class M2E_E2M_Helper_eBay_Config {
+class M2E_E2M_Helper_EBay_Config {
 
     const PREFIX = M2E_E2M_Helper_Data::PREFIX . 'settings/';
 

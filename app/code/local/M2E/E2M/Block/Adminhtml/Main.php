@@ -12,13 +12,13 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
 
         /** @var Mage_Adminhtml_Block_Widget_Button $button */
         /** @var Mage_Adminhtml_Block_Widget_Button $widgetButton */
-        $widgetButton = $this->getLayout()->createBlock('adminhtml/widget_button');
 
         //----------------------------------------
 
         if (empty($this->getAccountHelper()->getToken())) {
 
-            $button = (clone $widgetButton)->setData(array(
+            $widgetButton = $this->getLayout()->createBlock('adminhtml/widget_button');
+            $button = $widgetButton->setData(array(
                 'label' => $this->getDataHelper()->__('Get Token'),
                 'onclick' => 'getToken();'
             ));
@@ -28,7 +28,8 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
 
         //----------------------------------------
 
-        $button = (clone $widgetButton)->setData(array(
+        $widgetButton = $this->getLayout()->createBlock('adminhtml/widget_button');
+        $button = $widgetButton->setData(array(
             'label' => $this->getDataHelper()->__('Logout'),
             'onclick' => 'unsetToken();'
         ));
@@ -36,7 +37,8 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
 
         //----------------------------------------
 
-        $button = (clone $widgetButton)->setData(array(
+        $widgetButton = $this->getLayout()->createBlock('adminhtml/widget_button');
+        $button = $widgetButton->setData(array(
             'label' => Mage::helper('e2m')->__('Save config'),
             'class' => 'save',
             'onclick' => 'sendSettings();'
@@ -72,7 +74,8 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
                 break;
         }
 
-        $button = (clone $widgetButton)->setData(array(
+        $widgetButton = $this->getLayout()->createBlock('adminhtml/widget_button');
+        $button = $widgetButton->setData(array(
             'label' => $this->getDataHelper()->__($label),
             'onclick' => 'startDownloadInventory(this);',
             'disabled' => $disabled
@@ -112,7 +115,8 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
                 break;
         }
 
-        $button = (clone $widgetButton)->setData(array(
+        $widgetButton = $this->getLayout()->createBlock('adminhtml/widget_button');
+        $button = $widgetButton->setData(array(
             'label' => Mage::helper('e2m')->__($label),
             'onclick' => 'startImportInventory(this);',
             'disabled' => $disabled
@@ -127,7 +131,8 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
             $onclick = 'pauseFinishImportInventory(this);';
         }
 
-        $button = (clone $widgetButton)->setData(array(
+        $widgetButton = $this->getLayout()->createBlock('adminhtml/widget_button');
+        $button = $widgetButton->setData(array(
             'label' => $this->getDataHelper()->__($label),
             'onclick' => $onclick,
             'disabled' => $disabledPause

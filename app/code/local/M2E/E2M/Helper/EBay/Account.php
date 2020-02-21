@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Class M2E_E2M_Helper_eBay_Account
+ * Class M2E_E2M_Helper_EBay_Account
  */
-class M2E_E2M_Helper_eBay_Account {
+class M2E_E2M_Helper_EBay_Account {
 
     const PREFIX = M2E_E2M_Helper_Data::PREFIX . 'ebay/account/';
 

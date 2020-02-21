@@ -3,7 +3,7 @@
 /**
  * Class M2E_E2M_Model_Cron_Task_eBay_DownloadInventory
  */
-class M2E_E2M_Model_Cron_Task_eBay_DownloadInventory implements M2E_E2M_Model_Cron_Task {
+class M2E_E2M_Model_Cron_Task_EBay_DownloadInventory implements M2E_E2M_Model_Cron_Task {
 
     const TAG = 'ebay/download/inventory';
 
