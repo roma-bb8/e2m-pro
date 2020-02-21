@@ -58,6 +58,11 @@ function sendSettings() {
         parameters: {
             settings: JSON.stringify(settings)
         },
+        onCreate: function () {
+            $('loading-mask').setStyle({
+                visibility: 'visible'
+            });
+        },
         onSuccess: function () {
             window.location.reload();
         },

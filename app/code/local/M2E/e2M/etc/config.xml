@@ -19,7 +19,16 @@
         <models>
             <e2m>
                 <class>M2E_e2M_Model</class>
+                <resourceModel>e2m_resource</resourceModel>
             </e2m>
+            <e2m_resource>
+                <class>M2E_e2M_Model_Resource</class>
+                <entities>
+                    <log>
+                        <table>m2e_e2m_log</table>
+                    </log>
+                </entities>
+            </e2m_resource>
         </models>
         <resources>
             <e2m_setup>

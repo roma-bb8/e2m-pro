@@ -114,18 +114,23 @@ class M2E_e2M_Model_Product_Magento_Configurable extends M2E_e2M_Model_Product_M
         }
 
         $configProduct->setData('type_id', self::TYPE);
+        $configProduct->save();
+
+        $this->addLog('Create config product: "' . $configProduct->getSku() .
+            '" eBay Item Id: ' . $data['identifiers_item_id']);
 
         /**
          ** Dirty hack **
          *      by realtime cache attributes
          * app/code/core/Mage/Eav/Model/Config.php:450
          * getEntityAttributeCodes:463
+         *
+         * use if product exist in magento inventory
          */
         Mage::unregister('_singleton/eav/config');
-        if (!$configProduct->getEntityId()) {
-            $configProduct->getTypeInstance()->getUsedProductAttributeIds(array_keys($attributes));
-        }
 
+        // use only create new configurable
+        $configProduct->getTypeInstance()->setUsedProductAttributeIds(array_keys($attributes));
         $configurableAttributesData = $configProduct->getTypeInstance()->getConfigurableAttributesAsArray();
         foreach ($configurableAttributesData as &$configurableAttributesDatum) {
             $configurableAttributesDatum['values'] = $set[$configurableAttributesDatum['attribute_code']];
@@ -141,9 +146,6 @@ class M2E_e2M_Model_Product_Magento_Configurable extends M2E_e2M_Model_Product_M
         $configProduct->setData('configurable_attributes_data', $configurableAttributesData);
         $configProduct->setData('can_save_configurable_attributes', true);
         $configProduct->save();
-
-        $this->addLog('Create config product: "' . $configProduct->getSku() .
-            '" eBay Item Id: ' . $data['identifiers_item_id']);
 
         //----------------------------------------
 

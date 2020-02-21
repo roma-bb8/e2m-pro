@@ -133,6 +133,8 @@ class M2E_e2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
             'disabled' => $disabledPause
         ));
         $this->setChild('pause_download_inventory_button', $button);
+
+        $this->setChild('log_grid', $this->getLayout()->createBlock('e2m/adminhtml_log_grid'));
     }
 
     //########################################

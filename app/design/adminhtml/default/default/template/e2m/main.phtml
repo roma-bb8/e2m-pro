@@ -82,67 +82,6 @@
     </div>
 <?php endif; ?>
 
-<?php if (!empty($this->getAccountHelper()->getToken())): ?>
-    <div class="entry-edit">
-        <header class="entry-edit-head">
-            <h4><?php echo $this->getDataHelper()->__('Summary inventory'); ?></h4>
-        </header>
-        <div class="fieldset">
-            <div>
-                <table class="form-list" cellspacing="0" cellpadding="0">
-                    <tr>
-                        <td class="label">
-                            <label><?php echo $this->getDataHelper()->__('Total items downloaded'); ?>:</label>
-                        </td>
-                        <td class="value" style="width: auto">
-                            <span id="download-inventory-total-items"><?php echo $this->escapeHtml($this->getInventoryHelper()->getItemsTotal()) ?></span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="label">
-                            <label><?php echo $this->getDataHelper()->__('Variation items'); ?>:</label>
-                        </td>
-                        <td class="value" style="width: auto">
-                            <span id="download-inventory-variation-items"><?php echo $this->escapeHtml($this->getInventoryHelper()->getItemsVariation()); ?></span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="label">
-                            <label><?php echo $this->getDataHelper()->__('Simple items'); ?>:</label>
-                        </td>
-                        <td class="value" style="width: auto">
-                            <span id="download-inventory-simple-items"><?php echo $this->escapeHtml($this->getInventoryHelper()->getItemsSimple()); ?></span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="label">
-                            <?php echo $this->getChildHtml('start_download_inventory_button'); ?>
-                        </td>
-                        <td class="value block-download-inventory-progress" style="width: auto">
-                            <span id="download-inventory-progress"><?php echo $this->escapeHtml($this->getProgressHelper()->getProgressByTag(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::TAG)); ?></span>%
-                        </td>
-                    </tr>
-                    <?php if ($this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::TAG)): ?>
-                        <tr>
-                            <td class="label">
-                                <?php echo $this->getChildHtml('start_import_inventory_button'); ?>
-                            </td>
-                            <td class="value" style="width: auto">
-                                <span id="import-inventory-progress"><?php echo $this->escapeHtml($this->getProgressHelper()->getProgressByTag(M2E_e2M_Model_Cron_Task_Magento_ImportInventory::TAG)); ?></span>%
-                            </td>
-                        </tr>
-                        <tr>
-                            <td id="pause-download-inventory-button" class="label">
-                                <?php echo $this->getChildHtml('pause_download_inventory_button'); ?>
-                            </td>
-                        </tr>
-                    <?php endif; ?>
-                </table>
-            </div>
-        </div>
-    </div>
-<?php endif; ?>
-
 <?php if ($this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::TAG)): ?>
     <div class="entry-edit">
         <div class="entry-edit-head">
@@ -363,4 +302,78 @@
 
 <div <?php if (!$this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::TAG) || $this->getConfigHelper()->isFull()): ?> style="display: none" <?php endif; ?> class="config-button">
     <?php echo $this->getChildHtml('send_settings_button'); ?>
+    <br/>
+    <br/>
 </div>
+
+<?php if (!empty($this->getAccountHelper()->getToken())): ?>
+    <div class="box-left entry-edit" collapseable="no">
+        <div class="entry-edit-head">
+            <h4 class="icon-head head-edit-form fieldset-legend"><?php echo $this->getDataHelper()->__('Summary inventory'); ?></h4>
+        </div>
+        <div class="fieldset">
+            <div class="hor-scroll">
+                <table class="form-list" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td class="label">
+                            <label><?php echo $this->getDataHelper()->__('Total items downloaded'); ?>:</label>
+                        </td>
+                        <td class="value" style="width: auto">
+                            <span id="download-inventory-total-items"><?php echo $this->escapeHtml($this->getInventoryHelper()->getItemsTotal()) ?></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">
+                            <label><?php echo $this->getDataHelper()->__('Variation items'); ?>:</label>
+                        </td>
+                        <td class="value" style="width: auto">
+                            <span id="download-inventory-variation-items"><?php echo $this->escapeHtml($this->getInventoryHelper()->getItemsVariation()); ?></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">
+                            <label><?php echo $this->getDataHelper()->__('Simple items'); ?>:</label>
+                        </td>
+                        <td class="value" style="width: auto">
+                            <span id="download-inventory-simple-items"><?php echo $this->escapeHtml($this->getInventoryHelper()->getItemsSimple()); ?></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">
+                            <?php echo $this->getChildHtml('start_download_inventory_button'); ?>
+                        </td>
+                        <td class="value block-download-inventory-progress" style="width: auto">
+                            <span id="download-inventory-progress"><?php echo $this->escapeHtml($this->getProgressHelper()->getProgressByTag(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::TAG)); ?></span>%
+                        </td>
+                    </tr>
+                    <?php if ($this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::TAG)): ?>
+                        <tr>
+                            <td class="label">
+                                <?php echo $this->getChildHtml('start_import_inventory_button'); ?>
+                            </td>
+                            <td class="value" style="width: auto">
+                                <span id="import-inventory-progress"><?php echo $this->escapeHtml($this->getProgressHelper()->getProgressByTag(M2E_e2M_Model_Cron_Task_Magento_ImportInventory::TAG)); ?></span>%
+                            </td>
+                        </tr>
+                        <tr>
+                            <td id="pause-download-inventory-button" class="label">
+                                <?php echo $this->getChildHtml('pause_download_inventory_button'); ?>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="box-right entry-edit" collapseable="no">
+        <div class="entry-edit-head">
+            <h4 class="icon-head head-edit-form fieldset-legend"><?php echo Mage::helper('e2m')->__('Logs'); ?></h4>
+        </div>
+        <div class="fieldset">
+            <div class="hor-scroll">
+                <?php echo $this->getChildHtml('log_grid'); ?>
+            </div>
+        </div>
+
+    </div>
+<?php endif; ?>

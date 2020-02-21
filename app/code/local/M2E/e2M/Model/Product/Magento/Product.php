@@ -28,15 +28,15 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
     /**
      * @param string $value
      * @param string $attributeCode
-     * @param int $marketplaceId
+     * @param int $storeId
      *
      * @return Mage_Catalog_Model_Product
      */
-    private function loadProductBy($value, $attributeCode, $marketplaceId) {
+    private function loadProductBy($value, $attributeCode, $storeId) {
 
         $products = Mage::getResourceModel('catalog/product_collection');
         $products->addAttributeToSelect('*');
-        $products->addStoreFilter($this->eBayConfig->getStoreForMarketplace($marketplaceId));
+        $products->addStoreFilter($storeId);
         $products->addAttributeToFilter($attributeCode, $value);
         $products->setCurPage(1)->setPageSize(1);
         $products->load();
@@ -384,22 +384,22 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
     /**
      * @param Mage_Catalog_Model_Product $product
      * @param array $data
-     * @param int $marketplaceId
+     * @param int $storeId
      *
      * @return Mage_Catalog_Model_Product
      */
-    protected function loadProduct($product, $data, $marketplaceId) {
+    protected function loadProduct($product, $data, $storeId) {
         switch (true) {
             case $this->eBayConfig->isProductIdentifierSKU():
                 if (!empty($data['identifiers_sku'])) {
-                    $product->setData('store_id', $this->eBayConfig->getStoreForMarketplace($marketplaceId));
+                    $product->setData('store_id', $storeId);
                     $product->load($product->getIdBySku($data['identifiers_sku']));
                 }
 
                 break;
             case $this->eBayConfig->isProductIdentifierMPN():
                 if (!empty($data['identifiers_brand_mpn_mpn'])) {
-                    $tmp = $this->loadProductBy($data['identifiers_brand_mpn_mpn'], 'mpn', $marketplaceId);
+                    $tmp = $this->loadProductBy($data['identifiers_brand_mpn_mpn'], 'mpn', $storeId);
                     $tmp !== null && $product = $tmp;
                 }
 
@@ -407,7 +407,7 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
 
             case $this->eBayConfig->isProductIdentifierUPC():
                 if (!empty($data['identifiers_upc'])) {
-                    $tmp = $this->loadProductBy($data['identifiers_upc'], 'upc', $marketplaceId);
+                    $tmp = $this->loadProductBy($data['identifiers_upc'], 'upc', $storeId);
                     $tmp !== null && $product = $tmp;
                 }
 
@@ -415,7 +415,7 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
 
             case $this->eBayConfig->isProductIdentifierEAN():
                 if (!empty($data['identifiers_ean'])) {
-                    $tmp = $this->loadProductBy($data['identifiers_ean'], 'ean', $marketplaceId);
+                    $tmp = $this->loadProductBy($data['identifiers_ean'], 'ean', $storeId);
                     $tmp !== null && $product = $tmp;
                 }
 
@@ -424,11 +424,11 @@ abstract class M2E_e2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
             case $this->eBayConfig->isProductIdentifierGTIN():
                 $tmp = null;
                 if (!empty($data['identifiers_upc'])) {
-                    $tmp = $this->loadProductBy($data['upc'], 'gtin', $marketplaceId);
+                    $tmp = $this->loadProductBy($data['upc'], 'gtin', $storeId);
                 }
 
                 if (!empty($data['identifiers_ean']) && $tmp === null) {
-                    $tmp = $this->loadProductBy($data['ean'], 'gtin', $marketplaceId);
+                    $tmp = $this->loadProductBy($data['ean'], 'gtin', $storeId);
                 }
 
                 $tmp !== null && $product = $tmp;

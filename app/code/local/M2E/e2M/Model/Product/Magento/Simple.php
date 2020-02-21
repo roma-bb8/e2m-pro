@@ -18,8 +18,9 @@ class M2E_e2M_Model_Product_Magento_Simple extends M2E_e2M_Model_Product_Magento
             $data['identifiers_sku'] = 'RANDOM_' . md5($data['identifiers_item_id']);
         }
 
+        $storeId = $this->eBayConfig->getStoreForMarketplace($data['marketplace_id']);
         $product = clone $this->product;
-        $product = $this->loadProduct($product, $data, $data['marketplace_id']);
+        $product = $this->loadProduct($product, $data, $storeId);
         if ($product->getEntityId() && $this->eBayConfig->isActionFoundIgnore()) {
             $this->addLog('Skip update sku: ' . $product->getSku(), M2E_e2M_Helper_Data::TYPE_REPORT_WARNING);
 
@@ -32,11 +33,9 @@ class M2E_e2M_Model_Product_Magento_Simple extends M2E_e2M_Model_Product_Magento
 
         if (!$product->getId()) {
             $product->setData('type_id', self::TYPE);
-            $product->setData('store_id', $this->eBayConfig->getStoreForMarketplace($data['marketplace_id']));
+            $product->setData('store_id', $storeId);
             $product->setData('attribute_set_id', $this->eBayConfig->getAttributeSet());
-            $product->setData('website_ids', array(Mage::app()->getStore(
-                $this->eBayConfig->getStoreForMarketplace($data['marketplace_id']))->getWebsiteId()
-            ));
+            $product->setData('website_ids', array(Mage::app()->getStore($storeId)->getWebsiteId()));
             $product->setData('visibility', Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE);
             $product->setData('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
             $product->setData('tax_class_id', 0);
@@ -50,6 +49,10 @@ class M2E_e2M_Model_Product_Magento_Simple extends M2E_e2M_Model_Product_Magento
 
         $fieldsAttributes = $this->eBayConfig->getEbayFieldMagentoAttribute();
         foreach ($fieldsAttributes as $eBayField => $magentoAttribute) {
+            if (empty($data[$eBayField])) {
+                continue;
+            }
+
             $product->setData($magentoAttribute, $data[$eBayField]);
         }
 
@@ -57,7 +60,7 @@ class M2E_e2M_Model_Product_Magento_Simple extends M2E_e2M_Model_Product_Magento
 
         if (!$product->getId() && $this->eBayConfig->isImportImage()) {
             $product = $this->importImage($product, $data);
-        } else {
+        } elseif ($product->getId() && $this->eBayConfig->isImportImage()) {
             $product = $this->updateImage($product, $data);
         }
 
