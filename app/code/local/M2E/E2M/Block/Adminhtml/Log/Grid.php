@@ -1,37 +1,44 @@
 <?php
 
 /**
- * Class M2E_E2M_Block_Adminhtml__Log_Grid
+ * Class M2E_E2M_Block_Adminhtml_Log_Grid
  */
 class M2E_E2M_Block_Adminhtml_Log_Grid extends Mage_Adminhtml_Block_Widget_Grid {
-    //########################################
 
-    public function __construct() {
-        parent::__construct();
+    /**
+     * @param string $value
+     * @param M2E_E2M_Model_Log $row
+     * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
+     * @param bool $isExport
+     *
+     * @return string
+     */
+    public function callbackColumnType($value, $row, $column, $isExport) {
 
-        // Initialization block
-        // ---------------------------------------
-        $this->setId('logGrid');
-        // ---------------------------------------
+        $statusColors = array(
+            M2E_E2M_Helper_Data::TYPE_REPORT_SUCCESS => 'green',
+            M2E_E2M_Helper_Data::TYPE_REPORT_WARNING => 'orange',
+            M2E_E2M_Helper_Data::TYPE_REPORT_ERROR => 'red'
+        );
 
-        // Set default values
-        // ---------------------------------------
-        $this->setDefaultSort('id');
-        $this->setDefaultDir('DESC');
-        $this->setFilterVisibility(false);
-        //$this->setUseAjax(true);
-        // ---------------------------------------
+        $type = $row->getData('type');
+        $color = isset($statusColors[$type]) ? $statusColors[$type] : 'black';
+
+        return sprintf('<span style="color:%s">%s</span>', $color, $value);
     }
 
-    protected function _prepareCollection() {
-        $this->setCollection(Mage::getModel('e2m/Log')->getCollection());
+    //----------------------------------------
 
-        return parent::_prepareCollection();
-    }
-
+    /**
+     * @inheritDoc
+     * @throws Exception
+     */
     protected function _prepareColumns() {
+
+        $dataHelper = Mage::helper('e2m');
+
         $this->addColumn('id', array(
-            'header' => Mage::helper('e2m')->__('ID'),
+            'header' => $dataHelper->__('ID'),
             'align' => 'left',
             'width' => '*',
             'type' => 'text',
@@ -40,7 +47,7 @@ class M2E_E2M_Block_Adminhtml_Log_Grid extends Mage_Adminhtml_Block_Widget_Grid 
         ));
 
         $this->addColumn('task_id', array(
-            'header' => Mage::helper('e2m')->__('Task ID'),
+            'header' => $dataHelper->__('Task ID'),
             'align' => 'left',
             'width' => '*',
             'type' => 'text',
@@ -50,7 +57,7 @@ class M2E_E2M_Block_Adminhtml_Log_Grid extends Mage_Adminhtml_Block_Widget_Grid 
         ));
 
         $this->addColumn('description', array(
-            'header' => Mage::helper('e2m')->__('Description'),
+            'header' => $dataHelper->__('Description'),
             'align' => 'left',
             'width' => '*',
             'type' => 'text',
@@ -58,18 +65,18 @@ class M2E_E2M_Block_Adminhtml_Log_Grid extends Mage_Adminhtml_Block_Widget_Grid 
         ));
 
         $this->addColumn('type', array(
-            'header' => Mage::helper('e2m')->__('Type'),
+            'header' => $dataHelper->__('Type'),
             'align' => 'left',
             'width' => '*',
             'sortable' => false,
             'type' => 'options',
             'index' => 'type',
             'options' => array(
-                M2E_E2M_Helper_Data::TYPE_REPORT_SUCCESS => Mage::helper('e2m')->__('Success'),
-                M2E_E2M_Helper_Data::TYPE_REPORT_WARNING => Mage::helper('e2m')->__('Warning'),
-                M2E_E2M_Helper_Data::TYPE_REPORT_ERROR => Mage::helper('e2m')->__('Error')
+                M2E_E2M_Helper_Data::TYPE_REPORT_SUCCESS => $dataHelper->__('Success'),
+                M2E_E2M_Helper_Data::TYPE_REPORT_WARNING => $dataHelper->__('Warning'),
+                M2E_E2M_Helper_Data::TYPE_REPORT_ERROR => $dataHelper->__('Error')
             ),
-            'frame_callback' => array($this, 'callbackColumnStatus')
+            'frame_callback' => array($this, 'callbackColumnType')
         ));
 
         return parent::_prepareColumns();
@@ -77,17 +84,32 @@ class M2E_E2M_Block_Adminhtml_Log_Grid extends Mage_Adminhtml_Block_Widget_Grid 
 
     //########################################
 
-    public function callbackColumnStatus($value, $row, $column, $isExport) {
-        $type = $row->getData('type');
-        $statusColors = array(
-            M2E_E2M_Helper_Data::TYPE_REPORT_SUCCESS => 'green',
-            M2E_E2M_Helper_Data::TYPE_REPORT_WARNING => 'orange',
-            M2E_E2M_Helper_Data::TYPE_REPORT_ERROR => 'red'
-        );
+    /**
+     * @inheritDoc
+     */
+    protected function _prepareCollection() {
 
-        $color = isset($statusColors[$type]) ? $statusColors[$type] : 'black';
-        return '<span style="color: ' . $color . ';">' . $value . '</span>';
+        /** @var M2E_E2M_Model_Resource_Log_Collection $logCollection */
+        $logCollection = Mage::getModel('e2m/Log')->getCollection();
+
+        $this->setCollection($logCollection);
+
+        return parent::_prepareCollection();
     }
 
     //########################################
+
+    /**
+     * @inheritDoc
+     */
+    public function __construct() {
+        parent::__construct();
+
+        $this->setId('logGrid');
+
+        $this->setDefaultSort('id');
+        $this->setDefaultDir('DESC');
+        $this->setFilterVisibility(false);
+        //$this->setUseAjax(true);
+    }
 }
