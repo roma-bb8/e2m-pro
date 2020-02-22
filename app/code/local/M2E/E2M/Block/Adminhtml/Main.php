@@ -49,7 +49,7 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
 
         $widgetButton = $this->getLayout()->createBlock('adminhtml/widget_button');
         $button = $widgetButton->setData(array(
-            'label' => Mage::helper('e2m')->__('Save config'),
+            'label' => $this->getDataHelper()->__('Save config'),
             'class' => 'save',
             'onclick' => 'sendSettings();'
         ));
@@ -127,7 +127,7 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
 
         $widgetButton = $this->getLayout()->createBlock('adminhtml/widget_button');
         $button = $widgetButton->setData(array(
-            'label' => Mage::helper('e2m')->__($label),
+            'label' => $this->getDataHelper()->__($label),
             'onclick' => 'startImportInventory(this);',
             'disabled' => $disabled
         ));
@@ -179,7 +179,7 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
     public function getConfigHelper() {
 
         /** @var M2E_E2M_Helper_eBay_Config $eBayConfigHelper */
-        $eBayConfigHelper = Mage::helper('e2m/eBay_Config');
+        $eBayConfigHelper = Mage::helper('e2m/Ebay_Config');
 
         return $eBayConfigHelper;
     }
@@ -190,7 +190,7 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
     public function getInventoryHelper() {
 
         /** @var M2E_E2M_Helper_eBay_Inventory $eBayInventoryHelper */
-        $eBayInventoryHelper = Mage::helper('e2m/eBay_Inventory');
+        $eBayInventoryHelper = Mage::helper('e2m/Ebay_Inventory');
 
         return $eBayInventoryHelper;
     }
@@ -201,7 +201,7 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
     public function getAccountHelper() {
 
         /** @var M2E_E2M_Helper_eBay_Account $eBayAccountHelper */
-        $eBayAccountHelper = Mage::helper('e2m/eBay_Account');
+        $eBayAccountHelper = Mage::helper('e2m/Ebay_Account');
 
         return $eBayAccountHelper;
     }
