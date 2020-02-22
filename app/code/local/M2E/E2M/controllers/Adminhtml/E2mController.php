@@ -6,9 +6,9 @@
  */
 
 /**
- * Class M2E_E2M_Adminhtml_E2MController
+ * Class M2E_E2M_Adminhtml_E2mController
  */
-class M2E_E2M_Adminhtml_E2MController extends M2E_E2M_Controller_Adminhtml_BaseController {
+class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseController {
 
     /**
      * @return Zend_Controller_Response_Abstract
