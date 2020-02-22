@@ -43,7 +43,7 @@
             <e2m module="e2m">
                 <title>e2MPro</title>
                 <sort_order>70</sort_order>
-                <action>adminhtml/E2M</action>
+                <action>adminhtml/e2m</action>
             </e2m>
         </menu>
     </adminhtml>
