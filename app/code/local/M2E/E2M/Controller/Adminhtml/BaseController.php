@@ -8,7 +8,7 @@
 /**
  * Class Ess_E2M_Controller_Adminhtml_BaseController
  */
-class Ess_E2M_Controller_Adminhtml_BaseController extends Mage_Adminhtml_Controller_Action {
+class M2E_E2M_Controller_Adminhtml_BaseController extends Mage_Adminhtml_Controller_Action {
 
     const HTTP_INTERNAL_ERROR = 500;
 
