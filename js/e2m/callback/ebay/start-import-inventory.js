@@ -1,6 +1,11 @@
 function startImportInventory(element) {
     new Ajax.Request(e2m.url.startTaskImportInventory, {
         method: 'get',
+        onCreate: function () {
+            $('loading-mask').setStyle({
+                visibility: 'visible'
+            });
+        },
         onSuccess: function (transport) {
 
             var response = JSON.parse(transport.responseText);

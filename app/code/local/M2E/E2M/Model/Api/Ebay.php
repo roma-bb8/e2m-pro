@@ -1,4 +1,9 @@
 <?php
+/**
+ * @author     M2E Pro Developers Team
+ * @copyright  M2E LTD
+ * @license    Commercial use is forbidden
+ */
 
 /**
  * Class M2E_E2M_Model_Api_Ebay
@@ -320,12 +325,12 @@ XML;
     //########################################
 
     /** @tmp */
-    /* public function __construct() {
+    public function __construct() {
 
         $access = json_decode(file_get_contents(__DIR__ . '/../../../../../../../access.json'), true);
         $this->ruName = $access['RuName'];
         $this->headers['X-EBAY-API-DEV-NAME'] = $access['X-EBAY-API-DEV-NAME'];
         $this->headers['X-EBAY-API-APP-NAME'] = $access['X-EBAY-API-APP-NAME'];
         $this->headers['X-EBAY-API-CERT-NAME'] = $access['X-EBAY-API-CERT-NAME'];
-    } */
+    }
 }

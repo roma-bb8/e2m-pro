@@ -1,4 +1,9 @@
 <?php
+/**
+ * @author     M2E Pro Developers Team
+ * @copyright  M2E LTD
+ * @license    Commercial use is forbidden
+ */
 
 /**
  * Class M2E_E2M_Helper_Progress

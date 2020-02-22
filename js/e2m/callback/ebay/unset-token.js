@@ -1,6 +1,11 @@
 function unsetToken() {
     new Ajax.Request(e2m.url.unsetEbayToken, {
             method: 'get',
+            onCreate: function () {
+                $('loading-mask').setStyle({
+                    visibility: 'visible'
+                });
+            },
             onSuccess: function () {
                 window.location.reload();
             },

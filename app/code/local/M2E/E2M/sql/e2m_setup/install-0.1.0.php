@@ -1,4 +1,9 @@
 <?php
+/**
+ * @author     M2E Pro Developers Team
+ * @copyright  M2E LTD
+ * @license    Commercial use is forbidden
+ */
 
 /* @var Mage_Core_Model_Resource_Setup $installer */
 $installer = $this;

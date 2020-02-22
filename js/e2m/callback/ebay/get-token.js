@@ -8,10 +8,15 @@ function getToken() {
         parameters: {
             mode: mode
         },
+        onCreate: function () {
+            $('loading-mask').setStyle({
+                visibility: 'visible'
+            });
+        },
         onSuccess: function (transport) {
             var response = JSON.parse(transport.responseText);
 
-            window.location.replace(response.url);
+            window.location.replace(response.data.url);
         },
         onFailure: function (transport) {
             console.log(transport);

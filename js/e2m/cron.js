@@ -10,11 +10,10 @@ function cron() {
             var response = JSON.parse(transport.responseText);
             console.log(response);
 
-            response.run && setTimeout(cron, 3000);
-
-            response.handlers.forEach(function (data) {
-                data.handler === 'downloadInventoryHandler' && downloadInventoryHandler(data.data);
-                data.handler === 'importInventoryHandler' && importInventoryHandler(data.data);
+            setTimeout(cron, 3000);
+            response.data.forEach(function (task) {
+                task.handler === 'downloadInventoryHandler' && downloadInventoryHandler(task.data);
+                task.handler === 'importInventoryHandler' && importInventoryHandler(task.data);
             });
         },
         onFailure: function (transport) {

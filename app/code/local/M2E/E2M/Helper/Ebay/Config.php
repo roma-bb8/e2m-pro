@@ -1,6 +1,14 @@
 <?php
+/**
+ * @author     M2E Pro Developers Team
+ * @copyright  M2E LTD
+ * @license    Commercial use is forbidden
+ */
 
-class M2E_E2M_Helper_EBay_Config {
+/**
+ * Class M2E_E2M_Helper_Ebay_Config
+ */
+class M2E_E2M_Helper_Ebay_Config {
 
     const PREFIX = M2E_E2M_Helper_Data::PREFIX . 'settings/';
 

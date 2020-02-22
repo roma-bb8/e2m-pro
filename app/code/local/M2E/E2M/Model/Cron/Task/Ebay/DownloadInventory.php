@@ -1,9 +1,14 @@
 <?php
+/**
+ * @author     M2E Pro Developers Team
+ * @copyright  M2E LTD
+ * @license    Commercial use is forbidden
+ */
 
 /**
  * Class M2E_E2M_Model_Cron_Task_eBay_DownloadInventory
  */
-class M2E_E2M_Model_Cron_Task_EBay_DownloadInventory implements M2E_E2M_Model_Cron_Task {
+class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory implements M2E_E2M_Model_Cron_Task {
 
     const TAG = 'ebay/download/inventory';
 
