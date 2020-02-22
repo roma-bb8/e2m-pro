@@ -39,7 +39,8 @@ class M2E_E2M_Controller_Adminhtml_BaseController extends Mage_Adminhtml_Control
     //########################################
 
     /**
-     * @inheritDoc
+     * @param $action
+     *
      * @throws Zend_Controller_Response_Exception
      */
     final public function dispatch($action) {
@@ -48,12 +49,12 @@ class M2E_E2M_Controller_Adminhtml_BaseController extends Mage_Adminhtml_Control
             parent::dispatch($action);
         } catch (Exception $e) {
             if ($this->getRequest()->isAjax()) {
-                return $this->renderAjaxException($e);
+                $this->renderAjaxException($e);
             }
 
             $this->_getSession()->addError($e->getMessage());
-        }
 
-        return $this->_redirect('*/e2m/index');
+            $this->_redirect('*/e2m/index');
+        }
     }
 }
