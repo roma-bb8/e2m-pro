@@ -7,11 +7,12 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
 
     /**
      * @inheritDoc
+     * @throws Zend_Db_Statement_Exception
      */
     protected function _beforeToHtml() {
 
-        /** @var Mage_Adminhtml_Block_Widget_Button $button */
         /** @var Mage_Adminhtml_Block_Widget_Button $widgetButton */
+        /** @var Mage_Adminhtml_Block_Widget_Button $button */
 
         //----------------------------------------
 
@@ -25,6 +26,10 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
             $this->setChild('get_token_button', $button);
             return;
         }
+
+        //----------------------------------------
+
+        $this->setChild('log_grid', $this->getLayout()->createBlock('e2m/adminhtml_log_grid'));
 
         //----------------------------------------
 
@@ -123,12 +128,11 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
         ));
         $this->setChild('start_import_inventory_button', $button);
 
+        $label = 'Proceed Import inventory';
+        $onclick = 'pauseFinishImportInventory(this);';
         if (!$task['pause']) {
             $label = 'Pause Import inventory';
             $onclick = 'pauseStartImportInventory(this);';
-        } else {
-            $label = 'Proceed Import inventory';
-            $onclick = 'pauseFinishImportInventory(this);';
         }
 
         $widgetButton = $this->getLayout()->createBlock('adminhtml/widget_button');
@@ -138,8 +142,6 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
             'disabled' => $disabledPause
         ));
         $this->setChild('pause_download_inventory_button', $button);
-
-        $this->setChild('log_grid', $this->getLayout()->createBlock('e2m/adminhtml_log_grid'));
     }
 
     //########################################
