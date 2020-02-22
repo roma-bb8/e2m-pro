@@ -15,25 +15,14 @@ class M2E_E2M_Controller_Adminhtml_BaseController extends Mage_Adminhtml_Control
     //########################################
 
     /**
-     * @param Exception $e
+     * @param array $data
      *
      * @return Zend_Controller_Response_Abstract
-     * @throws Zend_Controller_Response_Exception
      */
-    public function renderAjaxException(Exception $e) {
-
-        /** @var M2E_E2M_Helper_Data $dataHelper */
-        $dataHelper = Mage::helper('e2m');
-        $dataHelper->logException($e);
-
-        $response = $this->getResponse();
-        $response->setHttpResponseCode(self::HTTP_INTERNAL_ERROR);
-        $response->setBody(Mage::helper('core')->jsonEncode(array(
-            'error' => true,
-            'message' => $e->getMessage()
+    public function ajaxResponse(array $data) {
+        return $this->getResponse()->setBody(Mage::helper('core')->jsonEncode(array(
+            'data' => $data
         )));
-
-        return $response;
     }
 
     //########################################
@@ -49,7 +38,17 @@ class M2E_E2M_Controller_Adminhtml_BaseController extends Mage_Adminhtml_Control
             parent::dispatch($action);
         } catch (Exception $e) {
             if ($this->getRequest()->isAjax()) {
-                $this->renderAjaxException($e);
+
+                /** @var M2E_E2M_Helper_Data $dataHelper */
+                $dataHelper = Mage::helper('e2m');
+                $dataHelper->logException($e);
+
+                $response = $this->getResponse();
+                $response->setHttpResponseCode(self::HTTP_INTERNAL_ERROR);
+                $response->setBody(Mage::helper('core')->jsonEncode(array(
+                    'error' => true,
+                    'message' => $e->getMessage()
+                )));
             }
 
             $this->_getSession()->addError($e->getMessage());
