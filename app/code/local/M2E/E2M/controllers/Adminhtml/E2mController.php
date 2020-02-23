@@ -148,23 +148,59 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
      */
     public function setSettingsAction() {
 
-        /** @var M2E_E2M_Model_Ebay_Config $eBayConfigHelper */
-        $eBayConfigHelper = Mage::getSingleton('e2m/Ebay_Config');
+        /** @var M2E_E2M_Model_Ebay_Config $eBayConfig */
+        $eBayConfig = Mage::getSingleton('e2m/Ebay_Config');
 
         //----------------------------------------
 
         $settings = Mage::helper('core')->jsonDecode($this->getRequest()->getParam('settings'));
 
-        $eBayConfigHelper->set('marketplace_store', $settings['marketplace-store'], false);
-        $eBayConfigHelper->set('product_identifier', $settings['product-identifier'], false);
-        $eBayConfigHelper->set('action_found', $settings['action-found'], false);
-        $eBayConfigHelper->set('import_qty', $settings['import-qty'], false);
-        $eBayConfigHelper->set('generate_sku', $settings['generate-sku'], false);
-        $eBayConfigHelper->set('import_image', $settings['import-image'], false);
-        $eBayConfigHelper->set('delete_html', $settings['delete-html'], false);
-        $eBayConfigHelper->set('attribute_set', $settings['attribute-set'], false);
-        $eBayConfigHelper->set('ebay_field_magento_attribute', $settings['ebay-field-magento-attribute'], false);
-        $eBayConfigHelper->save();
+        $eBayConfig->set(
+            M2E_E2M_Model_Ebay_Config::PATH_MARKETPLACE_TO_STORE_MAP,
+            $settings['marketplace-store'],
+            false
+        );
+        $eBayConfig->set(
+            M2E_E2M_Model_Ebay_Config::PATH_INVENTORY_PRODUCT_IDENTIFIER,
+            $settings['product-identifier'],
+            false
+        );
+        $eBayConfig->set(
+            M2E_E2M_Model_Ebay_Config::PATH_INVENTORY_ACTION_FOUND,
+            $settings['action-found'],
+            false
+        );
+        $eBayConfig->set(
+            M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_QTY,
+            $settings['import-qty'],
+            false
+        );
+        $eBayConfig->set(
+            M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_GENERATE_SKU,
+            $settings['generate-sku'],
+            false
+        );
+        $eBayConfig->set(
+            M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_IMAGE,
+            $settings['import-image'],
+            false
+        );
+        $eBayConfig->set(
+            M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_DELETE_HTML,
+            $settings['delete-html'],
+            false
+        );
+        $eBayConfig->set(
+            M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_ATTRIBUTE_SET,
+            $settings['attribute-set'],
+            false
+        );
+        $eBayConfig->set(
+            M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_FIELDS_ATTRIBUTES_MAP,
+            $settings['ebay-field-magento-attribute'],
+            false
+        );
+        $eBayConfig->save();
 
         //----------------------------------------
 
@@ -246,9 +282,9 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
 
         return $this->ajaxResponse(array(
             'process' => 0,
-            'total' => $eBayInventory->get('items/count/total'),
-            'variation' => $eBayInventory->get('items/count/variation'),
-            'simple' => $eBayInventory->get('items/count/simple')
+            'total' => $eBayInventory->get(M2E_E2M_Model_Ebay_Inventory::PATH_ITEMS_COUNT_TOTAL),
+            'variation' => $eBayInventory->get(M2E_E2M_Model_Ebay_Inventory::PATH_ITEMS_COUNT_VARIATION),
+            'simple' => $eBayInventory->get(M2E_E2M_Model_Ebay_Inventory::PATH_ITEMS_COUNT_SIMPLE)
         ));
     }
 
@@ -295,21 +331,29 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
         $eBayAccount->set(M2E_E2M_Model_Ebay_Account::SESSION_ID, false, false);
         $eBayAccount->save();
 
-        $eBayConfig->set('marketplace_store', array(), false);
-        $eBayConfig->set('product_identifier', M2E_E2M_Model_Ebay_Config::VALUE_SKU_PRODUCT_IDENTIFIER, false);
-        $eBayConfig->set('action_found', M2E_E2M_Model_Ebay_Config::VALUE_IGNORE_ACTION_FOUND, false);
-        $eBayConfig->set('import_qty', false, false);
-        $eBayConfig->set('generate_sku', false, false);
-        $eBayConfig->set('import_image', false, false);
-        $eBayConfig->set('delete_html', false, false);
-        $eBayConfig->set('attribute_set', null, false);
-        $eBayConfig->set('ebay_field_magento_attribute', array(), false);
+        $eBayConfig->set(M2E_E2M_Model_Ebay_Config::PATH_MARKETPLACE_TO_STORE_MAP, array(), false);
+        $eBayConfig->set(
+            M2E_E2M_Model_Ebay_Config::PATH_INVENTORY_PRODUCT_IDENTIFIER,
+            M2E_E2M_Model_Ebay_Config::VALUE_SKU_PRODUCT_IDENTIFIER,
+            false
+        );
+        $eBayConfig->set(
+            M2E_E2M_Model_Ebay_Config::PATH_INVENTORY_ACTION_FOUND,
+            M2E_E2M_Model_Ebay_Config::VALUE_IGNORE_ACTION_FOUND,
+            false
+        );
+        $eBayConfig->set(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_QTY, false, false);
+        $eBayConfig->set(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_GENERATE_SKU, false, false);
+        $eBayConfig->set(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_IMAGE, false, false);
+        $eBayConfig->set(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_DELETE_HTML, false, false);
+        $eBayConfig->set(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_ATTRIBUTE_SET, null, false);
+        $eBayConfig->set(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_FIELDS_ATTRIBUTES_MAP, array(), false);
         $eBayConfig->save();
 
-        $eBayInventory->set('items/count/total', 0, false);
-        $eBayInventory->set('items/count/variation', 0, false);
-        $eBayInventory->set('items/count/simple', 0, false);
-        $eBayInventory->set('marketplaces', array(), false);
+        $eBayInventory->set(M2E_E2M_Model_Ebay_Inventory::PATH_ITEMS_COUNT_TOTAL, 0, false);
+        $eBayInventory->set(M2E_E2M_Model_Ebay_Inventory::PATH_ITEMS_COUNT_VARIATION, 0, false);
+        $eBayInventory->set(M2E_E2M_Model_Ebay_Inventory::PATH_ITEMS_COUNT_SIMPLE, 0, false);
+        $eBayInventory->set(M2E_E2M_Model_Ebay_Inventory::PATH_MARKETPLACES, array(), false);
         $eBayInventory->save();
 
         //----------------------------------------
