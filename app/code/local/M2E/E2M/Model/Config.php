@@ -10,6 +10,10 @@
  */
 class M2E_E2M_Model_Config {
 
+    const PREFIX = 'm2e/e2m';
+
+    //########################################
+
     /** @var Mage_Core_Model_Resource $resource */
     private $resource;
 
@@ -30,6 +34,28 @@ class M2E_E2M_Model_Config {
     //########################################
 
     /**
+     * @param $key
+     *
+     * @return mixed
+     */
+    private function prepareKey($key) {
+
+        $lastSlash = substr($key, -1);
+        $lastSlash === '/' && $key = substr($key, 0, -1);
+
+        //----------------------------------------
+
+        $firstSlash = substr($key, 1);
+        $firstSlash === '/' && $key = substr($key, 1);
+
+        //----------------------------------------
+
+        return self::PREFIX . '/' . $key . '/';
+    }
+
+    //########################################
+
+    /**
      * @param string $key
      * @param mixed $value
      * @param bool $autoSave
@@ -39,16 +65,24 @@ class M2E_E2M_Model_Config {
      */
     public function set($key, $value, $autoSave = true) {
 
+        $key = $this->prepareKey($key);
+
+        //----------------------------------------
+
         $oldValue = null;
         isset($this->data[$key]) && $oldValue = $this->data[$key];
         if ($oldValue === $value) {
             return $this;
         }
 
+        //----------------------------------------
+
         $this->data[$key] = $value;
         if (!$autoSave) {
             return $this;
         }
+
+        //----------------------------------------
 
         $isSave = (bool)$this->connWrite->update($this->coreConfigDataTableName, array(
             'value' => $this->connWrite->quote($this->data[$key])
@@ -58,6 +92,8 @@ class M2E_E2M_Model_Config {
             return $this;
         }
 
+        //----------------------------------------
+
         $isSave = (bool)$this->connWrite->insert($this->coreConfigDataTableName, array(
             'path' => $key,
             'value' => $this->data[$key]
@@ -66,6 +102,8 @@ class M2E_E2M_Model_Config {
         if ($isSave) {
             return $this;
         }
+
+        //----------------------------------------
 
         throw new Exception('Not save config');
     }
@@ -80,9 +118,15 @@ class M2E_E2M_Model_Config {
      */
     public function get($key, $reload = false) {
 
+        $key = $this->prepareKey($key);
+
+        //----------------------------------------
+
         if (isset($this->data[$key]) && !$reload) {
             return $this->data[$key];
         }
+
+        //----------------------------------------
 
         $value = $this->connRead->select()->from($this->coreConfigDataTableName, 'value')
             ->where('path = ?', $key)->limit(1)->query()->fetchColumn();
@@ -107,6 +151,8 @@ class M2E_E2M_Model_Config {
                 continue;
             }
 
+            //----------------------------------------
+
             $isSave = (bool)$this->connWrite->insert($this->coreConfigDataTableName, array(
                 'path' => $key,
                 'value' => $this->data[$key]
@@ -115,6 +161,8 @@ class M2E_E2M_Model_Config {
             if ($isSave) {
                 continue;
             }
+
+            //----------------------------------------
 
             throw new Exception("Not save config: {$key}");
         }
