@@ -10,7 +10,7 @@
  */
 class M2E_E2M_Model_Ebay_Inventory extends M2E_E2M_Model_Config {
 
-    const PREFIX = parent::PREFIX . '/inventory/';
+    const PREFIX = parent::PREFIX . '/inventory';
 
     const PATH_ITEMS_COUNT_TOTAL = 'items/count/total';
     const PATH_ITEMS_COUNT_VARIATION = 'items/count/variation';

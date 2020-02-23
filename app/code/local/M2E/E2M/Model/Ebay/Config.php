@@ -10,7 +10,7 @@
  */
 class M2E_E2M_Model_Ebay_Config extends M2E_E2M_Model_Config {
 
-    const PREFIX = parent::PREFIX . '/settings/';
+    const PREFIX = parent::PREFIX . '/settings';
 
     //########################################
 
