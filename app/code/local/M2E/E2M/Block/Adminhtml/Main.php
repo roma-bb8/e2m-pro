@@ -101,7 +101,7 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
 
         $disabledPause = true;
         switch (true) {
-            case !$this->getEbayConfig()->isFull():
+            case !(bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_FULL_SETTINGS):
                 $label = 'Import inventory (look for settings)';
                 $disabled = true;
                 break;
@@ -119,7 +119,7 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
                 $disabled = false;
                 break;
 
-            case $this->getEbayConfig()->isFull():
+            case (bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_FULL_SETTINGS):
                 $label = 'Start import inventory';
                 $disabled = false;
                 break;
