@@ -10,7 +10,7 @@
  */
 class M2E_E2M_Model_Config {
 
-    const PREFIX = 'm2e/e2m';
+    const PREFIX = '/m2e/e2m';
 
     //########################################
 
@@ -26,10 +26,13 @@ class M2E_E2M_Model_Config {
     /** @var Varien_Db_Adapter_Interface $connRead */
     private $connRead;
 
+    /** @var Mage_Core_Helper_Data $coreHelper */
+    private $coreHelper;
+
     //########################################
 
     /** @var array $data */
-    private $data = array();
+    protected $data = array();
 
     //########################################
 
@@ -85,7 +88,7 @@ class M2E_E2M_Model_Config {
         //----------------------------------------
 
         $isSave = (bool)$this->connWrite->update($this->coreConfigDataTableName, array(
-            'value' => $this->connWrite->quote($this->data[$key])
+            'value' => $this->coreHelper->jsonEncode($this->data[$key])
         ), array('path = ?' => $key));
 
         if ($isSave) {
@@ -96,7 +99,7 @@ class M2E_E2M_Model_Config {
 
         $isSave = (bool)$this->connWrite->insert($this->coreConfigDataTableName, array(
             'path' => $key,
-            'value' => $this->data[$key]
+            'value' => $this->coreHelper->jsonEncode($this->data[$key])
         ));
 
         if ($isSave) {
@@ -131,7 +134,7 @@ class M2E_E2M_Model_Config {
         $value = $this->connRead->select()->from($this->coreConfigDataTableName, 'value')
             ->where('path = ?', $key)->limit(1)->query()->fetchColumn();
 
-        return $this->data[$key] = $value;
+        return $this->data[$key] = $this->coreHelper->jsonDecode($value);
     }
 
     //########################################
@@ -144,7 +147,7 @@ class M2E_E2M_Model_Config {
         foreach ($this->data as $key => $value) {
 
             $isSave = (bool)$this->connWrite->update($this->coreConfigDataTableName, array(
-                'value' => $value
+                'value' => $this->coreHelper->jsonEncode($value)
             ), array('path = ?' => $key));
 
             if ($isSave) {
@@ -155,7 +158,7 @@ class M2E_E2M_Model_Config {
 
             $isSave = (bool)$this->connWrite->insert($this->coreConfigDataTableName, array(
                 'path' => $key,
-                'value' => $this->data[$key]
+                'value' => $this->coreHelper->jsonEncode($value)
             ));
 
             if ($isSave) {
@@ -176,6 +179,7 @@ class M2E_E2M_Model_Config {
     public function __construct() {
 
         $this->resource = Mage::getSingleton('core/resource');
+        $this->coreHelper = Mage::helper('core');
 
         //----------------------------------------
 
