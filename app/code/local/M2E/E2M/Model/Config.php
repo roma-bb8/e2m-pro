@@ -64,7 +64,6 @@ class M2E_E2M_Model_Config {
      * @param bool $autoSave
      *
      * @return $this
-     * @throws Exception
      */
     public function set($key, $value, $autoSave = true) {
 
@@ -87,28 +86,13 @@ class M2E_E2M_Model_Config {
 
         //----------------------------------------
 
-        $isSave = (bool)$this->connWrite->update($this->coreConfigDataTableName, array(
+        $this->connWrite->update($this->coreConfigDataTableName, array(
             'value' => $this->coreHelper->jsonEncode($this->data[$key])
         ), array('path = ?' => $key));
 
-        if ($isSave) {
-            return $this;
-        }
-
         //----------------------------------------
 
-        $isSave = (bool)$this->connWrite->insert($this->coreConfigDataTableName, array(
-            'path' => $key,
-            'value' => $this->coreHelper->jsonEncode($this->data[$key])
-        ));
-
-        if ($isSave) {
-            return $this;
-        }
-
-        //----------------------------------------
-
-        throw new Exception('Not save config');
+        return $this;
     }
 
     //----------------------------------------
@@ -143,31 +127,10 @@ class M2E_E2M_Model_Config {
      * @throws Exception
      */
     public function save() {
-
         foreach ($this->data as $key => $value) {
-
-            $isSave = (bool)$this->connWrite->update($this->coreConfigDataTableName, array(
+            $this->connWrite->update($this->coreConfigDataTableName, array(
                 'value' => $this->coreHelper->jsonEncode($value)
             ), array('path = ?' => $key));
-
-            if ($isSave) {
-                continue;
-            }
-
-            //----------------------------------------
-
-            $isSave = (bool)$this->connWrite->insert($this->coreConfigDataTableName, array(
-                'path' => $key,
-                'value' => $this->coreHelper->jsonEncode($value)
-            ));
-
-            if ($isSave) {
-                continue;
-            }
-
-            //----------------------------------------
-
-            throw new Exception("Not save config: {$key}");
         }
     }
 
