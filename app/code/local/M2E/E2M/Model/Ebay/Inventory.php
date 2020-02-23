@@ -6,11 +6,11 @@
  */
 
 /**
- * Class M2E_E2M_Helper_eBay_Inventory
+ * Class M2E_E2M_Model_Ebay_Inventory
  */
-class M2E_E2M_Helper_Ebay_Inventory {
+class M2E_E2M_Model_Ebay_Inventory extends M2E_E2M_Model_Config {
 
-    const PREFIX = M2E_E2M_Helper_Data::PREFIX . 'inventory/';
+    const PREFIX = parent::PREFIX . '/inventory/';
 
     const PATH_ITEMS_COUNT_TOTAL = 'items/count/total';
     const PATH_ITEMS_COUNT_VARIATION = 'items/count/variation';
@@ -110,23 +110,6 @@ class M2E_E2M_Helper_Ebay_Inventory {
         'condition_type' => 'Condition ID'
     );
 
-    /** @var Mage_Core_Model_Resource $resource */
-    private $resource;
-
-    /** @var string $coreConfigDataTableName */
-    private $coreConfigDataTableName;
-
-    /** @var string $inventoryTableName */
-    private $inventoryTableName;
-
-    /** @var Mage_Core_Helper_Data */
-    private $coreHelper;
-
-    /** @var array $inventory */
-    private $inventory = array();
-
-    //########################################
-
     /**
      * @return array
      */
@@ -143,148 +126,40 @@ class M2E_E2M_Helper_Ebay_Inventory {
         return $this->marketplaceTitles[$marketplaceId];
     }
 
-    /**
-     * @return int
-     */
-    public function getItemsTotal() {
-        return $this->inventory['items']['count']['total'];
-    }
-
-    /**
-     * @return int
-     */
-    public function getItemsVariation() {
-        return $this->inventory['items']['count']['variation'];
-    }
-
-    /**
-     * @return int
-     */
-    public function getItemsSimple() {
-        return $this->inventory['items']['count']['simple'];
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getMarketplaces() {
-        return $this->inventory['marketplaces'];
-    }
-
     //########################################
 
-    public function reloadData() {
+    /**
+     * @param bool $autoSave
+     *
+     * @throws Exception
+     */
+    public function reloadData($autoSave = true) {
 
-        $connRead = $this->resource->getConnection('core_read');
+        $inventoryEbayTableName = $this->resource->getTableName('m2e_e2m_inventory_ebay');
 
-        $this->inventory['items']['count']['total'] = (int)$connRead->select()
-            ->from($this->inventoryTableName, 'COUNT(*)')
-            ->query()->fetchColumn();
+        //----------------------------------------
 
-        $this->inventory['items']['count']['variation'] = (int)$connRead->select()
-            ->from($this->inventoryTableName, 'COUNT(*)')
-            ->where('variation = ?', true)->query()->fetchColumn();
+        $this->set(self::PATH_ITEMS_COUNT_TOTAL, (int)$this->connRead->select()
+            ->from($inventoryEbayTableName, 'COUNT(*)')
+            ->query()->fetchColumn(), false);
 
-        $this->inventory['items']['count']['simple'] = (int)$connRead->select()
-            ->from($this->inventoryTableName, 'COUNT(*)')
-            ->where('variation = ?', false)->query()->fetchColumn();
+        $this->set(self::PATH_ITEMS_COUNT_VARIATION, (int)$this->connRead->select()
+            ->from($inventoryEbayTableName, 'COUNT(*)')
+            ->where('variation = ?', true)->query()->fetchColumn(), false);
 
-        $this->inventory['marketplaces'] = array();
-        foreach ($connRead->select()->from($this->inventoryTableName, 'marketplace_id')
+        $this->set(self::PATH_ITEMS_COUNT_SIMPLE, (int)$this->connRead->select()
+            ->from($inventoryEbayTableName, 'COUNT(*)')
+            ->where('variation = ?', false)->query()->fetchColumn(), false);
+
+        $marketplaces = array();
+        foreach ($this->connRead->select()->from($inventoryEbayTableName, 'marketplace_id')
                      ->group('marketplace_id')->query()->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            $this->inventory['marketplaces'][] = $row['marketplace_id'];
+            $marketplaces[] = $row['marketplace_id'];
         }
-    }
-
-    //########################################
-
-    /**
-     * @return $this
-     */
-    public function save() {
-
-        $connWrite = $this->resource->getConnection('core_write');
-
-        $connWrite->delete($this->coreConfigDataTableName, array('path IN (?)' => array(
-            self::PREFIX . self::PATH_ITEMS_COUNT_TOTAL,
-            self::PREFIX . self::PATH_ITEMS_COUNT_VARIATION,
-            self::PREFIX . self::PATH_ITEMS_COUNT_SIMPLE,
-            self::PREFIX . self::PATH_MARKETPLACES
-        )));
-
-        $connWrite->insertMultiple($this->coreConfigDataTableName, array(
-            array(
-                'path' => self::PREFIX . self::PATH_ITEMS_COUNT_TOTAL,
-                'value' => $this->inventory['items']['count']['total']
-            ),
-            array(
-                'path' => self::PREFIX . self::PATH_ITEMS_COUNT_VARIATION,
-                'value' => $this->inventory['items']['count']['variation']
-            ),
-            array(
-                'path' => self::PREFIX . self::PATH_ITEMS_COUNT_SIMPLE,
-                'value' => $this->inventory['items']['count']['simple']
-            ),
-            array(
-                'path' => self::PREFIX . self::PATH_MARKETPLACES,
-                'value' => $this->coreHelper->jsonEncode($this->inventory['marketplaces'])
-            )
-        ));
-
-        return $this;
-    }
-
-    /**
-     * M2E_E2M_Helper_eBay_Inventory constructor.
-     */
-    public function __construct() {
-
-        $this->coreHelper = Mage::helper('core');
-        $this->resource = Mage::getSingleton('core/resource');
-        $this->coreConfigDataTableName = $this->resource->getTableName('core_config_data');
-        $this->inventoryTableName = $this->resource->getTableName('m2e_e2m_inventory_ebay');
+        $this->set(self::PATH_MARKETPLACES, $marketplaces, false);
 
         //----------------------------------------
 
-        $this->inventory = array(
-            'items' => array(
-                'count' => array(
-                    'total' => 0,
-                    'variation' => 0,
-                    'simple' => 0
-                )
-            ),
-            'marketplaces' => array()
-        );
-
-        //----------------------------------------
-
-        $rows = $this->resource->getConnection('core_read')->select()
-            ->from($this->coreConfigDataTableName)
-            ->where('path IN (?)', array(
-                self::PREFIX . self::PATH_ITEMS_COUNT_TOTAL,
-                self::PREFIX . self::PATH_ITEMS_COUNT_VARIATION,
-                self::PREFIX . self::PATH_ITEMS_COUNT_SIMPLE,
-                self::PREFIX . self::PATH_MARKETPLACES
-            ))
-            ->query()
-            ->fetchAll(PDO::FETCH_ASSOC);
-
-        foreach ($rows as $row) {
-            switch ($row['path']) {
-                case self::PREFIX . self::PATH_ITEMS_COUNT_TOTAL:
-                    $this->inventory['items']['count']['total'] = (int)$row['value'];
-                    break;
-                case self::PREFIX . self::PATH_ITEMS_COUNT_VARIATION:
-                    $this->inventory['items']['count']['variation'] = (int)$row['value'];
-                    break;
-                case self::PREFIX . self::PATH_ITEMS_COUNT_SIMPLE:
-                    $this->inventory['items']['count']['simple'] = (int)$row['value'];
-                    break;
-                case self::PREFIX . self::PATH_MARKETPLACES:
-                    $this->inventory['marketplaces'] = $this->coreHelper->jsonDecode($row['value']);
-                    break;
-            }
-        }
+        $autoSave && $this->save();
     }
 }
