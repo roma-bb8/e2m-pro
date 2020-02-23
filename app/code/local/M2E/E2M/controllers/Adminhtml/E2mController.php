@@ -339,7 +339,7 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
 
         //----------------------------------------
 
-        $info = $eBayAPI->getInfo((int)$eBayAccount->get('mode'), $eBayAccount->get('session_id'));
+        $info = $eBayAPI->getInfo($eBayAccount->get('mode'), $eBayAccount->get('session_id'));
 
         $eBayAccount->set('session_id', false, false);
         $eBayAccount->set('token', $info['token'], false);
