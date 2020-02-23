@@ -15,8 +15,11 @@ class M2E_E2M_Model_Api_Ebay {
     const API_SANDBOX_ENDPOINT = 'https://api.sandbox.ebay.com/ws/api.dll';
     const API_ENDPOINT = 'https://api.ebay.com/ws/api.dll';
 
-    const AUTH_SANDBOX_ENDPOINT = 'https://signin.sandbox.ebay.com/ws/eBayISAPI.dll?SignIn&runame=%s&SessID=%s&ruparams=VarA%%3D%s';
-    const AUTH_ENDPOINT = 'https://signin.ebay.com/ws/eBayISAPI.dll?SignIn&runame=%s&SessID=%s&ruparams=VarA%%3D%s';
+    const PATH = '?SignIn&runame=%s&SessID=%s&ruparams=VarA%%3D%s';
+    const AUTH_SANDBOX_ENDPOINT = 'https://signin.sandbox.ebay.com/ws/eBayISAPI.dll' . self::PATH;
+    const AUTH_ENDPOINT = 'https://signin.ebay.com/ws/eBayISAPI.dll' . self::PATH;
+
+    //########################################
 
     /** @var string $ruName */
     private $ruName = 'xxx';
@@ -43,7 +46,7 @@ class M2E_E2M_Model_Api_Ebay {
     private function getURL($mode) {
 
         $url = self::API_ENDPOINT;
-        if ($mode === M2E_E2M_Helper_eBay_Account::MODE_SANDBOX) {
+        if (M2E_E2M_Model_Ebay_Account::MODE_SANDBOX === (int)$mode) {
             $url = self::API_SANDBOX_ENDPOINT;
         }
 
@@ -100,7 +103,7 @@ class M2E_E2M_Model_Api_Ebay {
     public function getAuthURL($mode, $backURL, $sessionID) {
 
         $url = self::AUTH_ENDPOINT;
-        if ($mode === M2E_E2M_Helper_eBay_Account::MODE_SANDBOX) {
+        if (M2E_E2M_Model_Ebay_Account::MODE_SANDBOX === (int)$mode) {
             $url = self::AUTH_SANDBOX_ENDPOINT;
         }
 
