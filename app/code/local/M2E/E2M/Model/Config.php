@@ -15,19 +15,19 @@ class M2E_E2M_Model_Config {
     //########################################
 
     /** @var Mage_Core_Model_Resource $resource */
-    private $resource;
+    protected $resource;
 
     /** @var string $coreConfigDataTableName */
-    private $coreConfigDataTableName;
+    protected $coreConfigDataTableName;
 
     /** @var Varien_Db_Adapter_Interface $connWrite */
-    private $connWrite;
+    protected $connWrite;
 
     /** @var Varien_Db_Adapter_Interface $connRead */
-    private $connRead;
+    protected $connRead;
 
     /** @var Mage_Core_Helper_Data $coreHelper */
-    private $coreHelper;
+    protected $coreHelper;
 
     //########################################
 
