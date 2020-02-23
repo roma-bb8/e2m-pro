@@ -101,19 +101,21 @@ class M2E_E2M_Model_Product_Magento_Configurable extends M2E_E2M_Model_Product_M
         //----------------------------------------
 
         $configProduct = $productMagentoSimple->process($data, false);
-        if ($configProduct->getEntityId() && $this->eBayConfig->isActionFoundIgnore()) {
+        if ($configProduct->getEntityId() && M2E_E2M_Model_Ebay_Config::VALUE_IGNORE_ACTION_FOUND ===
+            $this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::PATH_INVENTORY_ACTION_FOUND)) {
             $this->addLog('Skip update sku: ' . $configProduct->getSku(), M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
 
-            if ($this->eBayConfig->isImportQty()) {
+            if ((bool)$this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_QTY)) {
                 $configProduct = $this->importQty($configProduct, $data);
             }
 
             return $configProduct;
         } elseif ($configProduct->getEntityId()) {
             $configProduct->save();
-            $this->addLog('Update sets skip sku: ' . $configProduct->getSku(), M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
+            $this->addLog('Update sets skip sku: ' . $configProduct->getSku(),
+                M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
 
-            if ($this->eBayConfig->isImportQty()) {
+            if ((bool)$this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_QTY)) {
                 $configProduct = $this->importQty($configProduct, $data);
             }
 
@@ -156,7 +158,7 @@ class M2E_E2M_Model_Product_Magento_Configurable extends M2E_E2M_Model_Product_M
 
         //----------------------------------------
 
-        if ($this->eBayConfig->isImportQty()) {
+        if ((bool)$this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_QTY)) {
             $configProduct = $this->importQty($configProduct, $data);
         }
 

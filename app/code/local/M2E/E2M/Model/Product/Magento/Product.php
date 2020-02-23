@@ -10,7 +10,7 @@
  */
 abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abstract {
 
-    /** @var M2E_E2M_Helper_eBay_Config $eBayConfig */
+    /** @var M2E_E2M_Model_Ebay_Config $eBayConfig */
     protected $eBayConfig;
 
     /** @var Mage_Catalog_Model_Product $product */
@@ -65,9 +65,10 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
             return $this->groupId;
         }
 
+        $attributeSetId = $this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_ATTRIBUTE_SET);
         $groups = Mage::getModel('eav/entity_attribute_group')->getResourceCollection()
             ->addFilter('attribute_group_name', 'eBay')
-            ->addFilter('attribute_set_id', $this->eBayConfig->getAttributeSet())
+            ->addFilter('attribute_set_id', $attributeSetId)
             ->getItems();
 
         $group = array_shift($groups);
@@ -77,10 +78,10 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
 
         $group = Mage::getModel('eav/entity_attribute_group');
         $group->setAttributeGroupName('eBay')
-            ->setAttributeSetId($this->eBayConfig->getAttributeSet());
+            ->setAttributeSetId($attributeSetId);
         $group->save();
 
-        $this->addLog('Create eBay Group in Attribute Set ID:' . $this->eBayConfig->getAttributeSet());
+        $this->addLog('Create eBay Group in Attribute Set ID:' . $attributeSetId);
 
         return $this->groupId = $group->getId();
     }
@@ -101,7 +102,8 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
         /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
 
-        $attributes = $dataHelper->getMagentoAttributes($this->eBayConfig->getAttributeSet());
+        $attributeSetId = $this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_ATTRIBUTE_SET);
+        $attributes = $dataHelper->getMagentoAttributes($attributeSetId);
         foreach ($attributes as $code => $item) {
             if ($code === $attributeCode) {
                 $this->attributeSetTmp[$attributeCode] = true;
@@ -109,7 +111,7 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
             }
         }
 
-        $attributes = $dataHelper->getMagentoAttributes($this->eBayConfig->getAttributeSet(), true);
+        $attributes = $dataHelper->getMagentoAttributes($attributeSetId, true);
         foreach ($attributes as $code => $item) {
             if ($code === $attributeCode) {
                 $this->attributeSetTmp[$attributeCode] = true;
@@ -117,7 +119,7 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
             }
         }
 
-        $attribute->setData('attribute_set_id', $this->eBayConfig->getAttributeSet());
+        $attribute->setData('attribute_set_id', $attributeSetId);
         $attribute->setData('attribute_group_id', $this->loadEbayGroup());
         $attribute->save();
 
@@ -215,12 +217,14 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
             $attribute->setData('frontend_label', $frontendLabels);
             $attribute->save();
 
-            $this->addLog('Update title name in Attribute: "' . $attribute->getName() . '" in Store: "' . $attribute->getStoreId() . '"');
+            $this->addLog('Update title name in Attribute: "' .
+                $attribute->getName() . '" in Store: "' . $attribute->getStoreId() . '"');
 
         } catch (Exception $e) {
             Mage::helper('e2m')->logException($e);
 
-            $this->addLog('Not update title name in Attribute: "' . $attribute->getName() . '" in Store: "' . $attribute->getStoreId() . '"',
+            $this->addLog('Not update title name in Attribute: "' .
+                $attribute->getName() . '" in Store: "' . $attribute->getStoreId() . '"',
                 M2E_E2M_Helper_Data::TYPE_REPORT_ERROR);
         }
 
@@ -238,6 +242,7 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
 
         try {
 
+            $attributeSetId = $this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_ATTRIBUTE_SET);
             $attribute = Mage::getModel('catalog/resource_eav_attribute');
             $attribute->addData(array(
                 'attribute_code' => $code,
@@ -265,13 +270,13 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
                 'backend_type' => 'varchar',
                 'backend' => 'eav/entity_attribute_backend_array'
             ));
-            $attribute->setAttributeSetId($this->eBayConfig->getAttributeSet());
+            $attribute->setAttributeSetId($attributeSetId);
             $attribute->setAttributeGroupId($this->loadEbayGroup());
             $attribute->setEntityTypeId(Mage::getModel('eav/entity')->setType('catalog_product')->getTypeId());
             $attribute->setIsUserDefined(1);
             $attribute->save();
 
-            $this->addLog('Create new Attribute: "' . $title . '" in Attribute Set ID: "' . $this->eBayConfig->getAttributeSet() . '"');
+            $this->addLog('Create new Attribute: "' . $title . '" in Attribute Set ID: "' . $attributeSetId . '"');
 
         } catch (Exception $e) {
             Mage::helper('e2m')->logException($e);
@@ -351,7 +356,8 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
         } catch (Exception $e) {
             Mage::helper('e2m')->logException($e);
 
-            $this->addLog('Not Import Images for SKU:' . $product->getSku(), M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
+            $this->addLog('Not Import Images for SKU:' .
+                $product->getSku(), M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
         }
 
         return $product;
@@ -440,14 +446,14 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
      */
     protected function loadProduct($product, $data, $storeId) {
         switch (true) {
-            case $this->eBayConfig->isProductIdentifierSKU():
+            case$this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::VALUE_SKU_PRODUCT_IDENTIFIER):
                 if (!empty($data['identifiers_sku'])) {
                     $product->setData('store_id', $storeId);
                     $product->load($product->getIdBySku($data['identifiers_sku']));
                 }
 
                 break;
-            case $this->eBayConfig->isProductIdentifierMPN():
+            case $this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::VALUE_MPN_PRODUCT_IDENTIFIER):
                 if (!empty($data['identifiers_brand_mpn_mpn'])) {
                     $tmp = $this->loadProductBy($data['identifiers_brand_mpn_mpn'], 'mpn', $storeId);
                     $tmp !== null && $product = $tmp;
@@ -455,7 +461,7 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
 
                 break;
 
-            case $this->eBayConfig->isProductIdentifierUPC():
+            case $this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::VALUE_UPC_PRODUCT_IDENTIFIER):
                 if (!empty($data['identifiers_upc'])) {
                     $tmp = $this->loadProductBy($data['identifiers_upc'], 'upc', $storeId);
                     $tmp !== null && $product = $tmp;
@@ -463,7 +469,7 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
 
                 break;
 
-            case $this->eBayConfig->isProductIdentifierEAN():
+            case $this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::VALUE_EAN_PRODUCT_IDENTIFIER):
                 if (!empty($data['identifiers_ean'])) {
                     $tmp = $this->loadProductBy($data['identifiers_ean'], 'ean', $storeId);
                     $tmp !== null && $product = $tmp;
@@ -471,7 +477,7 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
 
                 break;
 
-            case $this->eBayConfig->isProductIdentifierGTIN():
+            case $this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::VALUE_GTIN_PRODUCT_IDENTIFIER):
                 $tmp = null;
                 if (!empty($data['identifiers_upc'])) {
                     $tmp = $this->loadProductBy($data['upc'], 'gtin', $storeId);
