@@ -110,7 +110,6 @@ class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory implements M2E_E2M_Model_Cr
         $eBayInventory->save();
 
         $eBayConfig->setFull();
-        $eBayConfig->save();
 
         $process = $this->getProcessAsPercentage($fromDateTime, $toDateTime);
 
