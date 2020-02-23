@@ -21,7 +21,7 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
 
         //----------------------------------------
 
-        if (empty($this->getAccountHelper()->getToken())) {
+        if (empty($this->getEbayAccount()->get(M2E_E2M_Model_Ebay_Account::TOKEN))) {
 
             $widgetButton = $this->getLayout()->createBlock('adminhtml/widget_button');
             $button = $widgetButton->setData(array(
@@ -101,7 +101,7 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
 
         $disabledPause = true;
         switch (true) {
-            case !$this->getConfigHelper()->isFull():
+            case !$this->getEbayConfig()->isFull():
                 $label = 'Import inventory (look for settings)';
                 $disabled = true;
                 break;
@@ -119,7 +119,7 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
                 $disabled = false;
                 break;
 
-            case $this->getConfigHelper()->isFull():
+            case $this->getEbayConfig()->isFull():
                 $label = 'Start import inventory';
                 $disabled = false;
                 break;
@@ -174,36 +174,36 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
     }
 
     /**
-     * @return M2E_E2M_Helper_eBay_Config
+     * @return M2E_E2M_Model_Ebay_Config
      */
-    public function getConfigHelper() {
+    public function getEbayConfig() {
 
-        /** @var M2E_E2M_Helper_eBay_Config $eBayConfigHelper */
-        $eBayConfigHelper = Mage::helper('e2m/Ebay_Config');
+        /** @var M2E_E2M_Model_Ebay_Config $eBayConfig */
+        $eBayConfig = Mage::getSingleton('e2m/Ebay_Config');
 
-        return $eBayConfigHelper;
+        return $eBayConfig;
     }
 
     /**
-     * @return M2E_E2M_Helper_eBay_Inventory
+     * @return M2E_E2M_Model_Ebay_Inventory
      */
-    public function getInventoryHelper() {
+    public function getEbayInventory() {
 
-        /** @var M2E_E2M_Helper_eBay_Inventory $eBayInventoryHelper */
-        $eBayInventoryHelper = Mage::helper('e2m/Ebay_Inventory');
+        /** @var M2E_E2M_Model_Ebay_Inventory $eBayInventory */
+        $eBayInventory = Mage::getSingleton('e2m/Ebay_Inventory');
 
-        return $eBayInventoryHelper;
+        return $eBayInventory;
     }
 
     /**
-     * @return M2E_E2M_Helper_eBay_Account
+     * @return M2E_E2M_Model_Ebay_Account
      */
-    public function getAccountHelper() {
+    public function getEbayAccount() {
 
-        /** @var M2E_E2M_Helper_eBay_Account $eBayAccountHelper */
-        $eBayAccountHelper = Mage::helper('e2m/Ebay_Account');
+        /** @var M2E_E2M_Model_Ebay_Account $eBayAccount */
+        $eBayAccount = Mage::getSingleton('e2m/Ebay_Account');
 
-        return $eBayAccountHelper;
+        return $eBayAccount;
     }
 
     /**
