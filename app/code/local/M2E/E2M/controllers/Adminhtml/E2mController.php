@@ -326,6 +326,37 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
     //----------------------------------------
 
     /**
+     * @return M2E_E2M_Adminhtml_E2MController|Mage_Core_Controller_Varien_Action
+     * @throws Exception
+     */
+    public function getAfterEbayTokenAction() {
+
+        /** @var M2E_E2M_Model_Ebay_Account $eBayAccount */
+        $eBayAccount = Mage::getSingleton('e2m/Ebay_Account');
+
+        /** @var M2e_e2m_Model_Api_Ebay $eBayAPI */
+        $eBayAPI = Mage::getSingleton('e2m/Api_Ebay');
+
+        //----------------------------------------
+
+        $info = $eBayAPI->getInfo((int)$eBayAccount->get('mode'), $eBayAccount->get('session_id'));
+
+        $eBayAccount->set('session_id', false, false);
+        $eBayAccount->set('token', $info['token'], false);
+        $eBayAccount->set('expiration_time', $info['expiration_time'], false);
+        $eBayAccount->set('user_id', $info['user_id'], false);
+        $eBayAccount->save();
+
+        //----------------------------------------
+
+        $this->_getSession()->addSuccess(Mage::helper('e2m')->__('Save eBay token'));
+
+        //----------------------------------------
+
+        return $this->_redirect('*/e2m/index');
+    }
+
+    /**
      * @return Zend_Controller_Response_Abstract
      * @throws Exception
      */
@@ -350,37 +381,6 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
             'url' => $eBayAPI->getAuthURL($eBayAccount->getMode(),
                 $this->getUrl('*/e2m/getAfterEbayToken'), $sessionID)
         ));
-    }
-
-    /**
-     * @return M2E_E2M_Adminhtml_E2MController|Mage_Core_Controller_Varien_Action
-     * @throws Exception
-     */
-    public function getAfterEbayTokenAction() {
-
-        /** @var M2E_E2M_Model_Ebay_Account $eBayAccount */
-        $eBayAccount = Mage::getSingleton('e2m/Ebay_Account');
-
-        /** @var M2e_e2m_Model_Api_Ebay $eBayAPI */
-        $eBayAPI = Mage::getSingleton('e2m/Api_Ebay');
-
-        //----------------------------------------
-
-        $info = $eBayAPI->getInfo($eBayAccount->get('mode'), $eBayAccount->get('session_id'));
-
-        $eBayAccount->set('session_id', false, false);
-        $eBayAccount->set('token', $info['token'], false);
-        $eBayAccount->set('expiration_time', $info['expiration_time'], false);
-        $eBayAccount->set('user_id', $info['user_id'], false);
-        $eBayAccount->save();
-
-        //----------------------------------------
-
-        $this->_getSession()->addSuccess(Mage::helper('e2m')->__('Save eBay token'));
-
-        //----------------------------------------
-
-        return $this->_redirect('*/e2m/index');
     }
 
     //########################################
