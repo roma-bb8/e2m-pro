@@ -10,8 +10,6 @@
  */
 class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
 
-    const PREFIX = 'm2e/e2m/';
-
     const TYPE_REPORT_ERROR = 3;
     const TYPE_REPORT_WARNING = 2;
     const TYPE_REPORT_SUCCESS = 1;
