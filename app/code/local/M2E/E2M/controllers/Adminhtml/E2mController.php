@@ -288,11 +288,11 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
             'instance IN (?)' => array('Cron_Task_eBay_DownloadInventory', 'Cron_Task_Magento_ImportInventory')
         ));
 
-        $eBayAccount->set('mode', 0, false);
-        $eBayAccount->set('token', false, false);
-        $eBayAccount->set('expiration_time', false, false);
-        $eBayAccount->set('user_id', false, false);
-        $eBayAccount->set('session_id', false, false);
+        $eBayAccount->set(M2E_E2M_Model_Ebay_Account::MODE, 0, false);
+        $eBayAccount->set(M2E_E2M_Model_Ebay_Account::TOKEN, false, false);
+        $eBayAccount->set(M2E_E2M_Model_Ebay_Account::EXPIRATION_TIME, false, false);
+        $eBayAccount->set(M2E_E2M_Model_Ebay_Account::USER_ID, false, false);
+        $eBayAccount->set(M2E_E2M_Model_Ebay_Account::SESSION_ID, false, false);
         $eBayAccount->save();
 
         $eBayConfig->set('marketplace_store', array(), false);
@@ -339,12 +339,15 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
 
         //----------------------------------------
 
-        $info = $eBayAPI->getInfo($eBayAccount->get('mode'), $eBayAccount->get('session_id'));
+        $info = $eBayAPI->getInfo(
+            $eBayAccount->get(M2E_E2M_Model_Ebay_Account::MODE),
+            $eBayAccount->get(M2E_E2M_Model_Ebay_Account::SESSION_ID)
+        );
 
-        $eBayAccount->set('session_id', false, false);
-        $eBayAccount->set('token', $info['token'], false);
-        $eBayAccount->set('expiration_time', $info['expiration_time'], false);
-        $eBayAccount->set('user_id', $info['user_id'], false);
+        $eBayAccount->set(M2E_E2M_Model_Ebay_Account::SESSION_ID, false, false);
+        $eBayAccount->set(M2E_E2M_Model_Ebay_Account::TOKEN, $info['token'], false);
+        $eBayAccount->set(M2E_E2M_Model_Ebay_Account::EXPIRATION_TIME, $info['expiration_time'], false);
+        $eBayAccount->set(M2E_E2M_Model_Ebay_Account::USER_ID, $info['user_id'], false);
         $eBayAccount->save();
 
         //----------------------------------------
@@ -370,15 +373,17 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
 
         //----------------------------------------
 
-        $mode = (int)Mage::helper('core')->jsonDecode($this->getRequest()->getParam('mode'));
+        $mode = (int)Mage::helper('core')->jsonDecode(
+            $this->getRequest()->getParam(M2E_E2M_Model_Ebay_Account::MODE)
+        );
         $sessionID = $eBayAPI->getSessionID($mode);
 
-        $eBayAccount->set('mode', $mode, false);
-        $eBayAccount->set('session_id', $sessionID, false);
+        $eBayAccount->set(M2E_E2M_Model_Ebay_Account::MODE, $mode, false);
+        $eBayAccount->set(M2E_E2M_Model_Ebay_Account::SESSION_ID, $sessionID, false);
         $eBayAccount->save();
 
         return $this->ajaxResponse(array(
-            'url' => $eBayAPI->getAuthURL($eBayAccount->getMode(),
+            'url' => $eBayAPI->getAuthURL($eBayAccount->get(M2E_E2M_Model_Ebay_Account::MODE),
                 $this->getUrl('*/e2m/getAfterEbayToken'), $sessionID)
         ));
     }
