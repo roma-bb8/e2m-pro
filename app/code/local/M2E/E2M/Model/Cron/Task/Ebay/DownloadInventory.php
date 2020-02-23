@@ -107,7 +107,6 @@ class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory implements M2E_E2M_Model_Cr
         //----------------------------------------
 
         $eBayInventory->reloadData();
-        $eBayInventory->save();
 
         $eBayConfig->setFull();
 
