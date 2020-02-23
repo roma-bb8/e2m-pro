@@ -61,8 +61,12 @@ class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory implements M2E_E2M_Model_Cr
 
         $cronTasksInProcessingTableName = $resource->getTableName('m2e_e2m_cron_tasks_in_processing');
 
-        $token = Mage::getStoreConfig(M2E_E2M_Model_Ebay_Account::PREFIX . '/token/');
-        $mode = Mage::getStoreConfig(M2E_E2M_Model_Ebay_Account::PREFIX . '/mode/');
+        $token = Mage::getStoreConfig(
+            M2E_E2M_Model_Ebay_Account::PREFIX . '/' . M2E_E2M_Model_Ebay_Account::TOKEN . '/'
+        );
+        $mode = Mage::getStoreConfig(
+            M2E_E2M_Model_Ebay_Account::PREFIX . '/' . M2E_E2M_Model_Ebay_Account::MODE . '/'
+        );
 
         //----------------------------------------
 
