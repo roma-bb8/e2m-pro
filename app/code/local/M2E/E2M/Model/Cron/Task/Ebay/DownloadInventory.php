@@ -43,16 +43,30 @@ class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory implements M2E_E2M_Model_Cr
      */
     public function process($taskId, $data) {
 
+        /** @var M2E_E2M_Model_Api_Ebay $eBayAPI */
+        $eBayAPI = Mage::getSingleton('e2m/Api_Ebay');
+
+        /** @var M2E_E2M_Model_Ebay_Config $eBayConfig */
+        $eBayConfig = Mage::getSingleton('e2m/Ebay_Config');
+
+        /** @var M2E_E2M_Model_Ebay_Inventory $eBayInventory */
+        $eBayInventory = Mage::getSingleton('e2m/Ebay_Inventory');
+
+        /** @var M2E_e2M_Helper_Progress $progressHelper */
+        $progressHelper = Mage::helper('e2m/Progress');
+
         $resource = Mage::getSingleton('core/resource');
 
         $connWrite = $resource->getConnection('core_write');
+
         $cronTasksInProcessingTableName = $resource->getTableName('m2e_e2m_cron_tasks_in_processing');
+
+        $token = Mage::getStoreConfig(M2E_E2M_Model_Ebay_Account::PREFIX . '/token/');
+        $mode = Mage::getStoreConfig(M2E_E2M_Model_Ebay_Account::PREFIX . '/mode/');
 
         //----------------------------------------
 
-        /** @var M2E_E2M_Helper_eBay_Account $eBayAccount */
-        $eBayAccount = Mage::helper('e2m/eBay_Account');
-        if (empty($eBayAccount->getToken())) {
+        if (empty($token)) {
             throw new Exception('eBay Token empty.');
         }
 
@@ -68,21 +82,13 @@ class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory implements M2E_E2M_Model_Cr
 
         //----------------------------------------
 
-        /** @var M2E_E2M_Model_Api_Ebay $eBayAPI */
-        $eBayAPI = Mage::getModel('e2m/Api_Ebay');
-
         $request = 0;
         while ($request < self::MAX_REQUESTS && $fromDateTime->getTimestamp() < $toDateTime->getTimestamp()) {
 
             $tmpDateTime = clone $fromDateTime;
             $tmpDateTime->modify('+' . self::MAX_DAYS . ' days');
 
-            $eBayAPI->downloadInventory(
-                $eBayAccount->getMode(),
-                $eBayAccount->getToken(),
-                $fromDateTime,
-                $tmpDateTime
-            );
+            $eBayAPI->downloadInventory($mode, $token, $fromDateTime, $tmpDateTime);
 
             $fromDateTime = $tmpDateTime;
             $request++;
@@ -96,29 +102,23 @@ class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory implements M2E_E2M_Model_Cr
 
         //----------------------------------------
 
-        /** @var M2E_e2M_Helper_eBay_Inventory $eBayInventory */
-        $eBayInventory = Mage::helper('e2m/eBay_Inventory');
         $eBayInventory->reloadData();
         $eBayInventory->save();
 
-        /** @var M2E_e2M_Helper_eBay_Config $eBayConfig */
-        $eBayConfig = Mage::helper('e2m/eBay_Config');
         $eBayConfig->setFull();
         $eBayConfig->save();
 
         $process = $this->getProcessAsPercentage($fromDateTime, $toDateTime);
 
-        /** @var M2E_e2M_Helper_Progress $progressHelper */
-        $progressHelper = Mage::helper('e2m/Progress');
         $progressHelper->setProgressByTag(self::TAG, $process);
 
         //----------------------------------------
 
         return array(
             'process' => $progressHelper->getProgressByTag(self::TAG),
-            'total' => $eBayInventory->getItemsTotal(),
-            'variation' => $eBayInventory->getItemsVariation(),
-            'simple' => $eBayInventory->getItemsSimple()
+            'total' => $eBayInventory->get('items/count/total'),
+            'variation' => $eBayInventory->get('items/count/variation'),
+            'simple' => $eBayInventory->get('items/count/simple')
         );
     }
 }
