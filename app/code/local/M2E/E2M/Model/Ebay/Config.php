@@ -119,6 +119,34 @@ class M2E_E2M_Model_Ebay_Config extends M2E_E2M_Model_Config {
     }
 
     /**
+     * @return bool
+     */
+    public function isImportQty() {
+        return (bool)$this->get(self::PATH_PRODUCT_IMPORT_QTY);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isGenerateSku() {
+        return (bool)$this->get(self::PATH_PRODUCT_GENERATE_SKU);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isImportImage() {
+        return (bool)$this->get(self::PATH_PRODUCT_IMPORT_IMAGE);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDeleteHtml() {
+        return (bool)$this->get(self::PATH_PRODUCT_DELETE_HTML);
+    }
+
+    /**
      * @param int $marketplaceId
      *
      * @return int

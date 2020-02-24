@@ -19,16 +19,14 @@ class M2E_E2M_Model_Product_Magento_Simple extends M2E_E2M_Model_Product_Magento
      */
     public function process($data, $save = true) {
 
-        if ((bool)$this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_GENERATE_SKU)
-            && empty($data['identifiers_sku'])) {
+        if ($this->eBayConfig->isGenerateSku() && empty($data['identifiers_sku'])) {
             $data['identifiers_sku'] = 'RANDOM_' . md5($data['identifiers_item_id']);
         }
 
         $storeId = $this->eBayConfig->getStoreForMarketplace($data['marketplace_id']);
         $product = clone $this->product;
         $product = $this->loadProduct($product, $data, $storeId);
-        if ($product->getEntityId() && M2E_E2M_Model_Ebay_Config::VALUE_IGNORE_ACTION_FOUND ===
-            $this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::PATH_INVENTORY_ACTION_FOUND)) {
+        if ($product->getEntityId() && $this->eBayConfig->isIgnoreActionFound()) {
             $this->addLog('Skip update sku: ' . $product->getSku(), M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
 
             if ($save && (bool)$this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_QTY)) {
@@ -56,7 +54,7 @@ class M2E_E2M_Model_Product_Magento_Simple extends M2E_E2M_Model_Product_Magento
             )));
         }
 
-        if ((bool)$this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_DELETE_HTML)) {
+        if ($this->eBayConfig->isDeleteHtml()) {
             $data['description_title'] = strip_tags($data['description_title']);
             $data['description_subtitle'] = strip_tags($data['description_subtitle']);
             $data['description_description'] = strip_tags($data['description_description']);
@@ -73,11 +71,9 @@ class M2E_E2M_Model_Product_Magento_Simple extends M2E_E2M_Model_Product_Magento
 
         //---------------------------------------
 
-        if (!$product->getId() &&
-            (bool)$this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_IMAGE)) {
+        if (!$product->getId() && $this->eBayConfig->isImportImage()) {
             $product = $this->importImage($product, $data);
-        } elseif ($product->getId() &&
-            (bool)$this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_IMAGE)) {
+        } elseif ($product->getId() && $this->eBayConfig->isImportImage()) {
             $product = $this->updateImage($product, $data);
         }
 
@@ -89,7 +85,7 @@ class M2E_E2M_Model_Product_Magento_Simple extends M2E_E2M_Model_Product_Magento
                 '" eBay Item Id: ' . $data['identifiers_item_id']);
         }
 
-        if ($save && (bool)$this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_QTY)) {
+        if ($save && $this->eBayConfig->isImportQty()) {
             $product = $this->importQty($product, $data);
         }
 

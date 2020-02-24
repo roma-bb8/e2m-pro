@@ -163,8 +163,8 @@
                     </td>
                     <td class="value" style="width: auto">
                         <select id="import-qty" class="config-input">
-                            <option value="1" <?php if ((bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_QTY)) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
-                            <option value="0" <?php if (!(bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_QTY)) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
+                            <option value="1" <?php if ($this->getEbayConfig()->isImportQty()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
+                            <option value="0" <?php if (!$this->getEbayConfig()->isImportQty()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
                         </select>
                         <p class="note">
                                 <span><?php echo Mage::helper('e2m')->__('Create Stock item (Import QTY)'); ?>
@@ -190,12 +190,11 @@
                     </td>
                     <td class="value">
                         <select id="generate-sku" class="config-input">
-                            <option value="1" <?php if ((bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_GENERATE_SKU)) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
-                            <option value="0" <?php if (!(bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_GENERATE_SKU)) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
+                            <option value="1" <?php if ($this->getEbayConfig()->isGenerateSku()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
+                            <option value="0" <?php if (!$this->getEbayConfig()->isGenerateSku()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
                         </select>
                         <p class="note">
-                                <span><?php echo Mage::helper('e2m')->__('Generate SKU (if empty)'); ?>
-                                </span>
+                            <span><?php echo Mage::helper('e2m')->__('Generate SKU (if empty)'); ?></span>
                         </p>
                     </td>
                 </tr>
@@ -205,12 +204,11 @@
                     </td>
                     <td class="value" style="width: auto">
                         <select id="import-image" class="config-input">
-                            <option value="1" <?php if ((bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_IMAGE)) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
-                            <option value="0" <?php if (!(bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_IMAGE)) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
+                            <option value="1" <?php if ($this->getEbayConfig()->isImportImage()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
+                            <option value="0" <?php if (!$this->getEbayConfig()->isImportImage()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
                         </select>
                         <p class="note">
-                                <span><?php echo Mage::helper('e2m')->__('Import image'); ?>
-                                </span>
+                            <span><?php echo Mage::helper('e2m')->__('Import image'); ?></span>
                         </p>
                     </td>
                 </tr>
@@ -220,12 +218,11 @@
                     </td>
                     <td class="value" style="width: auto">
                         <select id="delete-html" class="config-input">
-                            <option value="1" <?php if ((bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_DELETE_HTML)) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
-                            <option value="0" <?php if (!(bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_DELETE_HTML)) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
+                            <option value="1" <?php if ($this->getEbayConfig()->isDeleteHtml()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
+                            <option value="0" <?php if (!$this->getEbayConfig()->isDeleteHtml()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
                         </select>
                         <p class="note">
-                                <span><?php echo Mage::helper('e2m')->__('Clean HTML in Description'); ?>
-                                </span>
+                            <span><?php echo Mage::helper('e2m')->__('Clean HTML in Description'); ?></span>
                         </p>
                     </td>
                 </tr>
@@ -237,7 +234,7 @@
                         <select id="attribute-set" class="attribute-set config-input">
                             <option value="">-- Please Select --</option>
                             <?php foreach ($this->getDataHelper()->getAllAttributeSet() as $id => $title): ?>
-                                <option value="<?php echo $id; ?>" <?php if ($this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_ATTRIBUTE_SET) == $id) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__($title); ?></option>
+                                <option value="<?php echo $id; ?>" <?php if ($id == $this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_ATTRIBUTE_SET)) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__($title); ?></option>
                             <?php endforeach; ?>
                         </select>
                         <p class="note">
@@ -277,7 +274,6 @@
                         <label><?php echo $this->getDataHelper()->__('Import properties'); ?>:</label>
                     </td>
                     <td class="value" style="width: auto">
-
                         <table class="form-list" cellspacing="0" cellpadding="0">
                             <tr>
                                 <td class="value" style="width: auto">

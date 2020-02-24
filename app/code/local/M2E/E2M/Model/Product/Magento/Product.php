@@ -446,14 +446,14 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
      */
     protected function loadProduct($product, $data, $storeId) {
         switch (true) {
-            case$this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::VALUE_SKU_PRODUCT_IDENTIFIER):
+            case $this->eBayConfig->isSKUProductIdentifier():
                 if (!empty($data['identifiers_sku'])) {
                     $product->setData('store_id', $storeId);
                     $product->load($product->getIdBySku($data['identifiers_sku']));
                 }
 
                 break;
-            case $this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::VALUE_MPN_PRODUCT_IDENTIFIER):
+            case $this->eBayConfig->isMPNProductIdentifier():
                 if (!empty($data['identifiers_brand_mpn_mpn'])) {
                     $tmp = $this->loadProductBy($data['identifiers_brand_mpn_mpn'], 'mpn', $storeId);
                     $tmp !== null && $product = $tmp;
@@ -461,7 +461,7 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
 
                 break;
 
-            case $this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::VALUE_UPC_PRODUCT_IDENTIFIER):
+            case $this->eBayConfig->isUPCProductIdentifier():
                 if (!empty($data['identifiers_upc'])) {
                     $tmp = $this->loadProductBy($data['identifiers_upc'], 'upc', $storeId);
                     $tmp !== null && $product = $tmp;
@@ -469,7 +469,7 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
 
                 break;
 
-            case $this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::VALUE_EAN_PRODUCT_IDENTIFIER):
+            case $this->eBayConfig->isEANProductIdentifier():
                 if (!empty($data['identifiers_ean'])) {
                     $tmp = $this->loadProductBy($data['identifiers_ean'], 'ean', $storeId);
                     $tmp !== null && $product = $tmp;
@@ -477,7 +477,7 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
 
                 break;
 
-            case $this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::VALUE_GTIN_PRODUCT_IDENTIFIER):
+            case $this->eBayConfig->isGTINProductIdentifier():
                 $tmp = null;
                 if (!empty($data['identifiers_upc'])) {
                     $tmp = $this->loadProductBy($data['upc'], 'gtin', $storeId);
