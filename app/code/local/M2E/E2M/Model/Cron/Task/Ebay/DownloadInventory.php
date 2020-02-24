@@ -59,6 +59,9 @@ class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory implements M2E_E2M_Model_Cr
         /** @var M2E_E2M_Model_Api_Ebay $eBayAPI */
         $eBayAPI = Mage::getSingleton('e2m/Api_Ebay');
 
+        /** @var M2E_E2M_Model_Ebay_Account $eBayAccount */
+        $eBayAccount = Mage::getSingleton('e2m/Ebay_Account');
+
         /** @var M2E_E2M_Model_Ebay_Config $eBayConfig */
         $eBayConfig = Mage::getSingleton('e2m/Ebay_Config');
 
@@ -71,12 +74,8 @@ class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory implements M2E_E2M_Model_Cr
 
         $cronTasksInProcessingTableName = $resource->getTableName('m2e_e2m_cron_tasks_in_processing');
 
-        $token = Mage::getStoreConfig(
-            M2E_E2M_Model_Ebay_Account::PREFIX . '/' . M2E_E2M_Model_Ebay_Account::TOKEN . '/'
-        );
-        $mode = Mage::getStoreConfig(
-            M2E_E2M_Model_Ebay_Account::PREFIX . '/' . M2E_E2M_Model_Ebay_Account::MODE . '/'
-        );
+        $token = $eBayAccount->get(M2E_E2M_Model_Ebay_Account::TOKEN);
+        $mode = $eBayAccount->get(M2E_E2M_Model_Ebay_Account::MODE);
 
         //----------------------------------------
 
