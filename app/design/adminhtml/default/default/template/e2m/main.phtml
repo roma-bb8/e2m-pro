@@ -297,7 +297,7 @@
     </div>
 <?php endif; ?>
 
-<div <?php if (!$this->getProgressByTaskInstance(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::INSTANCE) === M2E_E2M_Model_Cron_Task_Completed::COMPLETED || (bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_FULL_SETTINGS)): ?>style="display: none" <?php endif; ?>class="config-button">
+<div <?php if (!($this->getProgressByTaskInstance(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::INSTANCE) === M2E_E2M_Model_Cron_Task_Completed::COMPLETED) || (bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_FULL_SETTINGS)): ?>style="display: none" <?php endif; ?>class="config-button">
     <?php echo $this->getChildHtml('send_settings_button'); ?>
     <br/>
     <br/>
