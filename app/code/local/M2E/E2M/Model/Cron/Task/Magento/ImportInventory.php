@@ -29,9 +29,22 @@ class M2E_E2M_Model_Cron_Task_Magento_ImportInventory implements M2E_E2M_Model_C
         $total = $connRead->select()->from($inventoryTableName, 'COUNT(*)')->query()->fetchColumn();
 
         $percentage = floor(100 / ($total / $lastImportId));
-        $percentage > 100 && $percentage = 100;
+        $percentage > 100 && $percentage = M2E_E2M_Model_Cron_Task_Completed::COMPLETED;
 
         return $percentage;
+    }
+
+    //########################################
+
+    /**
+     * @inheritDoc
+     */
+    public function completed($taskId, $data) {
+
+        /** @var M2E_E2M_Helper_Data $dataHelper */
+        $dataHelper = Mage::helper('e2m');
+
+        $dataHelper->logReport($taskId, 'Finish task of Import Inventory from Magento.');
     }
 
     //########################################
@@ -53,9 +66,6 @@ class M2E_E2M_Model_Cron_Task_Magento_ImportInventory implements M2E_E2M_Model_C
 
         /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
-
-        /** @var M2E_E2M_Helper_Progress $progressHelper */
-        $progressHelper = Mage::helper('e2m/Progress');
 
         $coreHelper = Mage::helper('core');
 
@@ -102,12 +112,14 @@ class M2E_E2M_Model_Cron_Task_Magento_ImportInventory implements M2E_E2M_Model_C
 
         $process = $this->getProcessAsPercentage($data['last_import_id']);
 
-        $progressHelper->setProgressByTag(self::TAG, $process);
+        $connWrite->update($cronTasksInProcessingTableName, array(
+            'progress' => $process
+        ), array('instance = ?' => 'Cron_Task_Magento_ImportInventory'));
 
         //----------------------------------------
 
         return array(
-            'process' => $progressHelper->getProgressByTag(self::TAG)
+            'process' => $process
         );
     }
 }

@@ -13,6 +13,14 @@ interface M2E_E2M_Model_Cron_Task {
     /**
      * @param int $taskId
      * @param array $data
+     */
+    public function completed($taskId, $data);
+
+    //########################################
+
+    /**
+     * @param int $taskId
+     * @param array $data
      *
      * @return array
      */

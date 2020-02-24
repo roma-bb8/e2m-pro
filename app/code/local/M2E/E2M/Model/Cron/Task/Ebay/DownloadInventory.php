@@ -30,9 +30,22 @@ class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory implements M2E_E2M_Model_Cr
         $downloadInterval = $from->getTimestamp() - self::MAX_DOWNLOAD_TIME;
 
         $percentage = floor(($downloadInterval / $fullInterval) * 100);
-        $percentage > 100 && $percentage = 100;
+        $percentage > 100 && $percentage = M2E_E2M_Model_Cron_Task_Completed::COMPLETED;
 
         return $percentage;
+    }
+
+    //########################################
+
+    /**
+     * @inheritDoc
+     */
+    public function completed($taskId, $data) {
+
+        /** @var M2E_E2M_Helper_Data $dataHelper */
+        $dataHelper = Mage::helper('e2m');
+
+        $dataHelper->logReport($taskId, 'Finish task of Downloading Inventory from eBay.');
     }
 
     //########################################
@@ -51,9 +64,6 @@ class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory implements M2E_E2M_Model_Cr
 
         /** @var M2E_E2M_Model_Ebay_Inventory $eBayInventory */
         $eBayInventory = Mage::getSingleton('e2m/Ebay_Inventory');
-
-        /** @var M2E_e2M_Helper_Progress $progressHelper */
-        $progressHelper = Mage::helper('e2m/Progress');
 
         $resource = Mage::getSingleton('core/resource');
 
@@ -98,26 +108,24 @@ class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory implements M2E_E2M_Model_Cr
             $request++;
         }
 
+        $process = $this->getProcessAsPercentage($fromDateTime, $toDateTime);
+
         $data['from'] = $fromDateTime->getTimestamp();
 
         $connWrite->update($cronTasksInProcessingTableName, array(
-            'data' => Mage::helper('core')->jsonEncode($data)
+            'data' => Mage::helper('core')->jsonEncode($data),
+            'progress' => $process
         ), array('instance = ?' => 'Cron_Task_eBay_DownloadInventory'));
 
         //----------------------------------------
 
         $eBayInventory->reloadData();
-
         $eBayConfig->setFull();
-
-        $process = $this->getProcessAsPercentage($fromDateTime, $toDateTime);
-
-        $progressHelper->setProgressByTag(self::TAG, $process);
 
         //----------------------------------------
 
         return array(
-            'process' => $progressHelper->getProgressByTag(self::TAG),
+            'process' => $process,
             'total' => $eBayInventory->get('items/count/total'),
             'variation' => $eBayInventory->get('items/count/variation'),
             'simple' => $eBayInventory->get('items/count/simple')

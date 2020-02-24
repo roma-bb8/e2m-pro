@@ -10,16 +10,29 @@
  */
 class M2E_E2M_Model_Cron_Task_Completed implements M2E_E2M_Model_Cron_Task {
 
+    const COMPLETED = 100;
+
+    const MAX_CREATED = '+30 minutes';
+    const MAX_UPDATE = '+10 minutes';
+
+    //########################################
+
     /**
      * @inheritDoc
      */
+    public function completed($taskId, $data) {
+
+    }
+
+    //########################################
+
+    /**
+     * @inheritDoc
+     * @throws Exception
+     */
     public function process($taskId, $data) {
 
-        /** @var M2E_E2M_Helper_Data $dataHelper */
-        $dataHelper = Mage::helper('e2m');
-
-        /** @var M2E_E2M_Helper_Progress $progressHelper */
-        $progressHelper = Mage::helper('e2m/Progress');
+        $coreHelper = Mage::helper('core');
 
         $resource = Mage::getSingleton('core/resource');
 
@@ -30,31 +43,47 @@ class M2E_E2M_Model_Cron_Task_Completed implements M2E_E2M_Model_Cron_Task {
 
         //----------------------------------------
 
-        if ($progressHelper->isCompletedProgressByTag(M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory::TAG)) {
-
-            $taskId = $connRead->select()->from($cronTasksInProcessingTableName, array('id'))
-                ->where('instance = ?', 'Cron_Task_Ebay_DownloadInventory')->query()->fetchColumn();
-
-            if ($taskId) {
+        $tasks = $connRead->select()->from($cronTasksInProcessingTableName)->query();
+        while ($task = $tasks->fetch(PDO::FETCH_ASSOC)) {
+            if (self::COMPLETED === $task['progress']) {
                 $connWrite->delete($cronTasksInProcessingTableName, array(
-                    'id = ?' => $taskId
+                    'id = ?' => $task['id']
                 ));
 
-                $dataHelper->logReport($taskId, 'Finish task of Downloading Inventory from eBay.');
+                /** @var M2E_E2M_Model_Cron_Task $taskModel */
+                $taskModel = Mage::getModel('e2m/' . $task['instance']);
+
+                $taskModel->completed($task['id'], $coreHelper->jsonDecode($task['data']));
+
+                continue;
             }
-        }
 
-        if ($progressHelper->isCompletedProgressByTag(M2E_E2M_Model_Cron_Task_Magento_ImportInventory::TAG)) {
+            $dateTimeZone = new DateTimeZone('UTC');
+            $current = new DateTime('now', $dateTimeZone);
 
-            $taskId = $connRead->select()->from($cronTasksInProcessingTableName, array('id'))
-                ->where('instance = ?', 'Cron_Task_Magento_ImportInventory')->query()->fetchColumn();
+            if (null !== $task['updated']) {
 
-            if ($taskId) {
+                $updated = new DateTime($task['updated'], $dateTimeZone);
+                $updated->modify(self::MAX_UPDATE);
+
+                if ($current->getTimestamp() > $updated->getTimestamp()) {
+                    $connWrite->delete($cronTasksInProcessingTableName, array(
+                        'id = ?' => $task['id']
+                    ));
+
+                    continue;
+                }
+            }
+
+            $created = new DateTime($task['created'], $dateTimeZone);
+            $created->modify(self::MAX_CREATED);
+
+            if ($current->getTimestamp() > $created->getTimestamp()) {
                 $connWrite->delete($cronTasksInProcessingTableName, array(
-                    'id = ?' => $taskId
+                    'id = ?' => $task['id']
                 ));
 
-                $dataHelper->logReport($taskId, 'Finish task of Import Inventory from Magento.');
+                continue;
             }
         }
 
