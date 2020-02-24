@@ -102,7 +102,8 @@ class M2E_E2M_Model_Product_Magento_Configurable extends M2E_E2M_Model_Product_M
 
         $configProduct = $productMagentoSimple->process($data, false);
         if ($configProduct->getId() && $this->eBayConfig->isIgnoreActionFound()) {
-            $this->addLog('Skip update sku: ' . $configProduct->getSku(), M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
+            $this->addLog('Skip update sku: ' . $configProduct->getSku() .
+                ' Store ID: ' . $configProduct->getStoreId(), M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
 
             if ($this->eBayConfig->isImportQty()) {
                 $configProduct = $this->importQty($configProduct, $data);
@@ -111,7 +112,8 @@ class M2E_E2M_Model_Product_Magento_Configurable extends M2E_E2M_Model_Product_M
             return $configProduct;
         } elseif ($configProduct->getId()) {
             $configProduct->save();
-            $this->addLog('Update sets skip sku: ' . $configProduct->getSku(),
+            $this->addLog('Update sets skip sku: ' . $configProduct->getSku() .
+                ' Store ID: ' . $configProduct->getStoreId(),
                 M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
 
             if ($this->eBayConfig->isImportQty()) {
@@ -125,7 +127,7 @@ class M2E_E2M_Model_Product_Magento_Configurable extends M2E_E2M_Model_Product_M
         $configProduct->save();
 
         $this->addLog('Create config product: "' . $configProduct->getSku() .
-            '" eBay Item Id: ' . $data['identifiers_item_id']);
+            '" eBay Item Id: ' . $data['identifiers_item_id'] . ' Store ID: ' . $configProduct->getStoreId());
 
         /**
          ** Dirty hack **

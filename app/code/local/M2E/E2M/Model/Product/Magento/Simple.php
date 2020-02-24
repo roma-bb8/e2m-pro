@@ -27,7 +27,8 @@ class M2E_E2M_Model_Product_Magento_Simple extends M2E_E2M_Model_Product_Magento
         $product = clone $this->product;
         $product = $this->loadProduct($product, $data, $storeId);
         if ($product->getId() && $this->eBayConfig->isIgnoreActionFound()) {
-            $this->addLog('Skip update sku: ' . $product->getSku(), M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
+            $this->addLog('Skip update sku: ' . $product->getSku()
+                . ' Store ID: ' . $product->getStoreId(), M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
 
             if ($save && (bool)$this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_QTY)) {
                 $product = $this->importQty($product, $data);
@@ -82,7 +83,7 @@ class M2E_E2M_Model_Product_Magento_Simple extends M2E_E2M_Model_Product_Magento
             $product->save();
 
             $this->addLog($action . ' product: "' . $product->getSku() .
-                '" eBay Item Id: ' . $data['identifiers_item_id']);
+                '" eBay Item Id: ' . $data['identifiers_item_id'] . ' Store ID: ' . $product->getStoreId());
         }
 
         if ($save && $this->eBayConfig->isImportQty()) {
