@@ -44,6 +44,11 @@ class M2E_E2M_Model_Cron_Task_Magento_ImportInventory implements M2E_E2M_Model_C
         /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
 
+        /** @var M2E_E2M_Model_Ebay_Inventory $eBayInventory */
+        $eBayInventory = Mage::getSingleton('e2m/Ebay_Inventory');
+
+        $eBayInventory->set(M2E_E2M_Model_Ebay_Inventory::PATH_IMPORT_INVENTORY, true);
+
         $dataHelper->logReport($taskId, 'Finish task of Import Inventory from Magento.');
     }
 

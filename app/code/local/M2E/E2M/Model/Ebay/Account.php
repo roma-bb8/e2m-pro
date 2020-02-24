@@ -26,6 +26,22 @@ class M2E_E2M_Model_Ebay_Account extends M2E_E2M_Model_Config {
     //########################################
 
     /**
+     * @return bool
+     */
+    public function isProductionMode() {
+        return self::MODE_PRODUCTION === (int)$this->get(self::MODE);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSandboxMode() {
+        return self::MODE_SANDBOX === (int)$this->get(self::MODE);
+    }
+
+    //########################################
+
+    /**
      * @return string
      */
     public function getAccountUrl() {

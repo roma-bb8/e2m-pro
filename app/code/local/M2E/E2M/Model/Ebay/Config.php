@@ -70,6 +70,55 @@ class M2E_E2M_Model_Ebay_Config extends M2E_E2M_Model_Config {
     //########################################
 
     /**
+     * @return bool
+     */
+    public function isSKUProductIdentifier() {
+        return self::VALUE_SKU_PRODUCT_IDENTIFIER === $this->get(self::PATH_PRODUCT_GENERATE_SKU);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isMPNProductIdentifier() {
+        return self::VALUE_MPN_PRODUCT_IDENTIFIER === $this->get(self::PATH_PRODUCT_GENERATE_SKU);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isUPCProductIdentifier() {
+        return self::VALUE_UPC_PRODUCT_IDENTIFIER === $this->get(self::PATH_PRODUCT_GENERATE_SKU);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isEANProductIdentifier() {
+        return self::VALUE_EAN_PRODUCT_IDENTIFIER === $this->get(self::PATH_PRODUCT_GENERATE_SKU);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isGTINProductIdentifier() {
+        return self::VALUE_GTIN_PRODUCT_IDENTIFIER === $this->get(self::PATH_PRODUCT_GENERATE_SKU);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isIgnoreActionFound() {
+        return self::VALUE_IGNORE_ACTION_FOUND === $this->get(self::VALUE_IGNORE_ACTION_FOUND);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isUpdateActionFound() {
+        return self::VALUE_UPDATE_ACTION_FOUND === $this->get(self::VALUE_IGNORE_ACTION_FOUND);
+    }
+
+    /**
      * @param int $marketplaceId
      *
      * @return int

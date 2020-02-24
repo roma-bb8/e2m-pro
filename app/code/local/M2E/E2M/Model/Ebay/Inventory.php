@@ -12,6 +12,9 @@ class M2E_E2M_Model_Ebay_Inventory extends M2E_E2M_Model_Config {
 
     const PREFIX = parent::PREFIX . '/inventory';
 
+    const PATH_DOWNLOAD_INVENTORY = 'download';
+    const PATH_IMPORT_INVENTORY = 'import';
+
     const PATH_ITEMS_COUNT_TOTAL = 'items/count/total';
     const PATH_ITEMS_COUNT_VARIATION = 'items/count/variation';
     const PATH_ITEMS_COUNT_SIMPLE = 'items/count/simple';
@@ -109,6 +112,24 @@ class M2E_E2M_Model_Ebay_Inventory extends M2E_E2M_Model_Config {
 
         'condition_type' => 'Condition ID'
     );
+
+    //########################################
+
+    /**
+     * @return bool
+     */
+    public function isDownloadInventory() {
+        return (bool)$this->get(self::PATH_DOWNLOAD_INVENTORY);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isImportInventory() {
+        return (bool)$this->get(self::PATH_IMPORT_INVENTORY);
+    }
+
+    //########################################
 
     /**
      * @return array

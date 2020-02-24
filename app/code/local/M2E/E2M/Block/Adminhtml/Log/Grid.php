@@ -40,7 +40,10 @@ class M2E_E2M_Block_Adminhtml_Log_Grid extends Mage_Adminhtml_Block_Widget_Grid 
      */
     protected function _prepareColumns() {
 
+        /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
+
+        //----------------------------------------
 
         $this->addColumn('id', array(
             'header' => $dataHelper->__('ID'),

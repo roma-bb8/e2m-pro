@@ -45,6 +45,11 @@ class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory implements M2E_E2M_Model_Cr
         /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
 
+        /** @var M2E_E2M_Model_Ebay_Inventory $eBayInventory */
+        $eBayInventory = Mage::getSingleton('e2m/Ebay_Inventory');
+
+        $eBayInventory->set(M2E_E2M_Model_Ebay_Inventory::PATH_DOWNLOAD_INVENTORY, true);
+
         $dataHelper->logReport($taskId, 'Finish task of Downloading Inventory from eBay.');
     }
 

@@ -76,7 +76,9 @@ VALUES
     ('/m2e/e2m/inventory/items/count/total/', 0),
     ('/m2e/e2m/inventory/items/count/variation/', 0),
     ('/m2e/e2m/inventory/items/count/simple/', 0),
-    ('/m2e/e2m/inventory/marketplaces/', '[]');
+    ('/m2e/e2m/inventory/marketplaces/', '[]'),
+    ('/m2e/e2m/inventory/download/', FALSE),
+    ('/m2e/e2m/inventory/import/', FALSE);
 SQL;
 
 $installer->run($sql);

@@ -71,14 +71,14 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
             ->where('instance = ?', 'Cron_Task_eBay_DownloadInventory')->query()->fetchColumn();
 
         switch (true) {
-            case $this->getProgressByTaskInstance(M2E_E2M_Model_Cron_Task_eBay_DownloadInventory::INSTANCE):
-                $label = 'Reload inventory (completed)';
-                $disabled = false;
-                break;
-
             case !empty($id):
                 $label = 'Download inventory (in progress...)';
                 $disabled = true;
+                break;
+
+            case $this->getEbayInventory()->get(M2E_E2M_Model_Ebay_Inventory::PATH_DOWNLOAD_INVENTORY):
+                $label = 'Reload inventory (completed)';
+                $disabled = false;
                 break;
 
             default:
@@ -115,7 +115,7 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
                 $disabledPause = false;
                 break;
 
-            case $this->getProgressByTaskInstance(M2E_E2M_Model_Cron_Task_Magento_ImportInventory::INSTANCE):
+            case $this->getEbayInventory()->get(M2E_E2M_Model_Ebay_Inventory::PATH_IMPORT_INVENTORY):
                 $label = 'Reimport inventory (completed)';
                 $disabled = false;
                 break;
@@ -153,61 +153,6 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
     //########################################
 
     /**
-     * @return M2E_E2M_Helper_Data
-     */
-    public function getDataHelper() {
-
-        /** @var M2E_E2M_Helper_Data $dataHelper */
-        $dataHelper = Mage::helper('e2m');
-
-        return $dataHelper;
-    }
-
-    /**
-     * @return Mage_Core_Helper_Data
-     */
-    public function getCoreHelper() {
-
-        /** @var Mage_Core_Helper_Data $coreHelper */
-        $coreHelper = Mage::helper('core');
-
-        return $coreHelper;
-    }
-
-    /**
-     * @return M2E_E2M_Model_Ebay_Config
-     */
-    public function getEbayConfig() {
-
-        /** @var M2E_E2M_Model_Ebay_Config $eBayConfig */
-        $eBayConfig = Mage::getSingleton('e2m/Ebay_Config');
-
-        return $eBayConfig;
-    }
-
-    /**
-     * @return M2E_E2M_Model_Ebay_Inventory
-     */
-    public function getEbayInventory() {
-
-        /** @var M2E_E2M_Model_Ebay_Inventory $eBayInventory */
-        $eBayInventory = Mage::getSingleton('e2m/Ebay_Inventory');
-
-        return $eBayInventory;
-    }
-
-    /**
-     * @return M2E_E2M_Model_Ebay_Account
-     */
-    public function getEbayAccount() {
-
-        /** @var M2E_E2M_Model_Ebay_Account $eBayAccount */
-        $eBayAccount = Mage::getSingleton('e2m/Ebay_Account');
-
-        return $eBayAccount;
-    }
-
-    /**
      * @param $instance
      *
      * @return string $instance
@@ -229,6 +174,61 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
             ->where('instance = ?', $instance)->query()->fetchColumn();
 
         return $this->progress[$instance] = $progress;
+    }
+
+    /**
+     * @return M2E_E2M_Model_Ebay_Inventory
+     */
+    public function getEbayInventory() {
+
+        /** @var M2E_E2M_Model_Ebay_Inventory $eBayInventory */
+        $eBayInventory = Mage::getSingleton('e2m/Ebay_Inventory');
+
+        return $eBayInventory;
+    }
+
+    /**
+     * @return M2E_E2M_Model_Ebay_Config
+     */
+    public function getEbayConfig() {
+
+        /** @var M2E_E2M_Model_Ebay_Config $eBayConfig */
+        $eBayConfig = Mage::getSingleton('e2m/Ebay_Config');
+
+        return $eBayConfig;
+    }
+
+    /**
+     * @return M2E_E2M_Model_Ebay_Account
+     */
+    public function getEbayAccount() {
+
+        /** @var M2E_E2M_Model_Ebay_Account $eBayAccount */
+        $eBayAccount = Mage::getSingleton('e2m/Ebay_Account');
+
+        return $eBayAccount;
+    }
+
+    /**
+     * @return M2E_E2M_Helper_Data
+     */
+    public function getDataHelper() {
+
+        /** @var M2E_E2M_Helper_Data $dataHelper */
+        $dataHelper = Mage::helper('e2m');
+
+        return $dataHelper;
+    }
+
+    /**
+     * @return Mage_Core_Helper_Data
+     */
+    public function getCoreHelper() {
+
+        /** @var Mage_Core_Helper_Data $coreHelper */
+        $coreHelper = Mage::helper('core');
+
+        return $coreHelper;
     }
 
     //########################################
