@@ -28,7 +28,7 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
         //----------------------------------------
 
         $taskId = $connRead->select()->from($cronTasksInProcessingTableName, array('id'))
-            ->where('instance = ?', 'Cron_Task_Magento_ImportInventory')->query()->fetchColumn();
+            ->where('instance = ?', M2E_E2M_Model_Cron_Task_Magento_ImportInventory::INSTANCE)->query()->fetchColumn();
 
         if (empty($taskId)) {
             return $this->ajaxResponse(array(
@@ -69,7 +69,7 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
         //----------------------------------------
 
         $taskId = $connRead->select()->from($cronTasksInProcessingTableName, array('id'))
-            ->where('instance = ?', 'Cron_Task_Magento_ImportInventory')->query()->fetchColumn();
+            ->where('instance = ?', M2E_E2M_Model_Cron_Task_Magento_ImportInventory::INSTANCE)->query()->fetchColumn();
 
         if (empty($taskId)) {
             return $this->ajaxResponse(array(
@@ -100,9 +100,6 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
         /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
 
-        /** @var M2E_E2M_Helper_Progress $progressHelper */
-        $progressHelper = Mage::helper('e2m/Progress');
-
         $resource = Mage::getSingleton('core/resource');
 
         $connWrite = $resource->getConnection('core_write');
@@ -113,13 +110,13 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
         //----------------------------------------
 
         $connWrite->delete($cronTasksInProcessingTableName, array(
-            'instance = ?' => 'Cron_Task_Magento_ImportInventory'
+            'instance = ?' => M2E_E2M_Model_Cron_Task_Magento_ImportInventory::INSTANCE
         ));
 
         //----------------------------------------
 
         $connWrite->insert($cronTasksInProcessingTableName, array(
-            'instance' => 'Cron_Task_Magento_ImportInventory',
+            'instance' => M2E_E2M_Model_Cron_Task_Magento_ImportInventory::INSTANCE,
             'data' => Mage::helper('core')->jsonEncode(array(
                 'last_import_id' => 0
             )),
@@ -129,7 +126,7 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
         //----------------------------------------
 
         $taskId = $connRead->select()->from($cronTasksInProcessingTableName, 'id')
-            ->where('instance = ?', 'Cron_Task_Magento_ImportInventory')->query()->fetchColumn();
+            ->where('instance = ?', M2E_E2M_Model_Cron_Task_Magento_ImportInventory::INSTANCE)->query()->fetchColumn();
 
         $dataHelper->logReport($taskId, $dataHelper->__('Start task of Import Inventory from Magento...'));
 
@@ -237,10 +234,7 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
         $dataHelper = Mage::helper('e2m');
 
         /** @var M2E_E2M_Model_Ebay_Inventory $eBayInventory */
-        $eBayInventory = Mage::helper('e2m/Ebay_Inventory');
-
-        /** @var M2E_E2M_Helper_Progress $progressHelper */
-        $progressHelper = Mage::helper('e2m/Progress');
+        $eBayInventory = Mage::getSingleton('e2m/Ebay_Inventory');
 
         $resource = Mage::getSingleton('core/resource');
 
@@ -252,7 +246,7 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
         //----------------------------------------
 
         $connWrite->delete($cronTasksInProcessingTableName, array(
-            'instance = ?' => 'Cron_Task_eBay_DownloadInventory'
+            'instance = ?' => M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory::INSTANCE
         ));
 
         //----------------------------------------
@@ -263,7 +257,7 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
         $fromDatetime->setTimestamp(M2E_E2M_Model_Cron_Task_eBay_DownloadInventory::MAX_DOWNLOAD_TIME);
 
         $connWrite->insert($cronTasksInProcessingTableName, array(
-            'instance' => 'Cron_Task_eBay_DownloadInventory',
+            'instance' => M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory::INSTANCE,
             'data' => Mage::helper('core')->jsonEncode(array(
                 'from' => $fromDatetime->getTimestamp(),
                 'to' => $toDateTime->getTimestamp()
@@ -274,7 +268,7 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
         //----------------------------------------
 
         $taskId = $connRead->select()->from($cronTasksInProcessingTableName, 'id')
-            ->where('instance = ?', 'Cron_Task_eBay_DownloadInventory')->query()->fetchColumn();
+            ->where('instance = ?', M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory::INSTANCE)->query()->fetchColumn();
 
         $dataHelper->logReport($taskId, $dataHelper->__('Start task of Downloading Inventory from eBay...'));
 
@@ -311,7 +305,10 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
         $connWrite->truncateTable($resource->getTableName('m2e_e2m_log'));
         $connWrite->truncateTable($resource->getTableName('m2e_e2m_inventory_ebay'));
         $connWrite->delete($resource->getTableName('m2e_e2m_cron_tasks_in_processing'), array(
-            'instance IN (?)' => array('Cron_Task_eBay_DownloadInventory', 'Cron_Task_Magento_ImportInventory')
+            'instance IN (?)' => array(
+                M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory::INSTANCE,
+                M2E_E2M_Model_Cron_Task_Magento_ImportInventory::INSTANCE
+            )
         ));
 
         $eBayAccount->set(M2E_E2M_Model_Ebay_Account::MODE, 0, false);
