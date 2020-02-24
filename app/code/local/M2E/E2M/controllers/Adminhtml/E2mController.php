@@ -501,12 +501,9 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
         $this->getLayout()->getBlock('head')->addJs('e2m/main.js');
         $this->getLayout()->getBlock('head')->addJs('e2m/magento.js');
         $this->getLayout()->getBlock('head')->addJs('e2m/ebay.js');
-
         $this->getLayout()->getBlock('head')->addJs('e2m/callback/magento.js');
         $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay.js');
-
         $this->getLayout()->getBlock('head')->addJs('e2m/cron/task/ebay.js');
-
         $this->getLayout()->getBlock('head')->addJs('e2m/observer.js');
 
         //----------------------------------------
