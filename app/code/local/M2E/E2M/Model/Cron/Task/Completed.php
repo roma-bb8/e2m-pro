@@ -10,6 +10,8 @@
  */
 class M2E_E2M_Model_Cron_Task_Completed implements M2E_E2M_Model_Cron_Task {
 
+    const INSTANCE = 'Cron_Task_Completed';
+
     const COMPLETED = 100;
 
     const MAX_CREATED = '+30 minutes';
@@ -43,7 +45,8 @@ class M2E_E2M_Model_Cron_Task_Completed implements M2E_E2M_Model_Cron_Task {
 
         //----------------------------------------
 
-        $tasks = $connRead->select()->from($cronTasksInProcessingTableName)->query();
+        $tasks = $connRead->select()->from($cronTasksInProcessingTableName)
+            ->where('instance <> ?', self::INSTANCE)->query();
         while ($task = $tasks->fetch(PDO::FETCH_ASSOC)) {
             if (self::COMPLETED === $task['progress']) {
                 $connWrite->delete($cronTasksInProcessingTableName, array(
