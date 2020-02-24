@@ -48,23 +48,30 @@ class M2E_E2M_Model_Ebay_Config extends M2E_E2M_Model_Config {
         /** @var M2E_E2M_Model_Ebay_Inventory $eBayInventory */
         $eBayInventory = Mage::getSingleton('e2m/Ebay_Inventory');
 
-        $productIdentifier = $eBayInventory->get(self::PATH_INVENTORY_PRODUCT_IDENTIFIER);
-        $actionFound = $eBayInventory->get(self::PATH_INVENTORY_ACTION_FOUND);
-        $attributeSet = $eBayInventory->get(self::PATH_PRODUCT_ATTRIBUTE_SET);
-        $importImage = $eBayInventory->get(self::PATH_PRODUCT_IMPORT_IMAGE);
-        $importQty = $eBayInventory->get(self::PATH_PRODUCT_IMPORT_QTY);
-        $generateSku = $eBayInventory->get(self::PATH_PRODUCT_GENERATE_SKU);
-        $deleteHtml = $eBayInventory->get(self::PATH_PRODUCT_DELETE_HTML);
-        $marketplacesStores = $eBayInventory->get(self::PATH_MARKETPLACE_TO_STORE_MAP);
-        $fieldsAttributes = $eBayInventory->get(self::PATH_PRODUCT_FIELDS_ATTRIBUTES_MAP);
+        $productIdentifier = $this->get(self::PATH_INVENTORY_PRODUCT_IDENTIFIER);
+        $actionFound = $this->get(self::PATH_INVENTORY_ACTION_FOUND);
+        $attributeSet = $this->get(self::PATH_PRODUCT_ATTRIBUTE_SET);
+        $importImage = $this->get(self::PATH_PRODUCT_IMPORT_IMAGE);
+        $importQty = $this->get(self::PATH_PRODUCT_IMPORT_QTY);
+        $generateSku = $this->get(self::PATH_PRODUCT_GENERATE_SKU);
+        $deleteHtml = $this->get(self::PATH_PRODUCT_DELETE_HTML);
+        $marketplacesStores = $this->get(self::PATH_MARKETPLACE_TO_STORE_MAP);
+        $fieldsAttributes = $this->get(self::PATH_PRODUCT_FIELDS_ATTRIBUTES_MAP);
         $is = count($marketplacesStores) ===
             count($eBayInventory->get(M2E_E2M_Model_Ebay_Inventory::PATH_MARKETPLACES));
 
-        $full = isset($productIdentifier) && isset($actionFound) &&
-            isset($attributeSet) && isset($importImage) && isset($importQty) &&
-            isset($generateSku) && isset($deleteHtml) && isset($deleteHtml) && $is && !empty($fieldsAttributes);
+        $full = isset($productIdentifier) &&
+            isset($actionFound) &&
+            isset($attributeSet) &&
+            isset($importImage) &&
+            isset($importQty) &&
+            isset($generateSku) &&
+            isset($deleteHtml) &&
+            isset($deleteHtml) &&
+            $is &&
+            !empty($fieldsAttributes);
 
-        $eBayInventory->set(self::PATH_FULL_SETTINGS, $full, $autoSave);
+        $this->set(self::PATH_FULL_SETTINGS, $full, $autoSave);
     }
 
     //########################################
@@ -108,14 +115,14 @@ class M2E_E2M_Model_Ebay_Config extends M2E_E2M_Model_Config {
      * @return bool
      */
     public function isIgnoreActionFound() {
-        return self::VALUE_IGNORE_ACTION_FOUND === $this->get(self::VALUE_IGNORE_ACTION_FOUND);
+        return self::VALUE_IGNORE_ACTION_FOUND === $this->get(self::PATH_INVENTORY_ACTION_FOUND);
     }
 
     /**
      * @return bool
      */
     public function isUpdateActionFound() {
-        return self::VALUE_UPDATE_ACTION_FOUND === $this->get(self::VALUE_IGNORE_ACTION_FOUND);
+        return self::VALUE_UPDATE_ACTION_FOUND === $this->get(self::PATH_INVENTORY_ACTION_FOUND);
     }
 
     /**

@@ -196,6 +196,7 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
             $settings['ebay-field-magento-attribute'],
             false
         );
+        $eBayConfig->setFull(false);
         $eBayConfig->save();
 
         //----------------------------------------

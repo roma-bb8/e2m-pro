@@ -13,6 +13,7 @@ function downloadInventoryHandler(data) {
 }
 
 function importInventoryHandler(data) {
+
     if (data.process === 100) {
         setTimeout(function () {
             window.location.reload();

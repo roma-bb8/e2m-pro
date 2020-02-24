@@ -177,7 +177,7 @@
     </div>
 <?php endif; ?>
 
-<?php if ((bool)$this->getEbayInventory()->get(M2E_E2M_Model_Ebay_Inventory::PATH_ITEMS_COUNT_TOTAL)): ?>
+<?php if ($this->getEbayInventory()->isDownloadInventory()): ?>
     <div class="entry-edit">
         <div class="entry-edit-head">
             <h4><?php echo $this->getDataHelper()->__('Product settings'); ?></h4>
@@ -366,7 +366,7 @@
     </div>
     <div class="box-right entry-edit" collapseable="no">
         <div class="entry-edit-head">
-            <h4 class="icon-head head-edit-form fieldset-legend"><?php echo Mage::helper('e2m')->__('Logs'); ?></h4>
+            <h4 class="icon-head head-edit-form fieldset-legend"><?php echo $this->getDataHelper()->__('Logs'); ?></h4>
         </div>
         <div class="fieldset">
             <div class="hor-scroll">

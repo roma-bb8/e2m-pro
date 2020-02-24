@@ -10,23 +10,23 @@
  */
 abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abstract {
 
+    /** @var int $groupId */
+    private $groupId;
+
+    /** @var array $attributeSetTmp */
+    private $attributeSetTmp = array();
+
+    /** @var Mage_Core_Helper_Data $coreHelper */
+    private $coreHelper;
+
+    /** @var int $taskId */
+    protected $taskId;
+
     /** @var M2E_E2M_Model_Ebay_Config $eBayConfig */
     protected $eBayConfig;
 
     /** @var Mage_Catalog_Model_Product $product */
     protected $product;
-
-    /** @var Mage_Core_Helper_Data $coreHelper */
-    private $coreHelper;
-
-    /** @var int $groupId */
-    private $groupId;
-
-    /** @var int $taskId */
-    protected $taskId;
-
-    /** @var array $attributeSetTmp */
-    private $attributeSetTmp = array();
 
     //########################################
 
@@ -515,8 +515,10 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
     public function __construct() {
         parent::__construct();
 
-        $this->eBayConfig = Mage::helper('e2m/eBay_Config');
         $this->coreHelper = Mage::helper('core');
+
+        $this->eBayConfig = Mage::getSingleton('e2m/Ebay_Config');
+
         $this->product = Mage::getModel('catalog/product');
     }
 

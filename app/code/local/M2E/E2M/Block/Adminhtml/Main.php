@@ -71,14 +71,14 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
             ->where('instance = ?', 'Cron_Task_eBay_DownloadInventory')->query()->fetchColumn();
 
         switch (true) {
+            case empty($id) && $this->getEbayInventory()->isDownloadInventory():
+                $label = 'Reload inventory (completed)';
+                $disabled = false;
+                break;
+
             case !empty($id):
                 $label = 'Download inventory (in progress...)';
                 $disabled = true;
-                break;
-
-            case $this->getEbayInventory()->get(M2E_E2M_Model_Ebay_Inventory::PATH_DOWNLOAD_INVENTORY):
-                $label = 'Reload inventory (completed)';
-                $disabled = false;
                 break;
 
             default:
@@ -115,7 +115,7 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
                 $disabledPause = false;
                 break;
 
-            case $this->getEbayInventory()->get(M2E_E2M_Model_Ebay_Inventory::PATH_IMPORT_INVENTORY):
+            case $this->getEbayInventory()->isImportInventory():
                 $label = 'Reimport inventory (completed)';
                 $disabled = false;
                 break;
