@@ -183,3 +183,100 @@ function md5(str) {
 
     return temp.toLowerCase();
 }
+
+function utf8Encode(data) {
+    data = data.replace(/\r\n/g, "\n");
+
+    var result = '';
+    for (var i = 0; i < data.length; i++) {
+        var char = data.charCodeAt(i);
+
+        if (char < 128) {
+            result += String.fromCharCode(char);
+            continue;
+        }
+
+        if ((char > 127) && (char < 2048)) {
+            result += String.fromCharCode((char >> 6) | 192);
+            result += String.fromCharCode((char & 63) | 128);
+            continue;
+        }
+
+        result += String.fromCharCode((char >> 12) | 224);
+        result += String.fromCharCode(((char >> 6) & 63) | 128);
+        result += String.fromCharCode((char & 63) | 128);
+    }
+
+    return result;
+}
+
+function deleteHashedStorage(id) {
+    removeLocalStorage(e2m.prefix + '_' + md5(id).substr(0, 10));
+    removeLocalStorage(id);
+}
+
+function getHashedStorage(id) {
+
+    var hashedStorageKey = e2m.prefix + '_' + md5(id).substr(0, 10);
+    if (typeof e2m.localStorage[hashedStorageKey] === 'undefined') {
+        return '';
+    }
+
+    return e2m.localStorage[hashedStorageKey];
+}
+
+function removeLocalStorage(key) {
+    if (typeof e2m.localStorage[key] === 'undefined') {
+        return false;
+    }
+
+    delete e2m.localStorage[key];
+    localStorage.setItem(e2m.prefix, JSON.stringify(e2m.localStorage));
+    return true;
+}
+
+function setHashedStorage(id) {
+    e2m.localStorage[e2m.prefix + '_' + md5(id).substr(0, 10)] = 1;
+    localStorage.setItem(e2m.prefix, JSON.stringify(e2m.localStorage));
+}
+
+function initializeLocalStorage() {
+
+    var data = localStorage.getItem(e2m.prefix);
+    if (data === null) {
+        localStorage.setItem(e2m.prefix, JSON.stringify({}));
+        return;
+    }
+
+    try {
+        e2m.localStorage = JSON.parse(data);
+    } catch (exception) {
+        localStorage.setItem(e2m.prefix, JSON.stringify({}));
+    }
+}
+
+function cron() {
+    new Ajax.Request(e2m.url.cron, {
+        method: 'get',
+        onCreate: function () {
+            $('loading-mask').setStyle({
+                visibility: 'hidden'
+            });
+        },
+        onSuccess: function (transport) {
+            var response = JSON.parse(transport.responseText);
+            console.log(response);
+
+            setTimeout(cron, 3000);
+            response.data.forEach(function (task) {
+                task.handler === 'downloadInventoryHandler' && downloadInventoryHandler(task.data);
+                task.handler === 'importInventoryHandler' && importInventoryHandler(task.data);
+            });
+        },
+        onFailure: function (transport) {
+            console.log(transport);
+
+            alert('Cron tasks did not complete successfully...');
+        }
+    });
+}

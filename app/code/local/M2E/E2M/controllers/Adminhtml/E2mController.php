@@ -494,40 +494,19 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
 
         //----------------------------------------
 
-        $this->getLayout()->getBlock('head')->addCss('e2m/css/tooltip.css');
+        $this->getLayout()->getBlock('head')->addCss('e2m/css/main.css');
 
         //----------------------------------------
 
-        $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay/get-token.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay/send-settings.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay/start-download-inventory.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay/start-import-inventory.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay/unset-token.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay/pause-finish-import-inventory.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay/pause-start-import-inventory.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/callback/magento/hide-block.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/callback/magento/show-block.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/cron/task/ebay/download-inventory-handler.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/cron/task/ebay/import-inventory-handler.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/ebay/paint-import-properties.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/change-tooltip-position.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/cron.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/delete-hashed-storage.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/get-hashed-storage.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/md5.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/on-tooltip-icon-mouse-leave.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/on-tooltip-mouse-enter.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/on-tooltip-mouse-leave.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/remove-local-storage.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/set-hashed-storage.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/show-tooltip.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/utf8-encode.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/observer/initialize-local-storage.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/observer/setting/ebay/attribute-set.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/observer/setting/ebay/config-input.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/observer/setting/ebay/ebay-field-magento-attribute.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/observer/hide-block.js');
-        $this->getLayout()->getBlock('head')->addJs('e2m/observer/note-block.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/main.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/magento.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/ebay.js');
+
+        $this->getLayout()->getBlock('head')->addJs('e2m/callback/magento.js');
+        $this->getLayout()->getBlock('head')->addJs('e2m/callback/ebay.js');
+
+        $this->getLayout()->getBlock('head')->addJs('e2m/cron/task/ebay.js');
+
         $this->getLayout()->getBlock('head')->addJs('e2m/observer.js');
 
         //----------------------------------------
