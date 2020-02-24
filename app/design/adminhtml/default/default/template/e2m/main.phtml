@@ -82,7 +82,7 @@
     </div>
 <?php endif; ?>
 
-<?php if ($this->getProgressByTaskInstance(M2E_E2M_Model_Cron_Task_eBay_DownloadInventory::INSTANCE) === M2E_E2M_Model_Cron_Task_Completed::COMPLETED): ?>
+<?php if ((bool)$this->getEbayInventory()->get(M2E_E2M_Model_Ebay_Inventory::PATH_ITEMS_COUNT_TOTAL)): ?>
     <div class="entry-edit">
         <div class="entry-edit-head">
             <h4><?php echo $this->getDataHelper()->__('Marketplace settings'); ?></h4>
@@ -110,7 +110,7 @@
     </div>
 <?php endif; ?>
 
-<?php if ($this->getProgressByTaskInstance(M2E_E2M_Model_Cron_Task_eBay_DownloadInventory::INSTANCE) === M2E_E2M_Model_Cron_Task_Completed::COMPLETED): ?>
+<?php if ((bool)$this->getEbayInventory()->get(M2E_E2M_Model_Ebay_Inventory::PATH_ITEMS_COUNT_TOTAL)): ?>
     <div class="entry-edit">
         <div class="entry-edit-head">
             <h4><?php echo $this->getDataHelper()->__('Inventory settings'); ?></h4>
@@ -157,7 +157,7 @@
                     <td class="value" style="width: auto">
                         <select id="import-qty" class="config-input">
                             <option value="1" <?php if ((bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_QTY)) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
-                            <option value="0" <?php if ((bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_QTY)) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
+                            <option value="0" <?php if (!(bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_QTY)) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
                         </select>
                         <p class="note">
                                 <span><?php echo Mage::helper('e2m')->__('Create Stock item (Import QTY)'); ?>
@@ -170,7 +170,7 @@
     </div>
 <?php endif; ?>
 
-<?php if ($this->getProgressByTaskInstance(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::INSTANCE) === M2E_E2M_Model_Cron_Task_Completed::COMPLETED): ?>
+<?php if ((bool)$this->getEbayInventory()->get(M2E_E2M_Model_Ebay_Inventory::PATH_ITEMS_COUNT_TOTAL)): ?>
     <div class="entry-edit">
         <div class="entry-edit-head">
             <h4><?php echo $this->getDataHelper()->__('Product settings'); ?></h4>
@@ -184,7 +184,7 @@
                     <td class="value">
                         <select id="generate-sku" class="config-input">
                             <option value="1" <?php if ((bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_GENERATE_SKU)) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
-                            <option value="0" <?php if ((bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_GENERATE_SKU)) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
+                            <option value="0" <?php if (!(bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_GENERATE_SKU)) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
                         </select><p class="note">
                                 <span><?php echo Mage::helper('e2m')->__('Generate SKU (if empty)'); ?>
                                 </span>
@@ -198,7 +198,7 @@
                     <td class="value" style="width: auto">
                         <select id="import-image" class="config-input">
                             <option value="1" <?php if ((bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_IMAGE)) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
-                            <option value="0" <?php if ((bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_IMAGE)) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
+                            <option value="0" <?php if (!(bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_IMAGE)) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
                         </select>
                         <p class="note">
                                 <span><?php echo Mage::helper('e2m')->__('Import image'); ?>
@@ -213,7 +213,7 @@
                     <td class="value" style="width: auto">
                         <select id="delete-html" class="config-input">
                             <option value="1" <?php if ((bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_DELETE_HTML)) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
-                            <option value="0" <?php if ((bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_DELETE_HTML)) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
+                            <option value="0" <?php if (!(bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_DELETE_HTML)) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
                         </select>
                         <p class="note">
                                 <span><?php echo Mage::helper('e2m')->__('Clean HTML in Description'); ?>
@@ -297,7 +297,7 @@
     </div>
 <?php endif; ?>
 
-<div <?php if (!($this->getProgressByTaskInstance(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::INSTANCE) === M2E_E2M_Model_Cron_Task_Completed::COMPLETED) || (bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_FULL_SETTINGS)): ?>style="display: none" <?php endif; ?>class="config-button">
+<div style="display: none" class="config-button">
     <?php echo $this->getChildHtml('send_settings_button'); ?>
     <br/>
     <br/>
@@ -343,7 +343,7 @@
                             <span id="download-inventory-progress"><?php echo $this->escapeHtml($this->getProgressByTaskInstance(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::INSTANCE)); ?></span>%
                         </td>
                     </tr>
-                    <?php if ($this->getProgressByTaskInstance(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::INSTANCE) === M2E_E2M_Model_Cron_Task_Completed::COMPLETED): ?>
+                    <?php if ((bool)$this->getEbayInventory()->get(M2E_E2M_Model_Ebay_Inventory::PATH_ITEMS_COUNT_TOTAL)): ?>
                         <tr>
                             <td class="label">
                                 <?php echo $this->getChildHtml('start_import_inventory_button'); ?>

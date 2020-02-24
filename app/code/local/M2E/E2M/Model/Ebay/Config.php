@@ -76,15 +76,12 @@ class M2E_E2M_Model_Ebay_Config extends M2E_E2M_Model_Config {
      */
     public function getStoreForMarketplace($marketplaceId) {
 
-        /** @var M2E_E2M_Model_Ebay_Inventory $eBayInventory */
-        $eBayInventory = Mage::getSingleton('e2m/Ebay_Inventory');
-
-        $marketplacesStores = $eBayInventory->get(M2E_E2M_Model_Ebay_Inventory::PATH_MARKETPLACES);
+        $marketplacesStores = $this->get(self::PATH_MARKETPLACE_TO_STORE_MAP);
         if (isset($marketplacesStores[$marketplaceId])) {
             return (int)$marketplacesStores[$marketplaceId];
         }
 
-        return Mage_Core_Model_App::ADMIN_STORE_ID;
+        return null;
     }
 
     /**
