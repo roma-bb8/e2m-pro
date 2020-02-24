@@ -122,10 +122,9 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
             'instance' => 'Cron_Task_Magento_ImportInventory',
             'data' => Mage::helper('core')->jsonEncode(array(
                 'last_import_id' => 0
-            ))
+            )),
+            'progress' => 0
         ));
-
-        $progressHelper->setProgressByTag(M2E_E2M_Model_Cron_Task_Magento_ImportInventory::TAG, 0);
 
         //----------------------------------------
 
@@ -268,10 +267,9 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
             'data' => Mage::helper('core')->jsonEncode(array(
                 'from' => $fromDatetime->getTimestamp(),
                 'to' => $toDateTime->getTimestamp()
-            ))
+            )),
+            'progress' => 0
         ));
-
-        $progressHelper->setProgressByTag(M2E_E2M_Model_Cron_Task_eBay_DownloadInventory::TAG, 0);
 
         //----------------------------------------
 
@@ -305,15 +303,7 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
         /** @var M2E_E2M_Model_Ebay_Inventory $eBayInventory */
         $eBayInventory = Mage::getSingleton('e2m/Ebay_Inventory');
 
-        /** @var M2E_E2M_Helper_Progress $progressHelper */
-        $progressHelper = Mage::helper('e2m/Progress');
-
         $resource = Mage::getSingleton('core/resource');
-
-        //----------------------------------------
-
-        $progressHelper->setProgressByTag(M2E_E2M_Model_Cron_Task_eBay_DownloadInventory::TAG, 0);
-        $progressHelper->setProgressByTag(M2E_E2M_Model_Cron_Task_Magento_ImportInventory::TAG, 0);
 
         //----------------------------------------
 
@@ -442,18 +432,23 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
 
         session_write_close();
 
-        $resource = Mage::getSingleton('core/resource');
+        $coreHelper = Mage::helper('core');
 
-        $cronTasksInProcessing = $resource->getTableName('m2e_e2m_cron_tasks_in_processing');
+        $resource = Mage::getSingleton('core/resource');
 
         $connWrite = $resource->getConnection('core_write');
         $connRead = $resource->getConnection('core_read');
+
+        $cronTasksInProcessing = $resource->getTableName('m2e_e2m_cron_tasks_in_processing');
+
+        //----------------------------------------
 
         $tasks = $connRead->select()->from($cronTasksInProcessing)->query();
 
         $handlers = array();
         while ($task = $tasks->fetch(PDO::FETCH_ASSOC)) {
-            if ($task['is_running'] || $task['pause']) {
+            if ($task['is_running'] || $task['pause'] ||
+                $task['progress'] === M2E_E2M_Model_Cron_Task_Completed::COMPLETED) {
                 continue;
             }
 
@@ -466,7 +461,7 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
                 /** @var M2E_E2M_Model_Cron_Task $taskModel */
                 $taskModel = Mage::getModel('e2m/' . $task['instance']);
 
-                $data = $taskModel->process($task['id'], Mage::helper('core')->jsonDecode($task['data']));
+                $data = $taskModel->process($task['id'], $coreHelper->jsonDecode($task['data']));
                 $instance = lcfirst(substr($task['instance'], strrpos($task['instance'], '_') + 1));
                 $handlers[] = array(
                     'handler' => $instance . 'Handler',

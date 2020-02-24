@@ -82,7 +82,7 @@
     </div>
 <?php endif; ?>
 
-<?php if ($this->getProgressHelper()->isCompletedProgressByTag(M2E_E2M_Model_Cron_Task_eBay_DownloadInventory::TAG)): ?>
+<?php if ($this->getProgressByTaskInstance(M2E_E2M_Model_Cron_Task_eBay_DownloadInventory::INSTANCE) === M2E_E2M_Model_Cron_Task_Completed::COMPLETED): ?>
     <div class="entry-edit">
         <div class="entry-edit-head">
             <h4><?php echo $this->getDataHelper()->__('Marketplace settings'); ?></h4>
@@ -110,7 +110,7 @@
     </div>
 <?php endif; ?>
 
-<?php if ($this->getProgressHelper()->isCompletedProgressByTag(M2E_E2M_Model_Cron_Task_eBay_DownloadInventory::TAG)): ?>
+<?php if ($this->getProgressByTaskInstance(M2E_E2M_Model_Cron_Task_eBay_DownloadInventory::INSTANCE) === M2E_E2M_Model_Cron_Task_Completed::COMPLETED): ?>
     <div class="entry-edit">
         <div class="entry-edit-head">
             <h4><?php echo $this->getDataHelper()->__('Inventory settings'); ?></h4>
@@ -170,7 +170,7 @@
     </div>
 <?php endif; ?>
 
-<?php if ($this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::TAG)): ?>
+<?php if ($this->getProgressByTaskInstance(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::INSTANCE) === M2E_E2M_Model_Cron_Task_Completed::COMPLETED): ?>
     <div class="entry-edit">
         <div class="entry-edit-head">
             <h4><?php echo $this->getDataHelper()->__('Product settings'); ?></h4>
@@ -297,7 +297,7 @@
     </div>
 <?php endif; ?>
 
-<div <?php if (!$this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::TAG) || (bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_FULL_SETTINGS)): ?>style="display: none" <?php endif; ?>class="config-button">
+<div <?php if (!$this->getProgressByTaskInstance(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::INSTANCE) === M2E_E2M_Model_Cron_Task_Completed::COMPLETED || (bool)$this->getEbayConfig()->get(M2E_E2M_Model_Ebay_Config::PATH_FULL_SETTINGS)): ?>style="display: none" <?php endif; ?>class="config-button">
     <?php echo $this->getChildHtml('send_settings_button'); ?>
     <br/>
     <br/>
@@ -340,16 +340,16 @@
                             <?php echo $this->getChildHtml('start_download_inventory_button'); ?>
                         </td>
                         <td class="value block-download-inventory-progress" style="width: auto">
-                            <span id="download-inventory-progress"><?php echo $this->escapeHtml($this->getProgressHelper()->getProgressByTag(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::TAG)); ?></span>%
+                            <span id="download-inventory-progress"><?php echo $this->escapeHtml($this->getProgressByTaskInstance(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::INSTANCE)); ?></span>%
                         </td>
                     </tr>
-                    <?php if ($this->getProgressHelper()->isCompletedProgressByTag(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::TAG)): ?>
+                    <?php if ($this->getProgressByTaskInstance(M2E_e2M_Model_Cron_Task_eBay_DownloadInventory::INSTANCE) === M2E_E2M_Model_Cron_Task_Completed::COMPLETED): ?>
                         <tr>
                             <td class="label">
                                 <?php echo $this->getChildHtml('start_import_inventory_button'); ?>
                             </td>
                             <td class="value" style="width: auto">
-                                <span id="import-inventory-progress"><?php echo $this->escapeHtml($this->getProgressHelper()->getProgressByTag(M2E_e2M_Model_Cron_Task_Magento_ImportInventory::TAG)); ?></span>%
+                                <span id="import-inventory-progress"><?php echo $this->escapeHtml($this->getProgressByTaskInstance(M2E_e2M_Model_Cron_Task_Magento_ImportInventory::INSTANCE)); ?></span>%
                             </td>
                         </tr>
                         <tr>

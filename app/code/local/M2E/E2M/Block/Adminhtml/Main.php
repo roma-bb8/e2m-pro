@@ -10,6 +10,11 @@
  */
 class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
 
+    /** @var array $progress */
+    private $progress;
+
+    //########################################
+
     /**
      * @inheritDoc
      * @throws Zend_Db_Statement_Exception
@@ -66,9 +71,7 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
             ->where('instance = ?', 'Cron_Task_eBay_DownloadInventory')->query()->fetchColumn();
 
         switch (true) {
-            case $this->getProgressHelper()->isCompletedProgressByTag(
-                M2E_E2M_Model_Cron_Task_eBay_DownloadInventory::TAG
-            ):
+            case $this->getProgressByTaskInstance(M2E_E2M_Model_Cron_Task_eBay_DownloadInventory::INSTANCE):
                 $label = 'Reload inventory (completed)';
                 $disabled = false;
                 break;
@@ -112,9 +115,7 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
                 $disabledPause = false;
                 break;
 
-            case $this->getProgressHelper()->isCompletedProgressByTag(
-                M2E_E2M_Model_Cron_Task_Magento_ImportInventory::TAG
-            ):
+            case $this->getProgressByTaskInstance(M2E_E2M_Model_Cron_Task_Magento_ImportInventory::INSTANCE):
                 $label = 'Reimport inventory (completed)';
                 $disabled = false;
                 break;
@@ -207,14 +208,27 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
     }
 
     /**
-     * @return M2E_E2M_Helper_Progress
+     * @param $instance
+     *
+     * @return string $instance
      */
-    public function getProgressHelper() {
+    public function getProgressByTaskInstance($instance) {
 
-        /** @var M2E_E2M_Helper_Progress $progressHelper */
-        $progressHelper = Mage::helper('e2m/Progress');
+        if (isset($this->progress[$instance])) {
+            return $this->progress[$instance];
+        }
 
-        return $progressHelper;
+        //----------------------------------------
+
+        $resource = Mage::getSingleton('core/resource');
+
+        $connRead = $resource->getConnection('core_read');
+
+        $cronTasksInProcessingTableName = $resource->getTableName('m2e_e2m_cron_tasks_in_processing');
+        $progress = (int)$connRead->select()->from($cronTasksInProcessingTableName, array('progress'))
+            ->where('instance = ?', $instance)->query()->fetchColumn();
+
+        return $this->progress[$instance] = $progress;
     }
 
     //########################################

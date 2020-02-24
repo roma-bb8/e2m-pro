@@ -10,7 +10,7 @@
  */
 class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory implements M2E_E2M_Model_Cron_Task {
 
-    const TAG = 'ebay/download/inventory';
+    const INSTANCE = 'Cron_Task_Ebay_DownloadInventory';
 
     const MAX_DOWNLOAD_TIME = 946684800;
     const MAX_REQUESTS = 4;

@@ -10,7 +10,7 @@
  */
 class M2E_E2M_Model_Cron_Task_Magento_ImportInventory implements M2E_E2M_Model_Cron_Task {
 
-    const TAG = 'magento/import/inventory';
+    const INSTANCE = 'Cron_Task_Magento_ImportInventory';
 
     const MAX_LIMIT = 20;
 
