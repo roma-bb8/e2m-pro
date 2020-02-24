@@ -53,7 +53,7 @@ class M2E_E2M_Model_Config {
 
         //----------------------------------------
 
-        return self::PREFIX . '/' . $key . '/';
+        return static::PREFIX . '/' . $key . '/';
     }
 
     //########################################
