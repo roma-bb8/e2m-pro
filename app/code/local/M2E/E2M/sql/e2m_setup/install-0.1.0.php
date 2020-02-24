@@ -56,27 +56,27 @@ VALUES
     ('Cron_Task_Completed', '{}');
 
 INSERT INTO `{$installer->getTable('core_config_data')}`
-    (`path`, `value`)
+    (`path`)
 VALUES
-    ('/m2e/e2m/ebay/account/mode/', NULL),
-    ('/m2e/e2m/ebay/account/session_id/', NULL),
-    ('/m2e/e2m/ebay/account/token/', NULL),
-    ('/m2e/e2m/ebay/account/expiration_time/', NULL),
-    ('/m2e/e2m/ebay/account/user_id/', NULL),
-    ('/m2e/e2m/settings/marketplaces/stores/map/', NULL),
-    ('/m2e/e2m/settings/inventory/product_identifier/', NULL),
-    ('/m2e/e2m/settings/inventory/action_found/', NULL),
-    ('/m2e/e2m/settings/product/import/qty/', NULL),
-    ('/m2e/e2m/settings/product/generate_sku/', NULL),
-    ('/m2e/e2m/settings/product/import/image/', NULL),
-    ('/m2e/e2m/settings/product/delete_html/', NULL),
-    ('/m2e/e2m/settings/product/attribute_set/', NULL),
-    ('/m2e/e2m/settings/product/fields_attributes/map/', NULL),
-    ('/m2e/e2m/settings/full/', NULL),
-    ('/m2e/e2m/inventory/items/count/total/', NULL),
-    ('/m2e/e2m/inventory/items/count/variation/', NULL),
-    ('/m2e/e2m/inventory/items/count/simple/', NULL),
-    ('/m2e/e2m/inventory/marketplaces/', NULL);
+    ('/m2e/e2m/ebay/account/mode/'),
+    ('/m2e/e2m/ebay/account/session_id/'),
+    ('/m2e/e2m/ebay/account/token/'),
+    ('/m2e/e2m/ebay/account/expiration_time/'),
+    ('/m2e/e2m/ebay/account/user_id/'),
+    ('/m2e/e2m/settings/marketplaces/stores/map/'),
+    ('/m2e/e2m/settings/inventory/product_identifier/'),
+    ('/m2e/e2m/settings/inventory/action_found/'),
+    ('/m2e/e2m/settings/product/import/qty/'),
+    ('/m2e/e2m/settings/product/generate_sku/'),
+    ('/m2e/e2m/settings/product/import/image/'),
+    ('/m2e/e2m/settings/product/delete_html/'),
+    ('/m2e/e2m/settings/product/attribute_set/'),
+    ('/m2e/e2m/settings/product/fields_attributes/map/'),
+    ('/m2e/e2m/settings/full/'),
+    ('/m2e/e2m/inventory/items/count/total/'),
+    ('/m2e/e2m/inventory/items/count/variation/'),
+    ('/m2e/e2m/inventory/items/count/simple/'),
+    ('/m2e/e2m/inventory/marketplaces/');
 SQL;
 
 $installer->run($sql);
