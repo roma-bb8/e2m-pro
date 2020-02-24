@@ -80,35 +80,35 @@ class M2E_E2M_Model_Ebay_Config extends M2E_E2M_Model_Config {
      * @return bool
      */
     public function isSKUProductIdentifier() {
-        return self::VALUE_SKU_PRODUCT_IDENTIFIER === $this->get(self::PATH_PRODUCT_GENERATE_SKU);
+        return self::VALUE_SKU_PRODUCT_IDENTIFIER === $this->get(self::PATH_INVENTORY_PRODUCT_IDENTIFIER);
     }
 
     /**
      * @return bool
      */
     public function isMPNProductIdentifier() {
-        return self::VALUE_MPN_PRODUCT_IDENTIFIER === $this->get(self::PATH_PRODUCT_GENERATE_SKU);
+        return self::VALUE_MPN_PRODUCT_IDENTIFIER === $this->get(self::PATH_INVENTORY_PRODUCT_IDENTIFIER);
     }
 
     /**
      * @return bool
      */
     public function isUPCProductIdentifier() {
-        return self::VALUE_UPC_PRODUCT_IDENTIFIER === $this->get(self::PATH_PRODUCT_GENERATE_SKU);
+        return self::VALUE_UPC_PRODUCT_IDENTIFIER === $this->get(self::PATH_INVENTORY_PRODUCT_IDENTIFIER);
     }
 
     /**
      * @return bool
      */
     public function isEANProductIdentifier() {
-        return self::VALUE_EAN_PRODUCT_IDENTIFIER === $this->get(self::PATH_PRODUCT_GENERATE_SKU);
+        return self::VALUE_EAN_PRODUCT_IDENTIFIER === $this->get(self::PATH_INVENTORY_PRODUCT_IDENTIFIER);
     }
 
     /**
      * @return bool
      */
     public function isGTINProductIdentifier() {
-        return self::VALUE_GTIN_PRODUCT_IDENTIFIER === $this->get(self::PATH_PRODUCT_GENERATE_SKU);
+        return self::VALUE_GTIN_PRODUCT_IDENTIFIER === $this->get(self::PATH_INVENTORY_PRODUCT_IDENTIFIER);
     }
 
     /**

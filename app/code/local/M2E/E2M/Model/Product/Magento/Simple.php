@@ -26,7 +26,7 @@ class M2E_E2M_Model_Product_Magento_Simple extends M2E_E2M_Model_Product_Magento
         $storeId = $this->eBayConfig->getStoreForMarketplace($data['marketplace_id']);
         $product = clone $this->product;
         $product = $this->loadProduct($product, $data, $storeId);
-        if ($product->getEntityId() && $this->eBayConfig->isIgnoreActionFound()) {
+        if ($product->getId() && $this->eBayConfig->isIgnoreActionFound()) {
             $this->addLog('Skip update sku: ' . $product->getSku(), M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
 
             if ($save && (bool)$this->eBayConfig->get(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_QTY)) {

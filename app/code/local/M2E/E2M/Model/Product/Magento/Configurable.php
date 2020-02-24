@@ -101,7 +101,7 @@ class M2E_E2M_Model_Product_Magento_Configurable extends M2E_E2M_Model_Product_M
         //----------------------------------------
 
         $configProduct = $productMagentoSimple->process($data, false);
-        if ($configProduct->getEntityId() && $this->eBayConfig->isIgnoreActionFound()) {
+        if ($configProduct->getId() && $this->eBayConfig->isIgnoreActionFound()) {
             $this->addLog('Skip update sku: ' . $configProduct->getSku(), M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
 
             if ($this->eBayConfig->isImportQty()) {
@@ -109,7 +109,7 @@ class M2E_E2M_Model_Product_Magento_Configurable extends M2E_E2M_Model_Product_M
             }
 
             return $configProduct;
-        } elseif ($configProduct->getEntityId()) {
+        } elseif ($configProduct->getId()) {
             $configProduct->save();
             $this->addLog('Update sets skip sku: ' . $configProduct->getSku(),
                 M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
