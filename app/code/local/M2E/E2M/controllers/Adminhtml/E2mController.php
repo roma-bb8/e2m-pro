@@ -255,6 +255,14 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
         /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
 
+        $resource = Mage::getSingleton('core/resource');
+        $connWrite = $resource->getConnection('core_write');
+        $connWrite->truncateTable($resource->getTableName('m2e_e2m_log'));
+        $connWrite->truncateTable($resource->getTableName('m2e_e2m_inventory_ebay'));
+        $connWrite->delete($resource->getTableName('m2e_e2m_cron_tasks'), array(
+            'instance <> ?' => M2E_E2M_Model_Cron_Task_Completed::class
+        ));
+
         $dataHelper->setConfig(M2E_E2M_Helper_Data::XML_PATH_EBAY_AVAILABLE_MARKETPLACES, array());
         $dataHelper->setConfig(M2E_E2M_Helper_Data::XML_PATH_EBAY_DOWNLOAD_INVENTORY, false);
         $dataHelper->setConfig(M2E_E2M_Helper_Data::XML_PATH_EBAY_IMPORT_INVENTORY, false);
