@@ -56,7 +56,7 @@ class M2E_E2M_Model_Cron_Task_Magento_ImportInventory implements M2E_E2M_Model_C
         $dataHelper = Mage::helper('e2m');
 
         /** @var M2E_E2M_Helper_Ebay_Config $eBayConfigHelper */
-        $eBayConfigHelper = Mage::getModel('e2m/Ebay_Config');
+        $eBayConfigHelper = Mage::helper('e2m/Ebay_Config');
 
         /** @var M2E_E2M_Model_Product_Magento_Configurable $productMagentoConfigurable */
         $productMagentoConfigurable = Mage::getModel('e2m/Product_Magento_Configurable');

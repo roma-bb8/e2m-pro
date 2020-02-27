@@ -66,7 +66,7 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
         /** @var Mage_Adminhtml_Block_Widget_Button $button */
         $button = clone $button;
         $button = $button->setData(array(
-            'label' => $this->getDataHelper()->__(!$task['pause'] ? 'Pause' : 'Proceed' . ' Import inventory'),
+            'label' => $this->getDataHelper()->__((!$task['pause'] ? 'Pause' : 'Proceed') . ' Import inventory'),
             'onclick' => !$task['pause'] ? 'pauseStartImportInventory(this);' : 'pauseFinishImportInventory(this);',
             'disabled' => $disabledPause
         ));

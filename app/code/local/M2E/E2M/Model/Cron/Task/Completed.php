@@ -14,7 +14,7 @@ class M2E_E2M_Model_Cron_Task_Completed implements M2E_E2M_Model_Cron_Task {
 
     const COMPLETED = 100;
 
-    const MAX_CREATED = '+30 minutes';
+    const MAX_CREATED = '+5 hours';
     const MAX_UPDATE = '+10 minutes';
 
     //########################################
