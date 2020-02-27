@@ -1,16 +1,10 @@
 <?php
-/**
- * @author     M2E Pro Developers Team
- * @copyright  M2E LTD
- * @license    Commercial use is forbidden
- */
 
-/**
- * Class M2E_E2M_Model_Cron_Task_eBay_DownloadInventory
- */
 class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory implements M2E_E2M_Model_Cron_Task {
 
-    const INSTANCE = 'Cron_Task_Ebay_DownloadInventory';
+    const CACHE_ID = M2E_E2M_Helper_Data::PREFIX . self::class;
+
+    //########################################
 
     const MAX_DOWNLOAD_TIME = 946684800;
     const MAX_REQUESTS = 4;
@@ -45,12 +39,11 @@ class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory implements M2E_E2M_Model_Cr
         /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
 
-        /** @var M2E_E2M_Model_Ebay_Inventory $eBayInventory */
-        $eBayInventory = Mage::getSingleton('e2m/Ebay_Inventory');
+        $dataHelper->setConfig(M2E_E2M_Helper_Data::XML_PATH_EBAY_DOWNLOAD_INVENTORY, true, true);
 
-        $eBayInventory->set(M2E_E2M_Model_Ebay_Inventory::PATH_DOWNLOAD_INVENTORY, true);
+        $dataHelper->logReport($taskId, $dataHelper->__('Finish task of Downloading Inventory from eBay.'));
 
-        $dataHelper->logReport($taskId, 'Finish task of Downloading Inventory from eBay.');
+        Mage::dispatchEvent('m2e_e2m_cron_task_ebay_inventory_download_completed');
     }
 
     //########################################
@@ -61,36 +54,34 @@ class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory implements M2E_E2M_Model_Cr
      */
     public function process($taskId, $data) {
 
-        /** @var M2E_E2M_Model_Api_Ebay $eBayAPI */
-        $eBayAPI = Mage::getSingleton('e2m/Api_Ebay');
+        /** @var Mage_Core_Helper_Data $coreHelper */
+        $coreHelper = Mage::helper('core');
 
-        /** @var M2E_E2M_Model_Ebay_Account $eBayAccount */
-        $eBayAccount = Mage::getSingleton('e2m/Ebay_Account');
+        /** @var M2E_E2M_Helper_Data $dataHelper */
+        $dataHelper = Mage::helper('e2m');
 
-        /** @var M2E_E2M_Model_Ebay_Config $eBayConfig */
-        $eBayConfig = Mage::getSingleton('e2m/Ebay_Config');
+        /** @var M2E_E2M_Model_Proxy_Ebay_Account $eBayAccount */
+        $eBayAccount = Mage::getSingleton('e2m/Proxy_Ebay_Account');
 
-        /** @var M2E_E2M_Model_Ebay_Inventory $eBayInventory */
-        $eBayInventory = Mage::getSingleton('e2m/Ebay_Inventory');
+        /** @var M2E_E2M_Model_Proxy_Ebay_Api $eBayApi */
+        $eBayApi = Mage::getSingleton('e2m/Proxy_Ebay_Api');
 
+        /** @var M2E_E2M_Model_Adapter_Ebay_Item $eBayItemAdapter */
+        $eBayItemAdapter = Mage::getSingleton('e2m/Adapter_Ebay_Item');
+
+        /** @var Mage_Core_Model_Resource $resource */
         $resource = Mage::getSingleton('core/resource');
 
         $connWrite = $resource->getConnection('core_write');
+        $connRead = $resource->getConnection('core_read');
 
-        $cronTasksInProcessingTableName = $resource->getTableName('m2e_e2m_cron_tasks_in_processing');
-
-        $token = $eBayAccount->get(M2E_E2M_Model_Ebay_Account::TOKEN);
-        $mode = $eBayAccount->get(M2E_E2M_Model_Ebay_Account::MODE);
-
-        //----------------------------------------
-
-        if (empty($token)) {
-            throw new Exception('eBay Token empty.');
-        }
+        $inventoryTableName = $resource->getTableName('m2e_e2m_inventory_ebay');
+        $cronTasksTableName = $resource->getTableName('m2e_e2m_cron_tasks');
 
         //----------------------------------------
 
-        $dateTimeObj = new DateTime('now', new DateTimeZone('UTC'));
+        $dateTimeZone = new DateTimeZone('UTC');
+        $dateTimeObj = new DateTime('now', $dateTimeZone);
 
         $fromDateTime = clone $dateTimeObj;
         $fromDateTime->setTimestamp($data['from']);
@@ -106,33 +97,94 @@ class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory implements M2E_E2M_Model_Cr
             $tmpDateTime = clone $fromDateTime;
             $tmpDateTime->modify('+' . self::MAX_DAYS . ' days');
 
-            $eBayAPI->downloadInventory($mode, $token, $fromDateTime, $tmpDateTime);
+            //----------------------------------------
 
-            $fromDateTime = $tmpDateTime;
+            $response = $eBayApi->sendRequest(array(
+                'command' => array('inventory', 'get', 'items'),
+                'data' => array(
+                    'account' => $eBayAccount->getToken(),
+                    'realtime' => true,
+                    'since_time' => $fromDateTime->format('Y-m-d H:i:s'),
+                    'to_time' => $tmpDateTime->format('Y-m-d H:i:s'),
+                    'format_type' => 'full'
+                )
+            ));
+
+            //----------------------------------------
+
+            $items = array();
+            foreach ($response['items'] as $item) {
+                $item = $eBayItemAdapter->process($item);
+                $items[$item['identifiers_item_id']] = $item;
+            }
+
+            //----------------------------------------
+
+            $itemIDs = array();
+            $rows = $connRead->select()->from($inventoryTableName, 'item_id')
+                ->where('item_id IN (?)', array_keys($items))->query()->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($rows as $row) {
+                $itemIDs[] = $row['item_id'];
+            }
+
+            foreach ($itemIDs as $itemId) {
+                $connWrite->update($inventoryTableName, array(
+                    'data' => $coreHelper->jsonEncode($items[$itemId])
+                ), array('item_id = ?' => $itemId));
+
+                unset($items[$itemId]);
+            }
+
+            //----------------------------------------
+
+            foreach ($items as $item => $data) {
+                $connWrite->insert($inventoryTableName, array(
+                    'marketplace_id' => $data['marketplace_id'],
+                    'item_id' => $item,
+                    'variation' => !empty($data['variations']),
+                    'data' => $coreHelper->jsonEncode($data)
+                ));
+            }
+
+            //----------------------------------------
+
+            /**
+             ** Dirty hack **
+             *      by pagination responses data
+             * app/code/Component/Ebay/Model/Command/Request/Auth/Trading/Paginated/Serial/Abstract.php:16
+             * getPaginatedOutputData:40
+             */
+            is_array($response['to_time']) && $response['to_time'] = array_pop($response['to_time']);
+
+            $toTime = new DateTime($response['to_time'], $dateTimeZone);
+            $fromDateTime = $toTime;
             $request++;
         }
 
         $process = $this->getProcessAsPercentage($fromDateTime, $toDateTime);
-
-        $data['from'] = $fromDateTime->getTimestamp();
-
-        $connWrite->update($cronTasksInProcessingTableName, array(
-            'data' => Mage::helper('core')->jsonEncode($data),
-            'progress' => $process
-        ), array('instance = ?' => 'Cron_Task_eBay_DownloadInventory'));
+        $dataHelper->setCacheValue(self::CACHE_ID, $process);
 
         //----------------------------------------
 
-        $eBayInventory->reloadData();
-        $eBayConfig->setFull();
+        $data['from'] = $fromDateTime->getTimestamp();
+
+        $connWrite->update($cronTasksTableName, array(
+            'data' => $coreHelper->jsonEncode($data),
+            'progress' => $dataHelper->getCacheValue(self::CACHE_ID)
+        ), array('instance = ?' => self::class));
+
+        //----------------------------------------
+
+        Mage::dispatchEvent('m2e_e2m_cron_task_ebay_inventory_download_after');
 
         //----------------------------------------
 
         return array(
-            'process' => $process,
-            'total' => $eBayInventory->get('items/count/total'),
-            'variation' => $eBayInventory->get('items/count/variation'),
-            'simple' => $eBayInventory->get('items/count/simple')
+            'process' => $dataHelper->getCacheValue(self::CACHE_ID, 0),
+            'total' => $dataHelper->getCacheValue(M2E_E2M_Helper_Data::CACHE_ID_EBAY_INVENTORY_TOTAL_COUNT, 0),
+            'variation' => $dataHelper->getCacheValue(M2E_E2M_Helper_Data::CACHE_ID_EBAY_INVENTORY_VARIATION_COUNT, 0),
+            'simple' => $dataHelper->getCacheValue(M2E_E2M_Helper_Data::CACHE_ID_EBAY_INVENTORY_SIMPLE_COUNT, 0)
         );
     }
 }
