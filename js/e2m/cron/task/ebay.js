@@ -1,6 +1,6 @@
 function downloadInventoryHandler(data) {
 
-    if (data.process === 100) {
+    if (Number(data.process) === 100) {
         window.location.reload();
         return;
     }
@@ -14,7 +14,7 @@ function downloadInventoryHandler(data) {
 
 function importInventoryHandler(data) {
 
-    if (data.process === 100) {
+    if (Number(data.process) === 100) {
         setTimeout(function () {
             window.location.reload();
         }, 3000);

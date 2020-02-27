@@ -1,3 +1,7 @@
+.value {
+    width: auto
+}
+
 .tooltip-image {
     cursor: help;
 }

@@ -1,60 +1,66 @@
-function getToken() {
+function linkAccount() {
 
     var accountMode = $('account-mode');
-    var mode = accountMode.options[accountMode.selectedIndex].value;
+    var accountId = accountMode.options[accountMode.selectedIndex].value;
 
-    new Ajax.Request(e2m.url.getBeforeEbayToken, {
+    new Ajax.Request(e2m.url.linkEbayAccount, {
         method: 'get',
         parameters: {
-            mode: mode
+            account_id: accountId
         },
+        onCreate: function () {
+            $('loading-mask').setStyle({
+                visibility: 'visible'
+            });
+        },
+        onSuccess: function () {
+            window.location.reload();
+        },
+        onFailure: function (transport) {
+            console.log(transport);
+
+            alert('Something went wrong...');
+        }
+    });
+}
+
+function unlinkAccount() {
+    new Ajax.Request(e2m.url.unlinkEbayAccount, {
+            method: 'get',
+            onCreate: function () {
+                $('loading-mask').setStyle({
+                    visibility: 'visible'
+                });
+            },
+            onSuccess: function () {
+                window.location.reload();
+            },
+            onFailure: function (transport) {
+                console.log(transport);
+
+                alert('Something went wrong...');
+            }
+        }
+    );
+}
+
+function startDownloadInventory(element) {
+    new Ajax.Request(e2m.url.startEbayDownloadInventory, {
+        method: 'get',
         onCreate: function () {
             $('loading-mask').setStyle({
                 visibility: 'visible'
             });
         },
         onSuccess: function (transport) {
+
+            $$('.block-download-inventory-progress')[0].show();
+
             var response = JSON.parse(transport.responseText);
+            downloadInventoryHandler(response.data);
 
-            window.location.replace(response.data.url);
-        },
-        onFailure: function (transport) {
-            console.log(transport);
-
-            alert('Something went wrong...');
-        }
-    });
-}
-
-function pauseFinishImportInventory() {
-    new Ajax.Request(e2m.url.pauseFinishTaskImportInventory, {
-        method: 'get',
-        onCreate: function () {
-            $('loading-mask').setStyle({
-                visibility: 'visible'
-            });
-        },
-        onSuccess: function () {
-            window.location.reload();
-        },
-        onFailure: function (transport) {
-            console.log(transport);
-
-            alert('Something went wrong...');
-        }
-    });
-}
-
-function pauseStartImportInventory() {
-    new Ajax.Request(e2m.url.pauseStartTaskImportInventory, {
-        method: 'get',
-        onCreate: function () {
-            $('loading-mask').setStyle({
-                visibility: 'visible'
-            });
-        },
-        onSuccess: function () {
-            window.location.reload();
+            element.addClassName('disabled');
+            element.innerHTML = 'Download inventory (in progress...)';
         },
         onFailure: function (transport) {
             console.log(transport);
@@ -140,34 +146,8 @@ function sendSettings() {
     });
 }
 
-function startDownloadInventory(element) {
-    new Ajax.Request(e2m.url.startTaskDownloadInventory, {
-        method: 'get',
-        onCreate: function () {
-            $('loading-mask').setStyle({
-                visibility: 'visible'
-            });
-        },
-        onSuccess: function (transport) {
-
-            $$('.block-download-inventory-progress')[0].show();
-
-            var response = JSON.parse(transport.responseText);
-            downloadInventoryHandler(response.data);
-
-            element.addClassName('disabled');
-            element.innerHTML = 'Download inventory (in progress...)';
-        },
-        onFailure: function (transport) {
-            console.log(transport);
-
-            alert('Something went wrong...');
-        }
-    });
-}
-
 function startImportInventory(element) {
-    new Ajax.Request(e2m.url.startTaskImportInventory, {
+    new Ajax.Request(e2m.url.startEbayImportInventory, {
         method: 'get',
         onCreate: function () {
             $('loading-mask').setStyle({
@@ -194,22 +174,40 @@ function startImportInventory(element) {
     });
 }
 
-function unsetToken() {
-    new Ajax.Request(e2m.url.unsetEbayToken, {
-            method: 'get',
-            onCreate: function () {
-                $('loading-mask').setStyle({
-                    visibility: 'visible'
-                });
-            },
-            onSuccess: function () {
-                window.location.reload();
-            },
-            onFailure: function (transport) {
-                console.log(transport);
+function pauseFinishImportInventory() {
+    new Ajax.Request(e2m.url.proceedEbayImportInventory, {
+        method: 'get',
+        onCreate: function () {
+            $('loading-mask').setStyle({
+                visibility: 'visible'
+            });
+        },
+        onSuccess: function () {
+            window.location.reload();
+        },
+        onFailure: function (transport) {
+            console.log(transport);
 
-                alert('Something went wrong...');
-            }
+            alert('Something went wrong...');
         }
-    );
+    });
+}
+
+function pauseStartImportInventory() {
+    new Ajax.Request(e2m.url.pauseEbayImportInventory, {
+        method: 'get',
+        onCreate: function () {
+            $('loading-mask').setStyle({
+                visibility: 'visible'
+            });
+        },
+        onSuccess: function () {
+            window.location.reload();
+        },
+        onFailure: function (transport) {
+            console.log(transport);
+
+            alert('Something went wrong...');
+        }
+    });
 }
