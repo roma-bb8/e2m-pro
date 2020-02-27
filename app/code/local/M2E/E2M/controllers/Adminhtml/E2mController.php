@@ -317,9 +317,17 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
     //########################################
 
     /**
-     * @return Mage_Core_Controller_Varien_Action
+     * @return Mage_Core_Controller_Varien_Action|Zend_Controller_Response_Abstract
      */
     public function indexAction() {
+
+        if ($this->getRequest()->isAjax()) {
+            return $this->getResponse()->setBody(
+                $this->getLayout()->createBlock('e2m/adminhtml_log_grid')->toHtml()
+            );
+        }
+
+        //----------------------------------------
 
         $this->loadLayout();
 

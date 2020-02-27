@@ -118,6 +118,6 @@ class M2E_E2M_Block_Adminhtml_Log_Grid extends Mage_Adminhtml_Block_Widget_Grid 
         $this->setDefaultSort('id');
         $this->setDefaultDir('DESC');
         $this->setFilterVisibility(false);
-        //$this->setUseAjax(true);
+        $this->setUseAjax(true);
     }
 }
