@@ -1,13 +1,5 @@
 <?php
-/**
- * @author     M2E Pro Developers Team
- * @copyright  M2E LTD
- * @license    Commercial use is forbidden
- */
 
-/**
- * Class M2E_E2M_Model_Product_Magento_Configurable
- */
 class M2E_E2M_Model_Product_Magento_Configurable extends M2E_E2M_Model_Product_Magento_Product {
 
     const TYPE = 'configurable';
@@ -43,8 +35,7 @@ class M2E_E2M_Model_Product_Magento_Configurable extends M2E_E2M_Model_Product_M
             $dataVariation['images_urls'] = $variation['images'];
 
             $childProduct = $productMagentoSimple->process($dataVariation);
-
-            $storeId = $this->eBayConfig->getStoreForMarketplace($dataVariation['marketplace_id']);
+            $storeId = $this->eBayConfigHelper->getStoreForMarketplace($dataVariation['marketplace_id']);
             foreach ($variation['specifics'] as $title => $specific) {
                 $attributeCode = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $title);
                 $attributeCode = preg_replace('/[^0-9a-z]/i', '_', $attributeCode);
@@ -71,7 +62,7 @@ class M2E_E2M_Model_Product_Magento_Configurable extends M2E_E2M_Model_Product_M
                     $attributeCode => $optionId
                 ), $childProduct->getStoreId());
 
-                $attributes[$attribute->getId()] = $attributeCode;
+                $attributes[$attribute->getId()] = $attribute;
             }
 
             $childProducts[$childProduct->getId()] = $childProduct->getPrice();
@@ -82,8 +73,7 @@ class M2E_E2M_Model_Product_Magento_Configurable extends M2E_E2M_Model_Product_M
         $set = array();
         $productSet = array();
         foreach ($childProducts as $childProductId => $childProductPrice) {
-            foreach ($attributes as $id => $code) {
-                $attribute = Mage::getModel('eav/config')->getAttribute('catalog_product', $code);
+            foreach ($attributes as $id => $attribute) {
                 $childData = array(
                     'id' => $attribute->getId(),
                     'label' => $attribute->getName(),
@@ -93,7 +83,7 @@ class M2E_E2M_Model_Product_Magento_Configurable extends M2E_E2M_Model_Product_M
                     'pricing_value' => $childProductPrice
                 );
 
-                $set[$code][] = $childData;
+                $set[$attribute->getData('code')][] = $childData;
                 $productSet[$childProductId][] = $childData;
             }
         }
@@ -101,11 +91,11 @@ class M2E_E2M_Model_Product_Magento_Configurable extends M2E_E2M_Model_Product_M
         //----------------------------------------
 
         $configProduct = $productMagentoSimple->process($data, false);
-        if ($configProduct->getId() && $this->eBayConfig->isIgnoreActionFound()) {
+        if ($configProduct->getId() && $this->eBayConfigHelper->isIgnoreActionFound()) {
             $this->addLog('Skip update sku: ' . $configProduct->getSku() .
                 ' Store ID: ' . $configProduct->getStoreId(), M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
 
-            if ($this->eBayConfig->isImportQty()) {
+            if ($this->eBayConfigHelper->isImportQty()) {
                 $configProduct = $this->importQty($configProduct, $data);
             }
 
@@ -116,7 +106,7 @@ class M2E_E2M_Model_Product_Magento_Configurable extends M2E_E2M_Model_Product_M
                 ' Store ID: ' . $configProduct->getStoreId(),
                 M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
 
-            if ($this->eBayConfig->isImportQty()) {
+            if ($this->eBayConfigHelper->isImportQty()) {
                 $configProduct = $this->importQty($configProduct, $data);
             }
 
@@ -159,7 +149,7 @@ class M2E_E2M_Model_Product_Magento_Configurable extends M2E_E2M_Model_Product_M
 
         //----------------------------------------
 
-        if ($this->eBayConfig->isImportQty()) {
+        if ($this->eBayConfigHelper->isImportQty()) {
             $configProduct = $this->importQty($configProduct, $data);
         }
 
