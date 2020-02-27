@@ -11,8 +11,8 @@ $installer = $this;
 //########################################
 
 $sql = <<<SQL
-DROP TABLE IF EXISTS `{$installer->getTable('m2e_e2m_cron_tasks_in_processing')}`;
-CREATE TABLE `{$installer->getTable('m2e_e2m_cron_tasks_in_processing')}` (
+DROP TABLE IF EXISTS `{$installer->getTable('m2e_e2m_cron_tasks')}`;
+CREATE TABLE `{$installer->getTable('m2e_e2m_cron_tasks')}` (
   `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
   `is_running` BOOL NOT NULL DEFAULT FALSE,
   `pause` BOOL NOT NULL DEFAULT FALSE,
@@ -50,35 +50,9 @@ CREATE TABLE `{$installer->getTable('m2e_e2m_log')}` (
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
 
-INSERT INTO `{$installer->getTable('m2e_e2m_cron_tasks_in_processing')}`
-    (`instance`, `data`)
+INSERT INTO `{$installer->getTable('m2e_e2m_cron_tasks')}` (`instance`, `data`)
 VALUES
-    ('Cron_Task_Completed', '{}');
-
-INSERT INTO `{$installer->getTable('core_config_data')}`
-    (`path`, `value`)
-VALUES
-    ('/m2e/e2m/ebay/account/mode/', 2),
-    ('/m2e/e2m/ebay/account/session_id/', NULL),
-    ('/m2e/e2m/ebay/account/token/', NULL),
-    ('/m2e/e2m/ebay/account/expiration_time/', NULL),
-    ('/m2e/e2m/ebay/account/user_id/', NULL),
-    ('/m2e/e2m/settings/marketplaces/stores/map/', '[]'),
-    ('/m2e/e2m/settings/inventory/product_identifier/', '"SKU"'),
-    ('/m2e/e2m/settings/inventory/action_found/', '"IGNORE"'),
-    ('/m2e/e2m/settings/product/import/qty/', FALSE),
-    ('/m2e/e2m/settings/product/generate_sku/', FALSE),
-    ('/m2e/e2m/settings/product/import/image/', FALSE),
-    ('/m2e/e2m/settings/product/delete_html/', FALSE),
-    ('/m2e/e2m/settings/product/attribute_set/', FALSE),
-    ('/m2e/e2m/settings/product/fields_attributes/map/', '[]'),
-    ('/m2e/e2m/settings/full/', FALSE),
-    ('/m2e/e2m/inventory/items/count/total/', 0),
-    ('/m2e/e2m/inventory/items/count/variation/', 0),
-    ('/m2e/e2m/inventory/items/count/simple/', 0),
-    ('/m2e/e2m/inventory/marketplaces/', '[]'),
-    ('/m2e/e2m/inventory/download/', FALSE),
-    ('/m2e/e2m/inventory/import/', FALSE);
+    ('M2E_E2M_Model_Cron_Task_Completed', '{}');
 SQL;
 
 $installer->run($sql);
