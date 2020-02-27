@@ -10,7 +10,7 @@
  */
 class M2E_E2M_Model_Cron_Task_Completed implements M2E_E2M_Model_Cron_Task {
 
-    const INSTANCE = 'Cron_Task_Completed';
+    const CACHE_ID = M2E_E2M_Helper_Data::PREFIX . self::class;
 
     const COMPLETED = 100;
 
@@ -41,20 +41,19 @@ class M2E_E2M_Model_Cron_Task_Completed implements M2E_E2M_Model_Cron_Task {
         $connWrite = $resource->getConnection('core_write');
         $connRead = $resource->getConnection('core_read');
 
-        $cronTasksInProcessingTableName = $resource->getTableName('m2e_e2m_cron_tasks_in_processing');
+        $cronTasksTableName = $resource->getTableName('m2e_e2m_cron_tasks');
 
         //----------------------------------------
 
-        $tasks = $connRead->select()->from($cronTasksInProcessingTableName)
-            ->where('instance <> ?', self::INSTANCE)->query();
+        $tasks = $connRead->select()->from($cronTasksTableName)->where('instance <> ?', self::class)->query();
         while ($task = $tasks->fetch(PDO::FETCH_ASSOC)) {
             if (self::COMPLETED === (int)$task['progress']) {
-                $connWrite->delete($cronTasksInProcessingTableName, array(
+                $connWrite->delete($cronTasksTableName, array(
                     'id = ?' => $task['id']
                 ));
 
                 /** @var M2E_E2M_Model_Cron_Task $taskModel */
-                $taskModel = Mage::getModel('e2m/' . $task['instance']);
+                $taskModel = Mage::getModel('e2m/' . str_replace('M2E_E2M_Model_', '', $task['instance']));
 
                 $taskModel->completed($task['id'], $coreHelper->jsonDecode($task['data']));
 
@@ -70,7 +69,7 @@ class M2E_E2M_Model_Cron_Task_Completed implements M2E_E2M_Model_Cron_Task {
                 $updated->modify(self::MAX_UPDATE);
 
                 if ($current->getTimestamp() > $updated->getTimestamp()) {
-                    $connWrite->delete($cronTasksInProcessingTableName, array(
+                    $connWrite->delete($cronTasksTableName, array(
                         'id = ?' => $task['id']
                     ));
 
@@ -82,7 +81,7 @@ class M2E_E2M_Model_Cron_Task_Completed implements M2E_E2M_Model_Cron_Task {
             $created->modify(self::MAX_CREATED);
 
             if ($current->getTimestamp() > $created->getTimestamp()) {
-                $connWrite->delete($cronTasksInProcessingTableName, array(
+                $connWrite->delete($cronTasksTableName, array(
                     'id = ?' => $task['id']
                 ));
 
