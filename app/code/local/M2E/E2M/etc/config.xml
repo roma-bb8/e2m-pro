@@ -79,6 +79,18 @@
             </m2e_e2m_available_marketplaces>
         </events>
     </global>
+    <crontab>
+        <jobs>
+            <e2m_cron>
+                <schedule>
+                    <cron_expr>*/1 * * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>e2m/Cron::process</model>
+                </run>
+            </e2m_cron>
+        </jobs>
+    </crontab>
     <adminhtml>
         <menu>
             <e2m module="e2m">

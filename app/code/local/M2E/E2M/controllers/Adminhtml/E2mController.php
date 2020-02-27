@@ -359,48 +359,9 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
 
         session_write_close();
 
-        $coreHelper = Mage::helper('core');
+        /** @var M2E_E2M_Model_Cron $cron */
+        $cron = Mage::getSingleton('e2m/Cron');
 
-        $resource = Mage::getSingleton('core/resource');
-
-        $connWrite = $resource->getConnection('core_write');
-        $connRead = $resource->getConnection('core_read');
-
-        $cronTasksTableName = $resource->getTableName('m2e_e2m_cron_tasks');
-
-        //----------------------------------------
-
-        $tasks = $connRead->select()->from($cronTasksTableName)->order('id DESC')->query();
-        $handlers = array();
-        while ($task = $tasks->fetch(PDO::FETCH_ASSOC)) {
-            if ($task['is_running'] || $task['pause'] ||
-                $task['progress'] === M2E_E2M_Model_Cron_Task_Completed::COMPLETED) {
-                continue;
-            }
-
-            $connWrite->update($cronTasksTableName, array(
-                'is_running' => true
-            ), array('id = ?' => $task['id']));
-
-            try {
-
-                /** @var M2E_E2M_Model_Cron_Task $taskModel */
-                $taskModel = Mage::getModel('e2m/' . str_replace('M2E_E2M_Model_', '', $task['instance']));
-
-                $data = $taskModel->process($task['id'], $coreHelper->jsonDecode($task['data']));
-                $instance = lcfirst(substr($task['instance'], strrpos($task['instance'], '_') + 1));
-                $handlers[] = array(
-                    'handler' => $instance . 'Handler',
-                    'data' => $data
-                );
-
-            } finally {
-                $connWrite->update($cronTasksTableName, array(
-                    'is_running' => false
-                ), array('id = ?' => $task['id']));
-            }
-        }
-
-        return $this->ajaxResponse($handlers);
+        return $this->ajaxResponse($cron->process());
     }
 }
