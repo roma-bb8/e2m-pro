@@ -1,19 +1,11 @@
 <?php
-/**
- * @author     M2E Pro Developers Team
- * @copyright  M2E LTD
- * @license    Commercial use is forbidden
- */
 
-/**
- * Class M2E_E2M_Adminhtml_E2mController
- */
 class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseController {
 
     /**
      * @return Zend_Controller_Response_Abstract
      */
-    public function pauseFinishTaskImportInventoryAction() {
+    public function proceedEbayImportInventoryAction() {
 
         /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
@@ -23,29 +15,28 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
         $connWrite = $resource->getConnection('core_write');
         $connRead = $resource->getConnection('core_read');
 
-        $cronTasksInProcessingTableName = $resource->getTableName('m2e_e2m_cron_tasks_in_processing');
+        $cronTasksTableName = $resource->getTableName('m2e_e2m_cron_tasks');
 
         //----------------------------------------
 
-        $taskId = $connRead->select()->from($cronTasksInProcessingTableName, array('id'))
-            ->where('instance = ?', M2E_E2M_Model_Cron_Task_Magento_ImportInventory::INSTANCE)->query()->fetchColumn();
+        $taskId = $connRead->select()->from($cronTasksTableName, array('id'))
+            ->where('instance = ?', M2E_E2M_Model_Cron_Task_Magento_ImportInventory::class)
+            ->limit(1)->query()->fetchColumn();
 
         if (empty($taskId)) {
             return $this->ajaxResponse(array(
-                'process' => 'empty',
-                'items' => 'empty'
+                'process' => $dataHelper->getConfig(M2E_E2M_Model_Cron_Task_Magento_ImportInventory::CACHE_ID)
             ));
         }
 
-        $connWrite->update($cronTasksInProcessingTableName, array(
+        $connWrite->update($cronTasksTableName, array(
             'pause' => false
         ), array('id = ?' => $taskId));
 
         $dataHelper->logReport($taskId, $dataHelper->__('Proceed task of Import Inventory from Magento...'));
 
         return $this->ajaxResponse(array(
-            'process' => 'pause',
-            'items' => 'pause'
+            'process' => $dataHelper->getConfig(M2E_E2M_Model_Cron_Task_Magento_ImportInventory::CACHE_ID)
         ));
     }
 
@@ -54,7 +45,7 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
     /**
      * @return Zend_Controller_Response_Abstract
      */
-    public function pauseStartTaskImportInventoryAction() {
+    public function pauseEbayImportInventoryAction() {
 
         /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
@@ -64,29 +55,30 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
         $connWrite = $resource->getConnection('core_write');
         $connRead = $resource->getConnection('core_read');
 
-        $cronTasksInProcessingTableName = $resource->getTableName('m2e_e2m_cron_tasks_in_processing');
+        $cronTasksTableName = $resource->getTableName('m2e_e2m_cron_tasks');
 
         //----------------------------------------
 
-        $taskId = $connRead->select()->from($cronTasksInProcessingTableName, array('id'))
-            ->where('instance = ?', M2E_E2M_Model_Cron_Task_Magento_ImportInventory::INSTANCE)->query()->fetchColumn();
+        $dataHelper->setCacheValue(M2E_E2M_Model_Cron_Task_Magento_ImportInventory::CACHE_ID, 'pause');
+
+        $taskId = $connRead->select()->from($cronTasksTableName, array('id'))
+            ->where('instance = ?', M2E_E2M_Model_Cron_Task_Magento_ImportInventory::class)
+            ->limit(1)->query()->fetchColumn();
 
         if (empty($taskId)) {
             return $this->ajaxResponse(array(
-                'process' => 'empty',
-                'items' => 'empty'
+                'process' => $dataHelper->getConfig(M2E_E2M_Model_Cron_Task_Magento_ImportInventory::CACHE_ID)
             ));
         }
 
-        $connWrite->update($cronTasksInProcessingTableName, array(
+        $connWrite->update($cronTasksTableName, array(
             'pause' => true
         ), array('id = ?' => $taskId));
 
         $dataHelper->logReport($taskId, $dataHelper->__('Pause task of Import Inventory from Magento!'));
 
         return $this->ajaxResponse(array(
-            'process' => 'pause',
-            'items' => 'pause'
+            'process' => $dataHelper->getConfig(M2E_E2M_Model_Cron_Task_Magento_ImportInventory::CACHE_ID)
         ));
     }
 
@@ -95,7 +87,7 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
     /**
      * @return Zend_Controller_Response_Abstract
      */
-    public function startTaskImportInventoryAction() {
+    public function startEbayImportInventoryAction() {
 
         /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
@@ -105,18 +97,18 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
         $connWrite = $resource->getConnection('core_write');
         $connRead = $resource->getConnection('core_read');
 
-        $cronTasksInProcessingTableName = $resource->getTableName('m2e_e2m_cron_tasks_in_processing');
+        $cronTasksTableName = $resource->getTableName('m2e_e2m_cron_tasks');
 
         //----------------------------------------
 
-        $connWrite->delete($cronTasksInProcessingTableName, array(
-            'instance = ?' => M2E_E2M_Model_Cron_Task_Magento_ImportInventory::INSTANCE
+        $connWrite->delete($cronTasksTableName, array(
+            'instance = ?' => M2E_E2M_Model_Cron_Task_Magento_ImportInventory::class
         ));
 
         //----------------------------------------
 
-        $connWrite->insert($cronTasksInProcessingTableName, array(
-            'instance' => M2E_E2M_Model_Cron_Task_Magento_ImportInventory::INSTANCE,
+        $connWrite->insert($cronTasksTableName, array(
+            'instance' => M2E_E2M_Model_Cron_Task_Magento_ImportInventory::class,
             'data' => Mage::helper('core')->jsonEncode(array(
                 'last_import_id' => 0
             )),
@@ -125,14 +117,14 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
 
         //----------------------------------------
 
-        $taskId = $connRead->select()->from($cronTasksInProcessingTableName, 'id')
-            ->where('instance = ?', M2E_E2M_Model_Cron_Task_Magento_ImportInventory::INSTANCE)->query()->fetchColumn();
+        $taskId = $connRead->select()->from($cronTasksTableName, 'id')
+            ->where('instance = ?', M2E_E2M_Model_Cron_Task_Magento_ImportInventory::class)
+            ->limit(1)->query()->fetchColumn();
 
         $dataHelper->logReport($taskId, $dataHelper->__('Start task of Import Inventory from Magento...'));
 
         return $this->ajaxResponse(array(
-            'process' => 0,
-            'items' => 0
+            'process' => 0
         ));
     }
 
@@ -144,64 +136,39 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
      */
     public function setSettingsAction() {
 
-        /** @var M2E_E2M_Model_Ebay_Config $eBayConfig */
-        $eBayConfig = Mage::getSingleton('e2m/Ebay_Config');
+        /** @var Mage_Core_Helper_Data $coreHelper */
+        $coreHelper = Mage::helper('core');
+
+        /** @var M2E_E2M_Helper_Data $dataHelper */
+        $dataHelper = Mage::helper('e2m');
+
+        $settings = $coreHelper->jsonDecode($this->getRequest()->getParam('settings'));
 
         //----------------------------------------
 
-        $settings = Mage::helper('core')->jsonDecode($this->getRequest()->getParam('settings'));
-
-        $eBayConfig->set(
-            M2E_E2M_Model_Ebay_Config::PATH_MARKETPLACE_TO_STORE_MAP,
-            $settings['marketplace-store'],
-            false
+        $dataHelper->setConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET, $settings['attribute-set']);
+        $dataHelper->setConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_STORE_MAP, $settings['marketplace-store']);
+        $dataHelper->setConfig(
+            M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_MAP,
+            $settings['ebay-field-magento-attribute']
         );
-        $eBayConfig->set(
-            M2E_E2M_Model_Ebay_Config::PATH_INVENTORY_PRODUCT_IDENTIFIER,
-            $settings['product-identifier'],
-            false
+        $dataHelper->setConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_GENERATE_SKU, $settings['generate-sku']);
+        $dataHelper->setConfig(
+            M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_IDENTIFIER,
+            $settings['product-identifier']
         );
-        $eBayConfig->set(
-            M2E_E2M_Model_Ebay_Config::PATH_INVENTORY_ACTION_FOUND,
-            $settings['action-found'],
-            false
-        );
-        $eBayConfig->set(
-            M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_QTY,
-            $settings['import-qty'],
-            false
-        );
-        $eBayConfig->set(
-            M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_GENERATE_SKU,
-            $settings['generate-sku'],
-            false
-        );
-        $eBayConfig->set(
-            M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_IMAGE,
-            $settings['import-image'],
-            false
-        );
-        $eBayConfig->set(
-            M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_DELETE_HTML,
-            $settings['delete-html'],
-            false
-        );
-        $eBayConfig->set(
-            M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_ATTRIBUTE_SET,
-            $settings['attribute-set'],
-            false
-        );
-        $eBayConfig->set(
-            M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_FIELDS_ATTRIBUTES_MAP,
-            $settings['ebay-field-magento-attribute'],
-            false
-        );
-        $eBayConfig->setFull(false);
-        $eBayConfig->save();
+        $dataHelper->setConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_DELETE_HTML, $settings['delete-html']);
+        $dataHelper->setConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_FOUND, $settings['action-found']);
+        $dataHelper->setConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_IMPORT_IMAGE, $settings['import-image']);
+        $dataHelper->setConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_IMPORT_QTY, $settings['import-qty'], true);
 
         //----------------------------------------
 
-        $this->_getSession()->addSuccess(Mage::helper('e2m')->__('Save settings'));
+        Mage::dispatchEvent('m2e_e2m_change_ebay_settings');
+
+        //----------------------------------------
+
+        $this->_getSession()->addSuccess($dataHelper->__('Save settings'));
 
         //----------------------------------------
 
@@ -209,8 +176,6 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
             'settings' => $settings
         ));
     }
-
-    //----------------------------------------
 
     /**
      * @return Zend_Controller_Response_Abstract
@@ -229,25 +194,22 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
      * @return Zend_Controller_Response_Abstract
      * @throws Exception
      */
-    public function startTaskDownloadInventoryAction() {
+    public function startEbayDownloadInventoryAction() {
 
         /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
-
-        /** @var M2E_E2M_Model_Ebay_Inventory $eBayInventory */
-        $eBayInventory = Mage::getSingleton('e2m/Ebay_Inventory');
 
         $resource = Mage::getSingleton('core/resource');
 
         $connWrite = $resource->getConnection('core_write');
         $connRead = $resource->getConnection('core_read');
 
-        $cronTasksInProcessingTableName = $resource->getTableName('m2e_e2m_cron_tasks_in_processing');
+        $cronTasksTableName = $resource->getTableName('m2e_e2m_cron_tasks');
 
         //----------------------------------------
 
-        $connWrite->delete($cronTasksInProcessingTableName, array(
-            'instance = ?' => M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory::INSTANCE
+        $connWrite->delete($cronTasksTableName, array(
+            'instance = ?' => M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory::class
         ));
 
         //----------------------------------------
@@ -255,10 +217,10 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
         $toDateTime = new DateTime('now', new DateTimeZone('UTC'));
 
         $fromDatetime = clone $toDateTime;
-        $fromDatetime->setTimestamp(M2E_E2M_Model_Cron_Task_eBay_DownloadInventory::MAX_DOWNLOAD_TIME);
+        $fromDatetime->setTimestamp(M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory::MAX_DOWNLOAD_TIME);
 
-        $connWrite->insert($cronTasksInProcessingTableName, array(
-            'instance' => M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory::INSTANCE,
+        $connWrite->insert($cronTasksTableName, array(
+            'instance' => M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory::class,
             'data' => Mage::helper('core')->jsonEncode(array(
                 'from' => $fromDatetime->getTimestamp(),
                 'to' => $toDateTime->getTimestamp()
@@ -268,16 +230,17 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
 
         //----------------------------------------
 
-        $taskId = $connRead->select()->from($cronTasksInProcessingTableName, 'id')
-            ->where('instance = ?', M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory::INSTANCE)->query()->fetchColumn();
+        $taskId = $connRead->select()->from($cronTasksTableName, 'id')
+            ->where('instance = ?', M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory::class)
+            ->limit(1)->query()->fetchColumn();
 
         $dataHelper->logReport($taskId, $dataHelper->__('Start task of Downloading Inventory from eBay...'));
 
         return $this->ajaxResponse(array(
             'process' => 0,
-            'total' => $eBayInventory->get(M2E_E2M_Model_Ebay_Inventory::PATH_ITEMS_COUNT_TOTAL),
-            'variation' => $eBayInventory->get(M2E_E2M_Model_Ebay_Inventory::PATH_ITEMS_COUNT_VARIATION),
-            'simple' => $eBayInventory->get(M2E_E2M_Model_Ebay_Inventory::PATH_ITEMS_COUNT_SIMPLE)
+            'total' => $dataHelper->getCacheValue(M2E_E2M_Helper_Data::CACHE_ID_EBAY_INVENTORY_TOTAL_COUNT, 0),
+            'variation' => $dataHelper->getCacheValue(M2E_E2M_Helper_Data::CACHE_ID_EBAY_INVENTORY_VARIATION_COUNT, 0),
+            'simple' => $dataHelper->getCacheValue(M2E_E2M_Helper_Data::CACHE_ID_EBAY_INVENTORY_SIMPLE_COUNT, 0)
         ));
     }
 
@@ -287,193 +250,60 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
      * @return Zend_Controller_Response_Abstract
      * @throws Exception
      */
-    public function unsetEbayTokenAction() {
+    public function unlinkEbayAccountAction() {
 
-        /** @var M2E_E2M_Model_Ebay_Account $eBayAccount */
-        $eBayAccount = Mage::getSingleton('e2m/Ebay_Account');
+        /** @var M2E_E2M_Helper_Data $dataHelper */
+        $dataHelper = Mage::helper('e2m');
 
-        /** @var M2E_E2M_Model_Ebay_Config $eBayConfig */
-        $eBayConfig = Mage::getSingleton('e2m/Ebay_Config');
+        $dataHelper->setConfig(M2E_E2M_Helper_Data::XML_PATH_EBAY_AVAILABLE_MARKETPLACES, array());
+        $dataHelper->setConfig(M2E_E2M_Helper_Data::XML_PATH_EBAY_DOWNLOAD_INVENTORY, false);
+        $dataHelper->setConfig(M2E_E2M_Helper_Data::XML_PATH_EBAY_IMPORT_INVENTORY, false);
 
-        /** @var M2E_E2M_Model_Ebay_Inventory $eBayInventory */
-        $eBayInventory = Mage::getSingleton('e2m/Ebay_Inventory');
+        $dataHelper->setConfig(M2E_E2M_Model_Proxy_Ebay_Account::XML_PATH_EBAY_ACCOUNT_ID, false, true);
 
-        $resource = Mage::getSingleton('core/resource');
+        $dataHelper->setCacheValue(M2E_E2M_Helper_Data::CACHE_ID_EBAY_INVENTORY_VARIATION_COUNT, false);
+        $dataHelper->setCacheValue(M2E_E2M_Helper_Data::CACHE_ID_EBAY_INVENTORY_SIMPLE_COUNT, false);
+        $dataHelper->setCacheValue(M2E_E2M_Helper_Data::CACHE_ID_EBAY_INVENTORY_TOTAL_COUNT, false);
 
-        //----------------------------------------
-
-        $connWrite = $resource->getConnection('core_write');
-        $connWrite->truncateTable($resource->getTableName('m2e_e2m_log'));
-        $connWrite->truncateTable($resource->getTableName('m2e_e2m_inventory_ebay'));
-        $connWrite->delete($resource->getTableName('m2e_e2m_cron_tasks_in_processing'), array(
-            'instance IN (?)' => array(
-                M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory::INSTANCE,
-                M2E_E2M_Model_Cron_Task_Magento_ImportInventory::INSTANCE
-            )
-        ));
-
-        $eBayAccount->set(M2E_E2M_Model_Ebay_Account::MODE, 0, false);
-        $eBayAccount->set(M2E_E2M_Model_Ebay_Account::TOKEN, false, false);
-        $eBayAccount->set(M2E_E2M_Model_Ebay_Account::EXPIRATION_TIME, false, false);
-        $eBayAccount->set(M2E_E2M_Model_Ebay_Account::USER_ID, false, false);
-        $eBayAccount->set(M2E_E2M_Model_Ebay_Account::SESSION_ID, false, false);
-        $eBayAccount->save();
-
-        $eBayConfig->set(M2E_E2M_Model_Ebay_Config::PATH_MARKETPLACE_TO_STORE_MAP, array(), false);
-        $eBayConfig->set(
-            M2E_E2M_Model_Ebay_Config::PATH_INVENTORY_PRODUCT_IDENTIFIER,
-            M2E_E2M_Model_Ebay_Config::VALUE_SKU_PRODUCT_IDENTIFIER,
-            false
-        );
-        $eBayConfig->set(
-            M2E_E2M_Model_Ebay_Config::PATH_INVENTORY_ACTION_FOUND,
-            M2E_E2M_Model_Ebay_Config::VALUE_IGNORE_ACTION_FOUND,
-            false
-        );
-        $eBayConfig->set(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_QTY, false, false);
-        $eBayConfig->set(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_GENERATE_SKU, false, false);
-        $eBayConfig->set(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_IMPORT_IMAGE, false, false);
-        $eBayConfig->set(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_DELETE_HTML, false, false);
-        $eBayConfig->set(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_ATTRIBUTE_SET, null, false);
-        $eBayConfig->set(M2E_E2M_Model_Ebay_Config::PATH_PRODUCT_FIELDS_ATTRIBUTES_MAP, array(), false);
-        $eBayConfig->save();
-
-        $eBayInventory->set(M2E_E2M_Model_Ebay_Inventory::PATH_ITEMS_COUNT_TOTAL, 0, false);
-        $eBayInventory->set(M2E_E2M_Model_Ebay_Inventory::PATH_ITEMS_COUNT_VARIATION, 0, false);
-        $eBayInventory->set(M2E_E2M_Model_Ebay_Inventory::PATH_ITEMS_COUNT_SIMPLE, 0, false);
-        $eBayInventory->set(M2E_E2M_Model_Ebay_Inventory::PATH_MARKETPLACES, array(), false);
-        $eBayInventory->save();
+        $dataHelper->setCacheValue(M2E_E2M_Model_Cron_Task_Magento_ImportInventory::CACHE_ID, 0);
+        $dataHelper->setCacheValue(M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory::CACHE_ID, 0);
 
         //----------------------------------------
 
-        $this->_getSession()->addSuccess(Mage::helper('e2m')->__('Unset token'));
+        $this->_getSession()->addSuccess(Mage::helper('e2m')->__('Account unlink.'));
 
         //----------------------------------------
 
         return $this->ajaxResponse(array(
-            'delete' => true
+            'redirect' => true
         ));
-    }
-
-    //----------------------------------------
-
-    /**
-     * @return M2E_E2M_Adminhtml_E2MController|Mage_Core_Controller_Varien_Action
-     * @throws Exception
-     */
-    public function getAfterEbayTokenAction() {
-
-        /** @var M2E_E2M_Model_Ebay_Account $eBayAccount */
-        $eBayAccount = Mage::getSingleton('e2m/Ebay_Account');
-
-        /** @var M2e_e2m_Model_Api_Ebay $eBayAPI */
-        $eBayAPI = Mage::getSingleton('e2m/Api_Ebay');
-
-        //----------------------------------------
-
-        $info = $eBayAPI->getInfo(
-            $eBayAccount->get(M2E_E2M_Model_Ebay_Account::MODE),
-            $eBayAccount->get(M2E_E2M_Model_Ebay_Account::SESSION_ID)
-        );
-
-        $eBayAccount->set(M2E_E2M_Model_Ebay_Account::SESSION_ID, false, false);
-        $eBayAccount->set(M2E_E2M_Model_Ebay_Account::TOKEN, $info['token'], false);
-        $eBayAccount->set(M2E_E2M_Model_Ebay_Account::EXPIRATION_TIME, $info['expiration_time'], false);
-        $eBayAccount->set(M2E_E2M_Model_Ebay_Account::USER_ID, $info['user_id'], false);
-        $eBayAccount->save();
-
-        //----------------------------------------
-
-        $this->_getSession()->addSuccess(Mage::helper('e2m')->__('Save eBay token'));
-
-        //----------------------------------------
-
-        return $this->_redirect('*/e2m/index');
     }
 
     /**
      * @return Zend_Controller_Response_Abstract
      * @throws Exception
      */
-    public function getBeforeEbayTokenAction() {
+    public function linkEbayAccountAction() {
 
-        /** @var M2E_E2M_Model_eBay_Account $eBayAccount */
-        $eBayAccount = Mage::getSingleton('e2m/Ebay_Account');
-
-        /** @var M2e_e2m_Model_Api_Ebay $eBayAPI */
-        $eBayAPI = Mage::getSingleton('e2m/Api_Ebay');
-
-        //----------------------------------------
-
-        $mode = (int)Mage::helper('core')->jsonDecode(
-            $this->getRequest()->getParam(M2E_E2M_Model_Ebay_Account::MODE)
-        );
-        $sessionID = $eBayAPI->getSessionID($mode);
-
-        $eBayAccount->set(M2E_E2M_Model_Ebay_Account::MODE, $mode, false);
-        $eBayAccount->set(M2E_E2M_Model_Ebay_Account::SESSION_ID, $sessionID, false);
-        $eBayAccount->save();
-
-        return $this->ajaxResponse(array(
-            'url' => $eBayAPI->getAuthURL($eBayAccount->get(M2E_E2M_Model_Ebay_Account::MODE),
-                $this->getUrl('*/e2m/getAfterEbayToken'), $sessionID)
-        ));
-    }
-
-    //########################################
-
-    /**
-     * @return Zend_Controller_Response_Abstract
-     * @throws Zend_Db_Statement_Exception
-     */
-    public function cronAction() {
-
-        session_write_close();
-
-        $coreHelper = Mage::helper('core');
-
-        $resource = Mage::getSingleton('core/resource');
-
-        $connWrite = $resource->getConnection('core_write');
-        $connRead = $resource->getConnection('core_read');
-
-        $cronTasksInProcessing = $resource->getTableName('m2e_e2m_cron_tasks_in_processing');
-
-        //----------------------------------------
-
-        $tasks = $connRead->select()->from($cronTasksInProcessing)->query();
-
-        $handlers = array();
-        while ($task = $tasks->fetch(PDO::FETCH_ASSOC)) {
-            if ($task['is_running'] || $task['pause'] ||
-                $task['progress'] === M2E_E2M_Model_Cron_Task_Completed::COMPLETED) {
-                continue;
-            }
-
-            $connWrite->update($cronTasksInProcessing, array(
-                'is_running' => true
-            ), array('id = ?' => $task['id']));
-
-            try {
-
-                /** @var M2E_E2M_Model_Cron_Task $taskModel */
-                $taskModel = Mage::getModel('e2m/' . $task['instance']);
-
-                $data = $taskModel->process($task['id'], $coreHelper->jsonDecode($task['data']));
-                $instance = lcfirst(substr($task['instance'], strrpos($task['instance'], '_') + 1));
-                $handlers[] = array(
-                    'handler' => $instance . 'Handler',
-                    'data' => $data
-                );
-
-            } finally {
-                $connWrite->update($cronTasksInProcessing, array(
-                    'is_running' => false
-                ), array('id = ?' => $task['id']));
-            }
+        $accountId = $this->getRequest()->getParam('account_id');
+        if (empty($accountId)) {
+            throw new Exception('Account invalid.');
         }
 
-        return $this->ajaxResponse($handlers);
+        /** @var M2E_E2M_Helper_Data $dataHelper */
+        $dataHelper = Mage::helper('e2m');
+
+        $dataHelper->setConfig(M2E_E2M_Model_Proxy_Ebay_Account::XML_PATH_EBAY_ACCOUNT_ID, $accountId, true);
+
+        //----------------------------------------
+
+        $this->_getSession()->addSuccess(Mage::helper('e2m')->__('Account link.'));
+
+        //----------------------------------------
+
+        return $this->ajaxResponse(array(
+            'redirect' => true
+        ));
     }
 
     //########################################
@@ -516,37 +346,53 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
         return $this->renderLayout();
     }
 
-    //########################################
 
-    /**
-     * @inheritDoc
-     *
-     * @param Zend_Controller_Request_Abstract $request
-     * @param Zend_Controller_Response_Abstract $response
-     * @param array $invokeArgs
-     */
-    public function __construct(
-        Zend_Controller_Request_Abstract $request,
-        Zend_Controller_Response_Abstract $response,
-        array $invokeArgs = array()) {
+    public function cronAction() {
 
-        register_shutdown_function(function () {
-            $error = error_get_last();
-            if (strpos($error['message'], 'deprecated')) {
-                return;
+        session_write_close();
+
+        $coreHelper = Mage::helper('core');
+
+        $resource = Mage::getSingleton('core/resource');
+
+        $connWrite = $resource->getConnection('core_write');
+        $connRead = $resource->getConnection('core_read');
+
+        $cronTasksTableName = $resource->getTableName('m2e_e2m_cron_tasks');
+
+        //----------------------------------------
+
+        $tasks = $connRead->select()->from($cronTasksTableName)->order('id DESC')->query();
+        $handlers = array();
+        while ($task = $tasks->fetch(PDO::FETCH_ASSOC)) {
+            if ($task['is_running'] || $task['pause'] ||
+                $task['progress'] === M2E_E2M_Model_Cron_Task_Completed::COMPLETED) {
+                continue;
             }
 
-            if (strpos($error['message'], 'Too few arguments')) {
-                return;
+            $connWrite->update($cronTasksTableName, array(
+                'is_running' => true
+            ), array('id = ?' => $task['id']));
+
+            try {
+
+                /** @var M2E_E2M_Model_Cron_Task $taskModel */
+                $taskModel = Mage::getModel('e2m/' . str_replace('M2E_E2M_Model_', '', $task['instance']));
+
+                $data = $taskModel->process($task['id'], $coreHelper->jsonDecode($task['data']));
+                $instance = lcfirst(substr($task['instance'], strrpos($task['instance'], '_') + 1));
+                $handlers[] = array(
+                    'handler' => $instance . 'Handler',
+                    'data' => $data
+                );
+
+            } finally {
+                $connWrite->update($cronTasksTableName, array(
+                    'is_running' => false
+                ), array('id = ?' => $task['id']));
             }
+        }
 
-            /** @var M2E_E2M_Helper_Data $dataHelper */
-            $dataHelper = Mage::helper('e2m');
-            $dataHelper->logException(new Exception(
-                "Error: {$error['message']}\nFile: {$error['file']}\nLine: {$error['line']}"
-            ));
-        });
-
-        parent::__construct($request, $response, $invokeArgs);
+        return $this->ajaxResponse($handlers);
     }
 }

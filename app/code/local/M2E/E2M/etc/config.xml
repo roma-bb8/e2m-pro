@@ -17,10 +17,6 @@
             </e2m>
         </helpers>
         <models>
-            <e2m>
-                <class>M2E_E2M_Model</class>
-                <resourceModel>e2m_resource</resourceModel>
-            </e2m>
             <e2m_resource>
                 <class>M2E_E2M_Model_Resource</class>
                 <entities>
@@ -29,6 +25,13 @@
                     </log>
                 </entities>
             </e2m_resource>
+            <e2m>
+                <class>M2E_E2M_Model</class>
+                <resourceModel>e2m_resource</resourceModel>
+            </e2m>
+            <m2e_observer>
+                <class>M2E_E2M_Observer</class>
+            </m2e_observer>
         </models>
         <resources>
             <e2m_setup>
@@ -37,6 +40,44 @@
                 </setup>
             </e2m_setup>
         </resources>
+        <events>
+            <m2e_e2m_cron_task_ebay_inventory_download_after>
+                <observers>
+                    <m2e_observer>
+                        <type>singleton</type>
+                        <class>M2E_E2M_Observer_Ebay_StatisticsInventory</class>
+                        <method>process</method>
+                    </m2e_observer>
+                </observers>
+            </m2e_e2m_cron_task_ebay_inventory_download_after>
+            <m2e_e2m_cron_task_ebay_inventory_download_completed>
+                <observers>
+                    <m2e_observer>
+                        <type>singleton</type>
+                        <class>M2E_E2M_Observer_Ebay_DownloadInventory</class>
+                        <method>process</method>
+                    </m2e_observer>
+                </observers>
+            </m2e_e2m_cron_task_ebay_inventory_download_completed>
+            <m2e_e2m_change_ebay_settings>
+                <observers>
+                    <m2e_observer>
+                        <type>singleton</type>
+                        <class>M2E_E2M_Observer_Ebay_Settings</class>
+                        <method>process</method>
+                    </m2e_observer>
+                </observers>
+            </m2e_e2m_change_ebay_settings>
+            <m2e_e2m_available_marketplaces>
+                <observers>
+                    <m2e_observer>
+                        <type>singleton</type>
+                        <class>M2E_E2M_Observer_Ebay_Settings</class>
+                        <method>process</method>
+                    </m2e_observer>
+                </observers>
+            </m2e_e2m_available_marketplaces>
+        </events>
     </global>
     <adminhtml>
         <menu>

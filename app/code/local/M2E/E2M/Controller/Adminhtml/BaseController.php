@@ -34,6 +34,23 @@ class M2E_E2M_Controller_Adminhtml_BaseController extends Mage_Adminhtml_Control
      */
     final public function dispatch($action) {
 
+        register_shutdown_function(function () {
+            $error = error_get_last();
+            if (strpos($error['message'], 'deprecated')) {
+                return;
+            }
+
+            if (strpos($error['message'], 'Too few arguments')) {
+                return;
+            }
+
+            /** @var M2E_E2M_Helper_Data $dataHelper */
+            $dataHelper = Mage::helper('e2m');
+            $dataHelper->logException(new Exception(
+                "Error: {$error['message']}\nFile: {$error['file']}\nLine: {$error['line']}"
+            ));
+        });
+
         try {
             parent::dispatch($action);
         } catch (Exception $e) {
