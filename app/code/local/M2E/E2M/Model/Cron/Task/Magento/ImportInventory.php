@@ -1,16 +1,8 @@
 <?php
-/**
- * @author     M2E Pro Developers Team
- * @copyright  M2E LTD
- * @license    Commercial use is forbidden
- */
 
-/**
- * Class M2E_E2M_Model_Cron_Task_Magento_ImportInventory
- */
 class M2E_E2M_Model_Cron_Task_Magento_ImportInventory implements M2E_E2M_Model_Cron_Task {
 
-    const INSTANCE = 'Cron_Task_Magento_ImportInventory';
+    const CACHE_ID = M2E_E2M_Helper_Data::PREFIX . self::class;
 
     const MAX_LIMIT = 20;
 
@@ -44,10 +36,7 @@ class M2E_E2M_Model_Cron_Task_Magento_ImportInventory implements M2E_E2M_Model_C
         /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
 
-        /** @var M2E_E2M_Model_Ebay_Inventory $eBayInventory */
-        $eBayInventory = Mage::getSingleton('e2m/Ebay_Inventory');
-
-        $eBayInventory->set(M2E_E2M_Model_Ebay_Inventory::PATH_IMPORT_INVENTORY, true);
+        $dataHelper->setConfig(M2E_E2M_Helper_Data::XML_PATH_EBAY_IMPORT_INVENTORY, true);
 
         $dataHelper->logReport($taskId, 'Finish task of Import Inventory from Magento.');
     }
@@ -60,19 +49,20 @@ class M2E_E2M_Model_Cron_Task_Magento_ImportInventory implements M2E_E2M_Model_C
      */
     public function process($taskId, $data) {
 
+        /** @var Mage_Core_Helper_Data $coreHelper */
+        $coreHelper = Mage::helper('core');
+
+        /** @var M2E_E2M_Helper_Data $dataHelper */
+        $dataHelper = Mage::helper('e2m');
+
+        /** @var M2E_E2M_Helper_Ebay_Config $eBayConfigHelper */
+        $eBayConfigHelper = Mage::getModel('e2m/Ebay_Config');
+
         /** @var M2E_E2M_Model_Product_Magento_Configurable $productMagentoConfigurable */
         $productMagentoConfigurable = Mage::getModel('e2m/Product_Magento_Configurable');
 
         /** @var M2E_E2M_Model_Product_Magento_Simple $productMagentoSimple */
         $productMagentoSimple = Mage::getModel('e2m/Product_Magento_Simple');
-
-        /** @var M2E_E2M_Model_Ebay_Config $eBayConfig */
-        $eBayConfig = Mage::getModel('e2m/Ebay_Config');
-
-        /** @var M2E_E2M_Helper_Data $dataHelper */
-        $dataHelper = Mage::helper('e2m');
-
-        $coreHelper = Mage::helper('core');
 
         $resource = Mage::getSingleton('core/resource');
 
@@ -80,7 +70,7 @@ class M2E_E2M_Model_Cron_Task_Magento_ImportInventory implements M2E_E2M_Model_C
         $connRead = $resource->getConnection('core_read');
 
         $inventoryTableName = $resource->getTableName('m2e_e2m_inventory_ebay');
-        $cronTasksInProcessingTableName = $resource->getTableName('m2e_e2m_cron_tasks_in_processing');
+        $cronTasksTableName = $resource->getTableName('m2e_e2m_cron_tasks');
 
         //----------------------------------------
 
@@ -94,9 +84,9 @@ class M2E_E2M_Model_Cron_Task_Magento_ImportInventory implements M2E_E2M_Model_C
         while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
 
             $rowData = $coreHelper->jsonDecode($row['data']);
-            if ($eBayConfig->isSkipStore($rowData['marketplace_id'])) {
-                $dataHelper->logReport(
-                    $row['id'], 'Skip marketplace eBay item: ' . $rowData['identifiers_item_id'],
+            if ($eBayConfigHelper->isSkipStore($rowData['marketplace_id'])) {
+                $dataHelper->logReport($taskId,
+                    'Skip marketplace eBay item: ' . $rowData['identifiers_item_id'],
                     M2E_E2M_Helper_Data::TYPE_REPORT_WARNING
                 );
 
@@ -108,23 +98,26 @@ class M2E_E2M_Model_Cron_Task_Magento_ImportInventory implements M2E_E2M_Model_C
 
             $data['last_import_id'] = $row['id'];
 
-            $connWrite->update($cronTasksInProcessingTableName, array(
+            $connWrite->update($cronTasksTableName, array(
                 'data' => Mage::helper('core')->jsonEncode($data)
-            ), array('instance = ?' => 'Cron_Task_Magento_ImportInventory'));
+            ), array('instance = ?' => self::class));
         }
 
         //----------------------------------------
 
         $process = $this->getProcessAsPercentage($data['last_import_id']);
+        $dataHelper->setCacheValue(self::CACHE_ID, $process);
 
-        $connWrite->update($cronTasksInProcessingTableName, array(
-            'progress' => $process
-        ), array('instance = ?' => 'Cron_Task_Magento_ImportInventory'));
+        //----------------------------------------
+
+        $connWrite->update($cronTasksTableName, array(
+            'progress' => $dataHelper->getCacheValue(self::CACHE_ID)
+        ), array('instance = ?' => self::class));
 
         //----------------------------------------
 
         return array(
-            'process' => $process
+            'process' => $dataHelper->getCacheValue(self::CACHE_ID, 0)
         );
     }
 }
