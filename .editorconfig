@@ -6,7 +6,7 @@ root = true
 end_of_line = lf
 insert_final_newline = true
 
-[*.{php,json,md,yml,xml,bash,sh,txt}]
+[*.{php,phtml,css,js,json,md,xml}]
 charset = utf-8
 indent_style = space
 indent_size = 4
