@@ -56,7 +56,6 @@ class M2E_E2M_Controller_Adminhtml_BaseController extends Mage_Adminhtml_Control
         } catch (Exception $e) {
             if ($this->getRequest()->isAjax()) {
 
-                /** @var M2E_E2M_Helper_Data $dataHelper */
                 $dataHelper = Mage::helper('e2m');
                 $dataHelper->logException($e);
 

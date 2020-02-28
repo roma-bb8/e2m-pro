@@ -24,6 +24,8 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
      */
     private function addStartImportInventoryButton(Mage_Adminhtml_Block_Widget_Button $button) {
 
+        /** @var Mage_Adminhtml_Block_Widget_Button $button */
+
         $resource = Mage::getSingleton('core/resource');
         $connRead = $resource->getConnection('core_read');
         $cronTasksTableName = $resource->getTableName('m2e_e2m_cron_tasks');
@@ -53,7 +55,6 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
             $disabled = true;
         }
 
-        /** @var Mage_Adminhtml_Block_Widget_Button $button */
         $button = $button->setData(array(
             'label' => $this->getDataHelper()->__($label),
             'onclick' => 'startImportInventory(this);',
@@ -63,7 +64,6 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
 
         //----------------------------------------
 
-        /** @var Mage_Adminhtml_Block_Widget_Button $button */
         $button = clone $button;
         $button = $button->setData(array(
             'label' => $this->getDataHelper()->__((!$task['pause'] ? 'Pause' : 'Proceed') . ' Import inventory'),
@@ -77,6 +77,8 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
      * @param Mage_Adminhtml_Block_Widget_Button $button
      */
     private function addStartDownloadInventoryButton(Mage_Adminhtml_Block_Widget_Button $button) {
+
+        /** @var Mage_Adminhtml_Block_Widget_Button $button */
 
         $resource = Mage::getSingleton('core/resource');
         $connRead = $resource->getConnection('core_read');
@@ -101,7 +103,6 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
             $disabled = true;
         }
 
-        /** @var Mage_Adminhtml_Block_Widget_Button $button */
         $button = $button->setData(array(
             'label' => $this->getDataHelper()->__($label),
             'onclick' => 'startDownloadInventory(this);',
@@ -169,9 +170,7 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
      */
     public function getEbayAccounts() {
 
-        /** @var Mage_Core_Model_Resource_Db_Collection_Abstract $accountsCollection */
         $accountsCollection = Mage::helper('M2ePro/Component_Ebay')->getCollection('Account');
-
         return $accountsCollection->getItems();
     }
 
@@ -179,11 +178,7 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
      * @return M2E_E2M_Model_Proxy_Ebay_Account
      */
     public function getEbayAccount() {
-
-        /** @var M2E_E2M_Model_Proxy_Ebay_Account $eBayAccount */
-        $eBayAccount = Mage::getSingleton('e2m/Proxy_Ebay_Account');
-
-        return $eBayAccount;
+        return Mage::getSingleton('e2m/Proxy_Ebay_Account');
     }
 
     //########################################
@@ -192,33 +187,21 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
      * @return M2E_E2M_Helper_Ebay_Config
      */
     public function getEbayConfigHelper() {
-
-        /** @var M2E_E2M_Helper_Ebay_Config $eBayConfigHelper */
-        $eBayConfigHelper = Mage::helper('e2m/Ebay_Config');
-
-        return $eBayConfigHelper;
+        return Mage::helper('e2m/Ebay_Config');
     }
 
     /**
      * @return M2E_E2M_Helper_Data
      */
     public function getDataHelper() {
-
-        /** @var M2E_E2M_Helper_Data $dataHelper */
-        $dataHelper = Mage::helper('e2m');
-
-        return $dataHelper;
+        return Mage::helper('e2m');
     }
 
     /**
      * @return Mage_Core_Helper_Data
      */
     public function getCoreHelper() {
-
-        /** @var Mage_Core_Helper_Data $coreHelper */
-        $coreHelper = Mage::helper('core');
-
-        return $coreHelper;
+        return  Mage::helper('core');
     }
 
     //########################################

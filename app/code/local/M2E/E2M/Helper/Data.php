@@ -4,22 +4,20 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
 
     const PREFIX = 'm2e/e2m/';
 
-    //########################################
-
     const CACHE_ID_MAINTENANCE = self::PREFIX . 'maintenance';
 
     const CACHE_ID_EBAY_INVENTORY_VARIATION_COUNT = self::PREFIX . 'ebay/inventory/variation/count';
     const CACHE_ID_EBAY_INVENTORY_SIMPLE_COUNT = self::PREFIX . 'ebay/inventory/simple/count';
     const CACHE_ID_EBAY_INVENTORY_TOTAL_COUNT = self::PREFIX . 'ebay/inventory/total/count';
 
-    //########################################
-
     const XML_PATH_EBAY_AVAILABLE_MARKETPLACES = self::PREFIX . 'ebay/available/marketplaces';
 
     const XML_PATH_EBAY_DOWNLOAD_INVENTORY = self::PREFIX . 'ebay/inventory/download';
     const XML_PATH_EBAY_IMPORT_INVENTORY = self::PREFIX . 'ebay/inventory/import';
 
-    //########################################
+    const TYPE_REPORT_SUCCESS = 1;
+    const TYPE_REPORT_WARNING = 2;
+    const TYPE_REPORT_ERROR = 3;
 
     const MARKETPLACE_AU_TITLE = 'Australia';
     const MARKETPLACE_AT_TITLE = 'Austria';
@@ -68,6 +66,10 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
         M2E_E2M_Model_Adapter_Ebay_Item::MARKETPLACE_PL_ID => self::MARKETPLACE_PL_TITLE,
         M2E_E2M_Model_Adapter_Ebay_Item::MARKETPLACE_SG_ID => self::MARKETPLACE_SG_TITLE
     );
+
+    private $magentoAttributeSets = array();
+    private $magentoAttributes = array();
+    private $magentoStores = array();
 
     //########################################
 
@@ -139,10 +141,8 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
      */
     public function setConfig($path, $value, $cleanCache = false) {
 
-        /** @var Mage_Core_Helper_Data $coreHelper */
         $coreHelper = Mage::helper('core');
 
-        /** @var Mage_Core_Model_Config $coreConfig */
         $coreConfig = Mage::getModel('core/config');
 
         $coreConfig->saveConfig($path, $coreHelper->jsonEncode($value));
@@ -151,17 +151,6 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
 
         return $this;
     }
-
-
-    const TYPE_REPORT_ERROR = 3;
-    const TYPE_REPORT_WARNING = 2;
-    const TYPE_REPORT_SUCCESS = 1;
-
-    //########################################
-
-    private $magentoAttributeSets = array();
-    private $magentoAttributes = array();
-    private $magentoStores = array();
 
     //########################################
 
@@ -248,6 +237,63 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
     //########################################
 
     /**
+     * @return array
+     */
+    public function getEbayFields() {
+        return array(
+            'identifiers_item_id' => 'Item ID',
+            'identifiers_sku' => 'SKU',
+            'identifiers_ean' => 'EAN',
+            'identifiers_upc' => 'UPC',
+            'identifiers_isbn' => 'ISBN',
+            'identifiers_epid' => 'EPID',
+            'identifiers_brand_mpn_mpn' => '(Brand) MPN',
+            'identifiers_brand_mpn_brand' => '(Brand) Brand',
+
+            'marketplace_id' => '(Site) Marketplace ID',
+            'categories_primary_id' => '(Category) Primary ID',
+            'categories_secondary_id' => '(Category) Secondary ID',
+            'store_categories_primary_id' => '(Store) Category ID',
+            'store_categories_secondary_id' => '(Store) Category 2 ID',
+
+            'description_title' => 'Title',
+            'description_subtitle' => 'SubTitle',
+            'description_description' => 'Description',
+
+            'price_start' => 'Start Price',
+            'price_current' => 'Current Price',
+            'price_buy_it_now' => 'Buy It Now Price',
+            'price_original' => 'Original Price',
+            'price_map_value' => '(DPI) Minimum Advertised Price',
+            'price_map_exposure' => '(DPI) Minimum Advertised Price Exposure',
+            'price_stp_value' => '(Discount Price Info) Original Retail Price',
+
+            'qty_total' => 'Quantity',
+
+            'shipping_dispatch_time' => 'Dispatch Time',
+            'shipping_package_dimensions_depth' => '(Dimensions) Depth',
+            'shipping_package_dimensions_length' => '(Dimensions) Length',
+            'shipping_package_dimensions_width' => '(Dimensions) Width',
+            'shipping_package_dimensions_unit_type' => 'Unit Type',
+
+            'condition_type' => 'Condition ID'
+        );
+    }
+
+    //########################################
+
+    /**
+     * @param int $marketplaceId
+     *
+     * @return string
+     */
+    public function getMarketplaceTitle($marketplaceId) {
+        return $this->marketplaceTitle[$marketplaceId];
+    }
+
+    //########################################
+
+    /**
      * @param int $taskId
      * @param string $description
      * @param int $type
@@ -287,63 +333,4 @@ EXCEPTION;
 
         Mage::log($exceptionInfo, Zend_Log::ERR, 'e2m.log', true);
     }
-
-
-    //########################################
-
-
-    private $eBayFields = array(
-        'identifiers_item_id' => 'Item ID',
-        'identifiers_sku' => 'SKU',
-        'identifiers_ean' => 'EAN',
-        'identifiers_upc' => 'UPC',
-        'identifiers_isbn' => 'ISBN',
-        'identifiers_epid' => 'EPID',
-        'identifiers_brand_mpn_mpn' => '(Brand) MPN',
-        'identifiers_brand_mpn_brand' => '(Brand) Brand',
-
-        'marketplace_id' => '(Site) Marketplace ID',
-        'categories_primary_id' => '(Category) Primary ID',
-        'categories_secondary_id' => '(Category) Secondary ID',
-        'store_categories_primary_id' => '(Store) Category ID',
-        'store_categories_secondary_id' => '(Store) Category 2 ID',
-
-        'description_title' => 'Title',
-        'description_subtitle' => 'SubTitle',
-        'description_description' => 'Description',
-
-        'price_start' => 'Start Price',
-        'price_current' => 'Current Price',
-        'price_buy_it_now' => 'Buy It Now Price',
-        'price_original' => 'Original Price',
-        'price_map_value' => '(DPI) Minimum Advertised Price',
-        'price_map_exposure' => '(DPI) Minimum Advertised Price Exposure',
-        'price_stp_value' => '(Discount Price Info) Original Retail Price',
-
-        'qty_total' => 'Quantity',
-
-        'shipping_dispatch_time' => 'Dispatch Time',
-        'shipping_package_dimensions_depth' => '(Dimensions) Depth',
-        'shipping_package_dimensions_length' => '(Dimensions) Length',
-        'shipping_package_dimensions_width' => '(Dimensions) Width',
-        'shipping_package_dimensions_unit_type' => 'Unit Type',
-
-        'condition_type' => 'Condition ID'
-    );
-
-
-    //########################################
-
-    /**
-     * @return array
-     */
-    public function getEbayFields() {
-        return $this->eBayFields;
-    }
-
-    public function getMarketplaceTitle($marketplaceId) {
-        return $this->marketplaceTitle[$marketplaceId];
-    }
-
-    //########################################
 }

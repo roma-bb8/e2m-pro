@@ -7,7 +7,6 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
      */
     public function proceedEbayImportInventoryAction() {
 
-        /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
 
         $resource = Mage::getSingleton('core/resource');
@@ -47,7 +46,6 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
      */
     public function pauseEbayImportInventoryAction() {
 
-        /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
 
         $resource = Mage::getSingleton('core/resource');
@@ -89,7 +87,6 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
      */
     public function startEbayImportInventoryAction() {
 
-        /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
 
         $resource = Mage::getSingleton('core/resource');
@@ -136,10 +133,7 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
      */
     public function setSettingsAction() {
 
-        /** @var Mage_Core_Helper_Data $coreHelper */
         $coreHelper = Mage::helper('core');
-
-        /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
 
         $settings = $coreHelper->jsonDecode($this->getRequest()->getParam('settings'));
@@ -196,7 +190,6 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
      */
     public function startEbayDownloadInventoryAction() {
 
-        /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
 
         $resource = Mage::getSingleton('core/resource');
@@ -252,7 +245,6 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
      */
     public function unlinkEbayAccountAction() {
 
-        /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
 
         $resource = Mage::getSingleton('core/resource');
@@ -298,7 +290,6 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
             throw new Exception('Account invalid.');
         }
 
-        /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
 
         $dataHelper->setConfig(M2E_E2M_Model_Proxy_Ebay_Account::XML_PATH_EBAY_ACCOUNT_ID, $accountId, true);
@@ -362,12 +353,14 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
         return $this->renderLayout();
     }
 
-
+    /**
+     * @return Zend_Controller_Response_Abstract
+     * @throws Zend_Db_Statement_Exception
+     */
     public function cronAction() {
 
         session_write_close();
 
-        /** @var M2E_E2M_Model_Cron $cron */
         $cron = Mage::getSingleton('e2m/Cron');
 
         return $this->ajaxResponse($cron->process());
