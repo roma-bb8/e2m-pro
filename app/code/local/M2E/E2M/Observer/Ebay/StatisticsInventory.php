@@ -11,17 +11,18 @@ class M2E_E2M_Observer_Ebay_StatisticsInventory {
 
         $connRead = $resource->getConnection('core_read');
 
-        $inventoryEbayTableName = $resource->getTableName('m2e_e2m_inventory_ebay');
-
-        $select = $connRead->select()->from($inventoryEbayTableName, 'COUNT(*)');
+        $select = $connRead->select()->from($resource->getTableName('m2e_e2m_inventory_ebay'), 'COUNT(*)');
 
         //----------------------------------------
 
-        $variation = (int)(clone $select)->where('variation = ?', true)->query()->fetchColumn();
-        $simple = (int)(clone $select)->where('variation = ?', false)->query()->fetchColumn();
-        $total = (int)(clone $select)->query()->fetchColumn();
+        $variationSelect = clone $select;
+        $variation = (int)$variationSelect->where('variation = ?', true)->query()->fetchColumn();
 
-        //----------------------------------------
+        $simpleSelect = clone $select;
+        $simple = (int)$simpleSelect->where('variation = ?', false)->query()->fetchColumn();
+
+        $totalSelect = clone $select;
+        $total = (int)$totalSelect->query()->fetchColumn();
 
         $dataHelper->setCacheValue(M2E_E2M_Helper_Data::CACHE_ID_EBAY_INVENTORY_VARIATION_COUNT, $variation);
         $dataHelper->setCacheValue(M2E_E2M_Helper_Data::CACHE_ID_EBAY_INVENTORY_SIMPLE_COUNT, $simple);

@@ -9,13 +9,6 @@
     ],
     "homepage": "https://www.m2epro.com/",
     "license": "proprietary",
-    "authors": [
-        {
-            "name": "Roma Baranenko",
-            "email": "jungle.romabb8@gmail.com",
-            "role": "PHP Developer"
-        }
-    ],
     "support": {
         "issues": "https://clients.m2epro.com/support/"
     },
