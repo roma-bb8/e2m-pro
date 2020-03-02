@@ -62,6 +62,10 @@ class M2E_E2M_Model_Product_Magento_Simple extends M2E_E2M_Model_Product_Magento
             $product->setData($magentoAttribute, $data[$eBayField]);
         }
 
+        if ($this->eBayConfigHelper->isGenerateSku() && empty($product->getSku())) {
+            $product->setData('sku', 'RANDOM_' . md5($data['identifiers_item_id']));
+        }
+
         //---------------------------------------
 
         if (!$product->getId() && $this->eBayConfigHelper->isImportImage()) {
