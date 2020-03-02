@@ -43,7 +43,7 @@ class M2E_E2M_Model_Product_Magento_Simple extends M2E_E2M_Model_Product_Magento
             $product->setData('store_id', $storeId);
             $product->setData('website_ids', array_unique(array_merge(
                 $product->getData('website_ids') ?: array(),
-                Mage::app()->getStore($storeId)->getWebsiteId()
+                array(Mage::app()->getStore($storeId)->getWebsiteId())
             )));
         }
 
