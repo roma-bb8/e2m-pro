@@ -36,6 +36,10 @@ class M2E_E2M_Controller_Adminhtml_BaseController extends Mage_Adminhtml_Control
 
         register_shutdown_function(function () {
             $error = error_get_last();
+            if ($error === null) {
+                return;
+            }
+
             if (strpos($error['message'], 'deprecated')) {
                 return;
             }
