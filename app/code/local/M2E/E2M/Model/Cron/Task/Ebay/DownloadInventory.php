@@ -138,12 +138,12 @@ class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory implements M2E_E2M_Model_Cr
 
             //----------------------------------------
 
-            foreach ($items as $item => $data) {
+            foreach ($items as $item => $value) {
                 $connWrite->insert($inventoryTableName, array(
-                    'marketplace_id' => $data['marketplace_id'],
+                    'marketplace_id' => $value['marketplace_id'],
                     'item_id' => $item,
-                    'variation' => !empty($data['variations']),
-                    'data' => $coreHelper->jsonEncode($data)
+                    'variation' => !empty($value['variations']),
+                    'data' => $coreHelper->jsonEncode($value)
                 ));
             }
 
