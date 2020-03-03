@@ -274,7 +274,6 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
             'shipping_package_dimensions_depth' => '(Dimensions) Depth',
             'shipping_package_dimensions_length' => '(Dimensions) Length',
             'shipping_package_dimensions_width' => '(Dimensions) Width',
-            'shipping_package_dimensions_unit_type' => 'Unit Type',
 
             'condition_type' => 'Condition ID'
         );

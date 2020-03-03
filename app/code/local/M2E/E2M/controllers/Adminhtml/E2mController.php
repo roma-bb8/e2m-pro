@@ -249,7 +249,6 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
 
         $resource = Mage::getSingleton('core/resource');
         $connWrite = $resource->getConnection('core_write');
-        $connWrite->truncateTable($resource->getTableName('m2e_e2m_log'));
         $connWrite->truncateTable($resource->getTableName('m2e_e2m_inventory_ebay'));
         $connWrite->delete($resource->getTableName('m2e_e2m_cron_tasks'), array(
             'instance <> ?' => M2E_E2M_Model_Cron_Task_Completed::class

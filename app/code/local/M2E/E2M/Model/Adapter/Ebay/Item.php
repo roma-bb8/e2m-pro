@@ -182,7 +182,6 @@ class M2E_E2M_Model_Adapter_Ebay_Item {
         $shippingData['shipping_package_dimensions_depth'] = $item['shipping']['package']['dimensions']['depth'];
         $shippingData['shipping_package_dimensions_length'] = $item['shipping']['package']['dimensions']['length'];
         $shippingData['shipping_package_dimensions_width'] = $item['shipping']['package']['dimensions']['width'];
-        $shippingData['shipping_package_dimensions_unit_type'] = $item['shipping']['package']['dimensions']['unit']['type'];
 
         return $shippingData;
     }

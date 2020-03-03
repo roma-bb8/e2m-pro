@@ -296,7 +296,15 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
                 $ext = strtolower(substr($url, (strripos($url, '.'))));
                 !in_array($ext, array('.png', '.jpg', '.jpeg')) && $ext = '.jpg';
                 $fileName = md5($url) . $ext;
-                file_put_contents($tempMediaPath . DS . $fileName, file_get_contents($url));
+                if (!is_file($tempMediaPath . DS . $fileName)) {
+                    try {
+                        file_put_contents($tempMediaPath . DS . $fileName, file_get_contents($url));
+                    } catch (Exception $e) {
+                        $this->addLog("Image '{$url}' not import because: " . $e->getMessage());
+
+                        continue;
+                    }
+                }
 
                 $files[] = $fileName;
             }
@@ -322,21 +330,11 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
                 return $product;
             }
 
-            $firstImage = reset($gallery);
-            $firstImage = $firstImage['file'];
-
-            $product->setData('image', $firstImage);
-            $product->setData('thumbnail', $firstImage);
-            $product->setData('small_image', $firstImage);
-            $product->setData('media_gallery', array(
-                'images' => $this->coreHelper->jsonEncode($gallery),
-                'values' => $this->coreHelper->jsonEncode(array(
-                    'main' => $firstImage,
-                    'image' => $firstImage,
-                    'small_image' => $firstImage,
-                    'thumbnail' => $firstImage
-                ))
-            ));
+            foreach ($gallery as $index => $image) {
+                $mediaAttribute = null;
+                $index === 0 && $mediaAttribute = array('image', 'small_image', 'thumbnail');
+                $product->addImageToMediaGallery($tempMediaPath . DS . $image['file'], $mediaAttribute, true, false);
+            }
 
         } catch (Exception $e) {
             $this->dataHelper->logException($e);
