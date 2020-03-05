@@ -127,7 +127,6 @@
                             <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_MPN; ?>" <?php if ($this->getEbayConfigHelper()->isMPNProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('MPN'); ?></option>
                             <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_UPC; ?>" <?php if ($this->getEbayConfigHelper()->isUPCProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('UPC'); ?></option>
                             <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_EAN; ?>" <?php if ($this->getEbayConfigHelper()->isEANProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('EAN'); ?></option>
-                            <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_GTIN; ?>" <?php if ($this->getEbayConfigHelper()->isGTINProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('GTIN'); ?></option>
                         </select>
                         <p class="note">
                             <span><?php echo Mage::helper('e2m')->__('Product identifier on different marketplaces'); ?></span>
@@ -213,6 +212,36 @@
                         </select>
                         <p class="note">
                             <span><?php echo Mage::helper('e2m')->__('Clean HTML in Description'); ?></span>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        <label for="import-specifics"><?php echo $this->getDataHelper()->__('Import Specifics') ?>:</label>
+                    </td>
+                    <td class="value">
+                        <select id="import-specifics" class="config-input">
+                            <option value="1" <?php if ($this->getEbayConfigHelper()->isImportSpecifics()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
+                            <option value="0" <?php if (!$this->getEbayConfigHelper()->isImportSpecifics()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
+                        </select>
+                        <p class="note">
+                                <span><?php echo Mage::helper('e2m')->__('Import Specifics'); ?>
+                                </span>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        <label for="rename-attribute-title-for-specifics"><?php echo $this->getDataHelper()->__('Rename attribute title for Specifics') ?>:</label>
+                    </td>
+                    <td class="value">
+                        <select id="rename-attribute-title-for-specifics" class="config-input">
+                            <option value="1" <?php if ($this->getEbayConfigHelper()->isImportRenameAttribute()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
+                            <option value="0" <?php if (!$this->getEbayConfigHelper()->isImportRenameAttribute()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
+                        </select>
+                        <p class="note">
+                                <span><?php echo Mage::helper('e2m')->__('Rename attribute title for specifics'); ?>
+                                </span>
                         </p>
                     </td>
                 </tr>
