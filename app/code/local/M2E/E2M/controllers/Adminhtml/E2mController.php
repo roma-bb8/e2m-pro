@@ -155,6 +155,16 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
         $dataHelper->setConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_FOUND, $settings['action-found']);
         $dataHelper->setConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_IMPORT_IMAGE, $settings['import-image']);
         $dataHelper->setConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_IMPORT_QTY, $settings['import-qty'], true);
+        $dataHelper->setConfig(
+            M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_IMPORT_SPECIFICS,
+            $settings['import-specifics'],
+            false
+        );
+        $dataHelper->setConfig(
+            M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_IMPORT_RENAME_ATTRIBUTE,
+            $settings['rename-attribute-title-for-specifics'],
+            false
+        );
 
         //----------------------------------------
 
