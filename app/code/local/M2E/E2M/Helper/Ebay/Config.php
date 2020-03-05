@@ -15,6 +15,8 @@ class M2E_E2M_Helper_Ebay_Config {
     const XML_PATH_PRODUCT_DELETE_HTML = self::PREFIX . 'product/delete/html';
     const XML_PATH_PRODUCT_IMPORT_IMAGE = self::PREFIX . 'product/import/image';
     const XML_PATH_PRODUCT_IMPORT_QTY = self::PREFIX . 'product/import/qty';
+    const XML_PATH_PRODUCT_IMPORT_SPECIFICS = self::PREFIX . 'product/import/specifics';
+    const XML_PATH_PRODUCT_IMPORT_RENAME_ATTRIBUTE = self::PREFIX . 'rename/attribute';
 
     const XML_PATH_FULL_SET_SETTING = self::PREFIX . 'full';
 
@@ -26,7 +28,6 @@ class M2E_E2M_Helper_Ebay_Config {
     const PRODUCT_IDENTIFIER_MPN = 'MPN';
     const PRODUCT_IDENTIFIER_EAN = 'EAN';
     const PRODUCT_IDENTIFIER_UPC = 'UPC';
-    const PRODUCT_IDENTIFIER_GTIN = 'GTIN';
 
     const ACTION_FOUND_IGNORE = 'IGNORE';
     const ACTION_FOUND_UPDATE = 'UPDATE';
@@ -69,13 +70,6 @@ class M2E_E2M_Helper_Ebay_Config {
     /**
      * @return bool
      */
-    public function isGTINProductIdentifier() {
-        return self::PRODUCT_IDENTIFIER_GTIN === $this->dataHelper->getConfig(self::XML_PATH_PRODUCT_IDENTIFIER);
-    }
-
-    /**
-     * @return bool
-     */
     public function isIgnoreActionFound() {
         return self::ACTION_FOUND_IGNORE === $this->dataHelper->getConfig(self::XML_PATH_PRODUCT_FOUND);
     }
@@ -92,6 +86,20 @@ class M2E_E2M_Helper_Ebay_Config {
      */
     public function isImportQty() {
         return (bool)$this->dataHelper->getConfig(self::XML_PATH_PRODUCT_IMPORT_QTY);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isImportSpecifics() {
+        return (bool)$this->dataHelper->getConfig(self::XML_PATH_PRODUCT_IMPORT_SPECIFICS);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isImportRenameAttribute() {
+        return (bool)$this->dataHelper->getConfig(self::XML_PATH_PRODUCT_IMPORT_RENAME_ATTRIBUTE);
     }
 
     /**
