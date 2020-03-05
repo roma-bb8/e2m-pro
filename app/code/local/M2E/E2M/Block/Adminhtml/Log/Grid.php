@@ -49,8 +49,8 @@ class M2E_E2M_Block_Adminhtml_Log_Grid extends Mage_Adminhtml_Block_Widget_Grid 
             'align' => 'left',
             'width' => '*',
             'type' => 'text',
-            'filter_index' => 'id',
-            'index' => 'id'
+            'index' => 'id',
+            'filter' => false
         ));
 
         $this->addColumn('task_id', array(
@@ -116,7 +116,7 @@ class M2E_E2M_Block_Adminhtml_Log_Grid extends Mage_Adminhtml_Block_Widget_Grid 
 
         $this->setDefaultSort('id');
         $this->setDefaultDir('DESC');
-        $this->setFilterVisibility(false);
+        $this->setFilterVisibility(true);
         $this->setUseAjax(true);
     }
 }
