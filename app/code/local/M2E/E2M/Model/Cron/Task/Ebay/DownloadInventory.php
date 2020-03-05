@@ -99,26 +99,42 @@ class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory implements M2E_E2M_Model_Cr
 
             //----------------------------------------
 
-            $response = $eBayApi->sendRequest(array(
-                'command' => array('inventory', 'get', 'items'),
-                'data' => array(
-                    'account' => $eBayAccount->getToken(),
-                    'realtime' => true,
-                    'since_time' => $fromDateTime->format('Y-m-d H:i:s'),
-                    'to_time' => $tmpDateTime->format('Y-m-d H:i:s'),
-                    'format_type' => 'full'
-                )
-            ));
+            try {
 
-            //----------------------------------------
+                $response = $eBayApi->sendRequest(array(
+                    'command' => array('inventory', 'get', 'items'),
+                    'data' => array(
+                        'account' => $eBayAccount->getToken(),
+                        'realtime' => true,
+                        'since_time' => $fromDateTime->format('Y-m-d H:i:s'),
+                        'to_time' => $tmpDateTime->format('Y-m-d H:i:s')
+                    )
+                ));
 
-            $items = array();
-            foreach ($response['items'] as $item) {
-                $item = $eBayItemAdapter->process($item);
-                $items[$item['identifiers_item_id']] = $item;
+                //----------------------------------------
+
+                $items = array();
+                foreach ($response['items'] as $item) {
+
+                    $fullItemInfo = $eBayApi->sendRequest(array(
+                        'command' => array('item', 'get', 'info'),
+                        'data' => array(
+                            'account' => $eBayAccount->getToken(),
+                            'item_id' => $item['id'],
+                            'parser_type' => 'full',
+                        )
+                    ));
+
+                    $item = $eBayItemAdapter->process($fullItemInfo['result']);
+                    $items[$item['identifiers_item_id']] = $item;
+                }
+
+                //----------------------------------------
+
+            } catch (Exception $e) {
+                $dataHelper->logReport($taskId, $e->getMessage(), M2E_E2M_Helper_Data::TYPE_REPORT_ERROR);
+                break;
             }
-
-            //----------------------------------------
 
             $itemIDs = array();
             $rows = $connRead->select()->from($inventoryTableName, 'item_id')
