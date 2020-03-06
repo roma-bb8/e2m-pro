@@ -8,6 +8,8 @@ class M2E_E2M_Helper_Magento_Attribute {
     /** @var M2E_E2M_Helper_Data $dataHelper */
     private $dataHelper;
 
+    private $updateResource;
+
     /** @var Mage_Catalog_Model_Product_Action $productAction */
     private $productAction;
 
@@ -54,7 +56,12 @@ class M2E_E2M_Helper_Magento_Attribute {
     private function addValue($attribute) {
 
         if ($this->text) {
-            $this->product->setData($this->code, $this->value);
+            $this->updateResource->updateAttributes(
+                array($this->product->getId()),
+                array($attribute->getAttributeCode() => $this->value),
+                $this->storeId
+            );
+
             return $attribute;
         }
 
@@ -412,6 +419,7 @@ class M2E_E2M_Helper_Magento_Attribute {
     //########################################
 
     public function __construct() {
+        $this->updateResource = Mage::getResourceSingleton('catalog/product_action');
         $this->productAction = Mage::getSingleton('catalog/product_action');
         $this->dataHelper = Mage::helper('e2m');
     }
