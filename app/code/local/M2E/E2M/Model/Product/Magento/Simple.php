@@ -7,85 +7,161 @@ class M2E_E2M_Model_Product_Magento_Simple extends M2E_E2M_Model_Product_Magento
     //########################################
 
     /**
-     * @inheritDoc
+     * @param Mage_Catalog_Model_Product $product
+     * @param array $data
+     * @param bool $save
+     *
+     * @return Mage_Catalog_Model_Product
+     * @throws Exception
      */
-    public function process($data, $save = true) {
+    private function createProduct(Mage_Catalog_Model_Product $product, array $data, $save) {
 
-        if ($this->eBayConfigHelper->isGenerateSku() && empty($data['identifiers_sku'])) {
-            $data['identifiers_sku'] = 'RANDOM_' . md5($data['identifiers_item_id']);
+        $product->setData('type_id', self::TYPE);
+        $product->setData('attribute_set_id', $this->getAttributeSet());
+        $product->setData('website_ids', array(Mage::app()->getStore($product->getStoreId())->getWebsiteId()));
+        $product->setData('visibility', Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE);
+        $product->setData('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
+        $product->setData('tax_class_id', Ess_M2ePro_Model_Magento_Product::TAX_CLASS_ID_NONE);
+
+        $product = $this->importFields($product, $data);
+        if (empty($product->getSku()) && $this->eBayConfigHelper->isGenerateSku()) {
+            $product->setData('sku', 'RANDOM_' . md5($data['identifiers_item_id']));
         }
 
-        $storeId = $this->eBayConfigHelper->getStoreForMarketplace($data['marketplace_id']);
-        $product = clone $this->product;
-        $product = $this->loadProduct($product, $data, $storeId);
-        if ($product->getId() && $this->eBayConfigHelper->isIgnoreActionFound()) {
-            $this->addLog('Skip update sku: ' . $product->getSku()
-                . ' Store ID: ' . $product->getStoreId(), M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
+        if ($this->eBayConfigHelper->isImportImage()) {
+            $product = $this->importImage($product, $data);
+        }
 
-            if ($save && $this->eBayConfigHelper->isImportQty()) {
+        if (!$save) {
+            return $product;
+        }
+
+        try {
+
+            $product->save();
+
+            $this->addLog(sprintf(
+                'Create product: "%s" Store ID: "%s" from eBay Item ID: "%s"',
+                $product->getSku(),
+                $data['identifiers_item_id'],
+                $product->getStoreId()
+            ));
+
+        } catch (Exception $e) {
+            $this->addLog(sprintf(
+                'Not create product from eBay Item ID: "%s" Because: %s',
+                $data['identifiers_item_id'],
+                $e->getMessage()
+            ), M2E_E2M_Helper_Data::TYPE_REPORT_ERROR);
+
+            throw $e;
+        }
+
+        if ($this->eBayConfigHelper->isImportQty()) {
+            $product = $this->importQty($product, $data);
+        }
+
+        if ($this->eBayConfigHelper->isImportSpecifics()) {
+            $product = $this->importSpecifics($product, 'eBay Specifics', $data['specifics']);
+        }
+
+        return $product;
+    }
+
+    /**
+     * @param Mage_Catalog_Model_Product $product
+     * @param array $data
+     * @param bool $save
+     *
+     * @return Mage_Catalog_Model_Product
+     * @throws Exception
+     */
+    private function updateProduct(Mage_Catalog_Model_Product $product, array $data, $save) {
+
+        $product->setData('website_ids', array_unique(array_merge(
+            $product->getData('website_ids') ?: array(),
+            array(Mage::app()->getStore($product->getStoreId())->getWebsiteId())
+        )));
+
+        $product = $this->importFields($product, $data);
+        if (empty($product->getSku()) && $this->eBayConfigHelper->isGenerateSku()) {
+            $product->setData('sku', 'RANDOM_' . md5($data['identifiers_item_id']));
+        }
+
+        if ($this->eBayConfigHelper->isImportImage()) {
+            $product = $this->updateImage($product, $data);
+        }
+
+        if (!$save) {
+            return $product;
+        }
+
+        try {
+
+            $product->save();
+
+            $this->addLog(sprintf(
+                'Update product: "%s" Store ID: "%s" from eBay Item ID: "%s"',
+                $product->getSku(),
+                $data['identifiers_item_id'],
+                $product->getStoreId()
+            ));
+
+        } catch (Exception $e) {
+            $this->addLog(sprintf(
+                'Not update product: "%s" from eBay Item ID: "%s" Because: %s',
+                $product->getSku(),
+                $data['identifiers_item_id'],
+                $e->getMessage()
+            ), M2E_E2M_Helper_Data::TYPE_REPORT_ERROR);
+
+            throw $e;
+        }
+
+        if ($this->eBayConfigHelper->isImportQty()) {
+            $product = $this->importQty($product, $data);
+        }
+
+        if ($this->eBayConfigHelper->isImportSpecifics()) {
+            $product = $this->importSpecifics($product, 'eBay Specifics', $data['specifics']);
+        }
+
+        return $product;
+    }
+
+    //########################################
+
+    /**
+     * @inheritDoc
+     */
+    public function process(array $data, $save = true) {
+
+        $data = $this->prepareData($data);
+
+        $product = clone $this->product;
+        $product->setStoreId($this->eBayConfigHelper->getStoreForMarketplace($data['marketplace_id']));
+
+        //----------------------------------------
+
+        $product = $this->loadProduct($product, $data);
+        if ($product->getId() && $this->eBayConfigHelper->isIgnoreActionFound()) {
+            $this->addLog(sprintf(
+                'Skip update sku: "%s" Store ID: "%s"',
+                $product->getSku(),
+                $product->getStoreId()
+            ), M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
+
+            if ($this->eBayConfigHelper->isImportQty()) {
                 $product = $this->importQty($product, $data);
             }
 
             return $product;
         }
 
-        if (!$product->getId()) {
-            $product->setData('type_id', self::TYPE);
-            $product->setData('store_id', $storeId);
-            $product->setData('attribute_set_id',
-                $this->dataHelper->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET)
-            );
-            $product->setData('website_ids', array(Mage::app()->getStore($storeId)->getWebsiteId()));
-            $product->setData('visibility', Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE);
-            $product->setData('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
-            $product->setData('tax_class_id', 0);
-        } else {
-            $product->setData('store_id', $storeId);
-            $product->setData('website_ids', array_unique(array_merge(
-                $product->getData('website_ids') ?: array(),
-                array(Mage::app()->getStore($storeId)->getWebsiteId())
-            )));
+        if ($product->getId()) {
+            return $this->updateProduct($product, $data, $save);
         }
 
-        if ($this->eBayConfigHelper->isDeleteHtml()) {
-            $data['description_title'] = strip_tags($data['description_title']);
-            $data['description_subtitle'] = strip_tags($data['description_subtitle']);
-            $data['description_description'] = strip_tags($data['description_description']);
-        }
-
-        $fieldsAttributes = $this->dataHelper->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_MAP);
-        foreach ($fieldsAttributes as $magentoAttribute => $eBayField) {
-            if (empty($data[$eBayField])) {
-                continue;
-            }
-
-            $product->setData($magentoAttribute, $data[$eBayField]);
-        }
-
-        if ($this->eBayConfigHelper->isGenerateSku() && empty($product->getSku())) {
-            $product->setData('sku', 'RANDOM_' . md5($data['identifiers_item_id']));
-        }
-
-        //---------------------------------------
-
-        if (!$product->getId() && $this->eBayConfigHelper->isImportImage()) {
-            $product = $this->importImage($product, $data);
-        } elseif ($product->getId() && $this->eBayConfigHelper->isImportImage()) {
-            $product = $this->updateImage($product, $data);
-        }
-
-        if ($save) {
-            $action = $product->getId() ? 'Update' : 'Create';
-            $product->save();
-
-            $this->addLog($action . ' product: "' . $product->getSku() .
-                '" eBay Item Id: ' . $data['identifiers_item_id'] . ' Store ID: ' . $product->getStoreId());
-        }
-
-        if ($save && $this->eBayConfigHelper->isImportQty()) {
-            $product = $this->importQty($product, $data);
-        }
-
-        return $product;
+        return $this->createProduct($product, $data, $save);
     }
 }

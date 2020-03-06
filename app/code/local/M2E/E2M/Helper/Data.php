@@ -263,7 +263,6 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
             'price_start' => 'Start Price',
             'price_current' => 'Current Price',
             'price_buy_it_now' => 'Buy It Now Price',
-            'price_original' => 'Original Price',
             'price_map_value' => '(DPI) Minimum Advertised Price',
             'price_map_exposure' => '(DPI) Minimum Advertised Price Exposure',
             'price_stp_value' => '(Discount Price Info) Original Retail Price',

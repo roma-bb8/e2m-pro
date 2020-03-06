@@ -2,14 +2,18 @@
 
 abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abstract {
 
-    /** @var int $groupId */
-    private $groupId;
+    const DOES_NOT_APPLY = 'does not apply';
 
-    /** @var array $attributeSetTmp */
-    private $attributeSetTmp = array();
+    //########################################
+
+    /** @var string $tmpMediaPath */
+    private $tmpMediaPath;
 
     /** @var Mage_Core_Helper_Data $coreHelper */
     private $coreHelper;
+
+    /** @var M2E_E2M_Helper_Data $dataHelper */
+    private $dataHelper;
 
     /** @var int $taskId */
     protected $taskId;
@@ -17,262 +21,14 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
     /** @var M2E_E2M_Helper_Ebay_Config $eBayConfigHelper */
     protected $eBayConfigHelper;
 
-    /** @var M2E_E2M_Helper_Data $dataHelper */
-    protected $dataHelper;
+    /** @var M2E_E2M_Helper_Magento_Attribute $magentoAttributeHelper */
+    protected $magentoAttributeHelper;
 
     /** @var Mage_Catalog_Model_Product $product */
     protected $product;
 
-    //########################################
-
-    /**
-     * @param string $value
-     * @param string $attributeCode
-     * @param int $storeId
-     *
-     * @return Mage_Catalog_Model_Product
-     */
-    private function loadProductBy($value, $attributeCode, $storeId) {
-
-        $products = Mage::getResourceModel('catalog/product_collection');
-        $products->addAttributeToSelect('*');
-        $products->addStoreFilter($storeId);
-        $products->addAttributeToFilter($attributeCode, $value);
-        $products->setCurPage(1)->setPageSize(1);
-        $products->load();
-
-        /** @var Mage_Catalog_Model_Product $product */
-        $product = $products->getFirstItem();
-        if (!$product->getId()) {
-            return null;
-        }
-
-        return $product;
-    }
-
-    /**
-     * @return int
-     * @throws Exception
-     */
-    private function loadEbayGroup() {
-
-        if (!empty($this->groupId)) {
-            return $this->groupId;
-        }
-
-        $attributeSetId = $this->dataHelper->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET);
-        $groups = Mage::getModel('eav/entity_attribute_group')->getResourceCollection()
-            ->addFilter('attribute_group_name', 'eBay')
-            ->addFilter('attribute_set_id', $attributeSetId)
-            ->getItems();
-
-        $group = array_shift($groups);
-        if ($group) {
-            return $this->groupId = $group->getId();
-        }
-
-        $group = Mage::getModel('eav/entity_attribute_group');
-        $group->setAttributeGroupName('eBay')
-            ->setAttributeSetId($attributeSetId);
-        $group->save();
-
-        $this->addLog('Create eBay Group in Attribute Set ID:' . $attributeSetId);
-
-        return $this->groupId = $group->getId();
-    }
-
-    /***
-     * @param Mage_Eav_Model_Entity_Attribute_Abstract $attribute
-     *
-     * @return bool
-     * @throws Exception
-     */
-    protected function checkAssignedAttributes($attribute) {
-
-        $attributeCode = $attribute->getData('attribute_code');
-        if (isset($this->attributeSetTmp[$attributeCode])) {
-            return true;
-        }
-
-        $attributeSetId = $this->dataHelper->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET);
-        $attributes = $this->dataHelper->getMagentoAttributes($attributeSetId);
-        foreach ($attributes as $code => $item) {
-            if ($code === $attributeCode) {
-                $this->attributeSetTmp[$attributeCode] = true;
-                return true;
-            }
-        }
-
-        $attributes = $this->dataHelper->getMagentoAttributes($attributeSetId, true);
-        foreach ($attributes as $code => $item) {
-            if ($code === $attributeCode) {
-                $this->attributeSetTmp[$attributeCode] = true;
-                return true;
-            }
-        }
-
-        $attribute->setData('attribute_set_id', $attributeSetId);
-        $attribute->setData('attribute_group_id', $this->loadEbayGroup());
-        $attribute->save();
-
-        $this->addLog('Add attribute: "' . $attribute->getName() . '" to "eBay" Group');
-
-        return false;
-    }
-
-    //########################################
-
-    /**
-     * @param string $description
-     * @param int $type
-     */
-    protected function addLog($description, $type = M2E_E2M_Helper_Data::TYPE_REPORT_SUCCESS) {
-        $this->dataHelper->logReport($this->taskId, $description, $type);
-    }
-
-    //########################################
-
-    /**
-     * @param Mage_Eav_Model_Entity_Attribute_Abstract $attribute
-     * @param string|int $option
-     * @param int $storeId
-     *
-     * @return int|null
-     * @throws Exception
-     */
-    protected function addAttributeValue($attribute, $option, $storeId) {
-
-        $optionId = Mage::getModel('eav/entity_attribute_source_table')
-            ->setAttribute($attribute)
-            ->getOptionId($option);
-        if ($optionId) {
-            return $optionId;
-        }
-
-        try {
-
-            $attribute->setData('option', array('value' => array('option' => array(
-                Mage_Core_Model_App::ADMIN_STORE_ID => $option,
-                $storeId => $option
-            ))));
-            $attribute->save();
-
-            $this->addLog('Add new value: "' . $option . '" in Attribute: "' . $attribute->getName() . '"');
-
-        } catch (Exception $e) {
-            $this->addLog('Not add value: "' . $option . '" in Attribute: "' . $attribute->getName() . '"');
-
-            throw $e;
-        }
-
-        return Mage::getModel('eav/entity_attribute_source_table')
-            ->setAttribute($attribute)
-            ->getOptionId($option);
-    }
-
-    /**
-     * @param Mage_Eav_Model_Entity_Attribute_Abstract $attribute
-     * @param string $title
-     * @param int $storeId
-     *
-     * @return Mage_Eav_Model_Entity_Attribute_Abstract
-     */
-    protected function updateTitleAttribute($attribute, $title, $storeId) {
-
-        try {
-
-            $frontendLabels = $attribute->getData('frontend_label');
-            if (is_array($frontendLabels)) {
-                if ($frontendLabels[$storeId] == $title) {
-                    return $attribute;
-                }
-
-                $frontendLabels[$storeId] = $title;
-            } else {
-                if ($frontendLabels == $title) {
-                    return $attribute;
-                }
-
-                $frontendLabels = array(
-                    Mage_Core_Model_App::ADMIN_STORE_ID => $attribute->getData('frontend_label')
-                );
-
-                $frontendLabels[$storeId] = $title;
-            }
-
-            $attribute->setData('frontend_label', $frontendLabels);
-            $attribute->save();
-
-            $this->addLog('Update title name in Attribute: "' .
-                $attribute->getName() . '" in Store: "' . $attribute->getStoreId() . '"');
-
-        } catch (Exception $e) {
-            $this->dataHelper->logException($e);
-
-            $this->addLog('Not update title name in Attribute: "' .
-                $attribute->getName() . '" in Store: "' . $attribute->getStoreId() . '"',
-                M2E_E2M_Helper_Data::TYPE_REPORT_ERROR);
-        }
-
-        return $attribute;
-    }
-
-    /**
-     * @param string $code
-     * @param string $title
-     * @param int $storeId
-     *
-     * @return null|Mage_Eav_Model_Entity_Attribute_Abstract
-     * @throws Exception
-     */
-    protected function createAttribute($code, $title, $storeId) {
-
-        try {
-
-            $attributeSetId = $this->dataHelper->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET);
-            $attribute = Mage::getModel('catalog/resource_eav_attribute');
-            $attribute->addData(array(
-                'attribute_code' => $code,
-                'is_global' => Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_GLOBAL,
-                'frontend_input' => 'select',
-                'default_value_text' => '',
-                'default_value_yesno' => '0',
-                'default_value_date' => '',
-                'default_value_textarea' => '',
-                'is_unique' => '0',
-                'is_required' => '0',
-                'apply_to' => array('simple', 'configurable'),
-                'is_configurable' => '1',
-                'is_searchable' => '0',
-                'is_visible_in_advanced_search' => '1',
-                'is_comparable' => '1',
-                'is_used_for_price_rules' => '0',
-                'is_wysiwyg_enabled' => '0',
-                'is_html_allowed_on_front' => '1',
-                'is_visible_on_front' => '0',
-                'used_in_product_listing' => '0',
-                'used_for_sort_by' => '0',
-                'frontend_label' => array(Mage_Core_Model_App::ADMIN_STORE_ID => $title, $storeId => $title),
-                'type' => 'varchar',
-                'backend_type' => 'varchar',
-                'backend' => 'eav/entity_attribute_backend_array'
-            ));
-            $attribute->setAttributeSetId($attributeSetId);
-            $attribute->setAttributeGroupId($this->loadEbayGroup());
-            $attribute->setEntityTypeId(Mage::getModel('eav/entity')->setType('catalog_product')->getTypeId());
-            $attribute->setIsUserDefined(1);
-            $attribute->save();
-
-            $this->addLog('Create new Attribute: "' . $title . '" in Attribute Set ID: "' . $attributeSetId . '"');
-
-        } catch (Exception $e) {
-            $this->addLog('Not create new Attribute: ' . $title, M2E_E2M_Helper_Data::TYPE_REPORT_ERROR);
-
-            throw $e;
-        }
-
-        return Mage::getModel('eav/config')->getAttribute('catalog_product', $code);
-    }
+    /** @var array $attributes */
+    protected $attributes;
 
     //########################################
 
@@ -282,65 +38,94 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
      *
      * @return Mage_Catalog_Model_Product
      */
-    protected function importImage($product, $data) {
+    protected function importQty(Mage_Catalog_Model_Product $product, array $data) {
+
+        $qty = (int)$data['qty_total'];
 
         try {
 
-            if (empty($data['images_urls'])) {
-                return $product;
-            }
+            /** @var Mage_CatalogInventory_Model_Stock_Item $stockItem */
+            $stockItem = Mage::getModel('cataloginventory/stock_item');
+            $stockItem->assignProduct($product);
+            $stockItem->addData(array(
+                'qty' => $qty,
+                'stock_id' => Mage_CatalogInventory_Model_Stock::DEFAULT_STOCK_ID,
+                'is_in_stock' => $qty >= 1,
+                'is_qty_decimal' => 0
+            ));
 
-            $tempMediaPath = Mage::getSingleton('catalog/product_media_config')->getBaseTmpMediaPath();
-            $files = array();
-            foreach ($data['images_urls'] as $url) {
-                $ext = strtolower(substr($url, (strripos($url, '.'))));
-                !in_array($ext, array('.png', '.jpg', '.jpeg')) && $ext = '.jpg';
-                $fileName = md5($url) . $ext;
-                if (!is_file($tempMediaPath . DS . $fileName)) {
-                    try {
-                        file_put_contents($tempMediaPath . DS . $fileName, file_get_contents($url));
-                    } catch (Exception $e) {
-                        $this->addLog("Image '{$url}' not import because: " . $e->getMessage());
+            $stockItem->save();
 
-                        continue;
-                    }
-                }
+        } catch (Exception $e) {
+            $this->addLog(sprintf(
+                "Quantity not import for product: %s Because: %s",
+                $product->getSku(),
+                $e->getMessage()
+            ), M2E_E2M_Helper_Data::TYPE_REPORT_ERROR);
+        }
 
-                $files[] = $fileName;
-            }
+        return $product;
+    }
 
-            $gallery = array();
+    /**
+     * @param Mage_Catalog_Model_Product $product
+     * @param array $data
+     *
+     * @return Mage_Catalog_Model_Product
+     */
+    protected function importImage(Mage_Catalog_Model_Product $product, array $data) {
 
-            $imagePosition = 1;
-            foreach ($files as $file) {
-                if (!is_file($tempMediaPath . DS . $file)) {
+        if (empty($data['images_urls'])) {
+            return $product;
+        }
+
+        $gallery = array();
+        foreach ($data['images_urls'] as $index => $url) {
+
+            //------------------------------------------
+            $ext = strtolower(substr($url, (strripos($url, '.'))));
+            !in_array($ext, array('.png', '.jpg', '.jpeg')) && $ext = '.jpg';
+            $fileName = md5($url) . $ext;
+            //------------------------------------------
+
+            if (!is_file($this->tmpMediaPath . DS . $fileName)) {
+                try {
+                    file_put_contents($this->tmpMediaPath . DS . $fileName, file_get_contents($url));
+                } catch (Exception $e) {
+                    $this->addLog("Image '{$url}' not import Because: " . $e->getMessage(), M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
                     continue;
                 }
+            }
 
-                $gallery[] = array(
-                    'file' => $file,
-                    'label' => '',
-                    'position' => $imagePosition++,
-                    'disabled' => 0,
-                    'removed' => 0
+            $gallery[] = array(
+                'file' => $fileName,
+                'label' => '',
+                'position' => ($index + 1),
+                'disabled' => 0,
+                'removed' => 0
+            );
+        }
+
+        if (empty($gallery)) {
+            return $product;
+        }
+
+        foreach ($gallery as $index => $image) {
+            try {
+                $product->addImageToMediaGallery(
+                    $this->tmpMediaPath . DS . $image['file'],
+                    $index === 0 ? array('image', 'small_image', 'thumbnail') : null,
+                    true,
+                    false
                 );
+            } catch (Exception $e) {
+                $this->addLog(sprintf(
+                    'Image "%s" not adding to product Because: %s',
+                    $this->tmpMediaPath . DS . $image['file'],
+                    $e->getMessage()
+                ), M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
+                continue;
             }
-
-            if (empty($gallery)) {
-                return $product;
-            }
-
-            foreach ($gallery as $index => $image) {
-                $mediaAttribute = null;
-                $index === 0 && $mediaAttribute = array('image', 'small_image', 'thumbnail');
-                $product->addImageToMediaGallery($tempMediaPath . DS . $image['file'], $mediaAttribute, true, false);
-            }
-
-        } catch (Exception $e) {
-            $this->dataHelper->logException($e);
-
-            $this->addLog('Not Import Images for SKU:' .
-                $product->getSku(), M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
         }
 
         return $product;
@@ -352,7 +137,7 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
      *
      * @return Mage_Catalog_Model_Product
      */
-    protected function updateImage($product, $data) {
+    protected function updateImage(Mage_Catalog_Model_Product $product, array $data) {
 
         $galleryImages = $product->getData('media_gallery');
         if (!isset($galleryImages['images']) || !is_array($galleryImages['images'])) {
@@ -360,13 +145,13 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
         }
 
         $imagesURLs = array();
-        $importURLs = array();
         foreach ($data['images_urls'] as $index => $url) {
             $ext = strtolower(substr($url, (strripos($url, '.'))));
             !in_array($ext, array('.png', '.jpg', '.jpeg')) && $ext = '.jpg';
             $imagesURLs[$index] = md5($url) . $ext;
         }
 
+        $importURLs = array();
         foreach ($galleryImages['images'] as $galleryImage) {
             if (!isset($galleryImage['file'])) {
                 continue;
@@ -388,33 +173,41 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
 
     /**
      * @param Mage_Catalog_Model_Product $product
-     * @param array $data
+     * @param string $groupName
+     * @param array $specifics
+     * @param bool $text
+     * @param bool $rename
      *
      * @return Mage_Catalog_Model_Product
-     * @throws Exception
      */
-    protected function importQty($product, $data) {
+    protected function importSpecifics($product, $groupName, $specifics, $text = true, $rename = false) {
+        $this->attributes = array();
 
-        try {
+        $this->magentoAttributeHelper->setStoreId($product->getStoreId());
+        $this->magentoAttributeHelper->setAttributeSetId($this->getAttributeSet());
+        $this->magentoAttributeHelper->setProduct($product);
+        $this->magentoAttributeHelper->setGroupName($groupName);
+        $this->magentoAttributeHelper->setText($text);
+        $this->magentoAttributeHelper->setRename($rename);
 
-            $qty = (int)$data['qty_total'];
+        foreach ($specifics as $name => $value) {
+            $this->magentoAttributeHelper->setTitle($name);
+            $this->magentoAttributeHelper->setValue($value);
 
-            /** @var Mage_CatalogInventory_Model_Stock_Item $stockItem */
-            $stockItem = Mage::getModel('cataloginventory/stock_item');
-            $stockItem->assignProduct($product);
-            $stockItem->addData(array(
-                'qty' => $qty,
-                'stock_id' => Mage_CatalogInventory_Model_Stock::DEFAULT_STOCK_ID,
-                'is_in_stock' => $qty >= 1,
-                'is_qty_decimal' => 0
-            ));
+            try {
 
-            $stockItem->save();
+                $attribute = $this->magentoAttributeHelper->save();
 
-        } catch (Exception $e) {
-            $this->dataHelper->logException($e);
+                $this->attributes[$attribute->getId()] = $attribute;
 
-            $this->addLog('Not Import Qty for SKU:' . $product->getSku(), M2E_E2M_Helper_Data::TYPE_REPORT_WARNING);
+            } catch (Exception $e) {
+                $this->addLog(sprintf(
+                    'Import data attribute not success Because: %s',
+                    $e->getMessage()
+                ), M2E_E2M_Helper_Data::TYPE_REPORT_ERROR);
+
+                continue;
+            }
         }
 
         return $product;
@@ -423,55 +216,18 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
     /**
      * @param Mage_Catalog_Model_Product $product
      * @param array $data
-     * @param int $storeId
      *
      * @return Mage_Catalog_Model_Product
      */
-    protected function loadProduct($product, $data, $storeId) {
-        switch (true) {
-            case $this->eBayConfigHelper->isSKUProductIdentifier():
-                if (!empty($data['identifiers_sku'])) {
-                    $product->setData('store_id', $storeId);
-                    $product->load($product->getIdBySku($data['identifiers_sku']));
-                }
+    protected function importFields(Mage_Catalog_Model_Product $product, array $data) {
 
-                break;
-            case $this->eBayConfigHelper->isMPNProductIdentifier():
-                if (!empty($data['identifiers_brand_mpn_mpn'])) {
-                    $tmp = $this->loadProductBy($data['identifiers_brand_mpn_mpn'], 'mpn', $storeId);
-                    $tmp !== null && $product = $tmp;
-                }
+        $fieldsAttributes = $this->dataHelper->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_MAP);
+        foreach ($fieldsAttributes as $magentoAttribute => $eBayField) {
+            if (empty($data[$eBayField])) {
+                continue;
+            }
 
-                break;
-
-            case $this->eBayConfigHelper->isUPCProductIdentifier():
-                if (!empty($data['identifiers_upc'])) {
-                    $tmp = $this->loadProductBy($data['identifiers_upc'], 'upc', $storeId);
-                    $tmp !== null && $product = $tmp;
-                }
-
-                break;
-
-            case $this->eBayConfigHelper->isEANProductIdentifier():
-                if (!empty($data['identifiers_ean'])) {
-                    $tmp = $this->loadProductBy($data['identifiers_ean'], 'ean', $storeId);
-                    $tmp !== null && $product = $tmp;
-                }
-
-                break;
-
-            case $this->eBayConfigHelper->isGTINProductIdentifier():
-                $tmp = null;
-                if (!empty($data['identifiers_upc'])) {
-                    $tmp = $this->loadProductBy($data['upc'], 'gtin', $storeId);
-                }
-
-                if (!empty($data['identifiers_ean']) && $tmp === null) {
-                    $tmp = $this->loadProductBy($data['ean'], 'gtin', $storeId);
-                }
-
-                $tmp !== null && $product = $tmp;
-                break;
+            $product->setData($magentoAttribute, $data[$eBayField]);
         }
 
         return $product;
@@ -480,12 +236,118 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
     //########################################
 
     /**
-     * @param $taskId
+     * @param Mage_Catalog_Model_Product $product
+     * @param array $data
+     *
+     * @return Mage_Catalog_Model_Product
+     */
+    protected function loadProduct(Mage_Catalog_Model_Product $product, array $data) {
+
+        if ($this->eBayConfigHelper->isSKUProductIdentifier()) {
+            $product->load($product->getIdBySku($data['identifiers_sku']));
+            return $product;
+        }
+
+        $products = Mage::getResourceModel('catalog/product_collection');
+        $products->addAttributeToSelect('*');
+        $products->addStoreFilter($product->getStoreId());
+
+        switch (true) {
+            case $this->eBayConfigHelper->isMPNProductIdentifier():
+                $products->addAttributeToFilter('mpn', $data['identifiers_brand_mpn_mpn']);
+                break;
+            case $this->eBayConfigHelper->isUPCProductIdentifier():
+                $products->addAttributeToFilter('upc', $data['identifiers_upc']);
+                break;
+            case $this->eBayConfigHelper->isEANProductIdentifier():
+                $products->addAttributeToFilter('ean', $data['identifiers_ean']);
+                break;
+        }
+
+        /** @var Mage_Catalog_Model_Product $loadProduct */
+        $products->setCurPage(1)->setPageSize(1);
+        $loadProduct = $products->load()->getFirstItem();
+        if ($loadProduct->getId()) {
+            $loadProduct->setData('store_id', $product->getStoreId());
+
+            return $loadProduct;
+        }
+
+        return $product;
+    }
+
+    //########################################
+
+    /**
+     * @return int|null
+     */
+    protected function getAttributeSet() {
+        return $this->dataHelper->getConfig(
+            M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET
+        );
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return array
+     */
+    protected function prepareData(array $data) {
+
+        if ($this->eBayConfigHelper->isDeleteHtml()) {
+            $data['description_title'] = strip_tags($data['description_title']);
+            $data['description_subtitle'] = strip_tags($data['description_subtitle']);
+            $data['description_description'] = strip_tags($data['description_description']);
+        }
+
+        if (empty($data['identifiers_sku']) && $this->eBayConfigHelper->isGenerateSku()) {
+            $data['identifiers_sku'] = 'RANDOM_' . md5($data['identifiers_item_id']);
+        }
+
+        $postfix = 'sku';
+        switch (true) {
+            case $this->eBayConfigHelper->isMPNProductIdentifier():
+                $postfix = 'brand_mpn_mpn';
+                break;
+            case $this->eBayConfigHelper->isUPCProductIdentifier():
+                $postfix = 'upc';
+                break;
+            case $this->eBayConfigHelper->isEANProductIdentifier():
+                $postfix = 'ean';
+                break;
+        }
+
+        if (empty($data["identifiers_{$postfix}"])) {
+            $data["identifiers_{$postfix}"] = 'RANDOM_' . md5($data['identifiers_item_id']);
+        }
+
+        if (self::DOES_NOT_APPLY === strtolower($data["identifiers_{$postfix}"])) {
+            $data["identifiers_{$postfix}"] = 'DNA_' . md5($data['identifiers_item_id']);
+        }
+
+        return $data;
+    }
+
+    //########################################
+
+    /**
+     * @param string $description
+     * @param int $type
+     */
+    protected function addLog($description, $type = M2E_E2M_Helper_Data::TYPE_REPORT_SUCCESS) {
+        $this->dataHelper->logReport($this->taskId, $description, $type);
+    }
+
+    //########################################
+
+    /**
+     * @param int $taskId
      *
      * @return $this
      */
     public function setTaskId($taskId) {
         $this->taskId = $taskId;
+        $this->magentoAttributeHelper->setTaskId($taskId);
 
         return $this;
     }
@@ -503,8 +365,13 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
         $this->dataHelper = Mage::helper('e2m');
 
         $this->eBayConfigHelper = Mage::helper('e2m/Ebay_Config');
+        $this->magentoAttributeHelper = Mage::helper('e2m/Magento_Attribute');
 
         $this->product = Mage::getModel('catalog/product');
+
+        /** @var Mage_Catalog_Model_Product_Media_Config $productMediaConfig */
+        $productMediaConfig = Mage::getSingleton('catalog/product_media_config');
+        $this->tmpMediaPath = $productMediaConfig->getBaseTmpMediaPath();
     }
 
     //########################################
@@ -516,5 +383,5 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
      * @return Mage_Catalog_Model_Product
      * @throws Exception
      */
-    abstract public function process($data, $save = true);
+    abstract public function process(array $data, $save = true);
 }

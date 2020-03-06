@@ -121,6 +121,16 @@ function sendSettings() {
 
     //----------------------------------------
 
+    var importSpecifics = $('import-specifics');
+    settings['import-specifics'] = importSpecifics.options[importSpecifics.selectedIndex].value;
+
+    //----------------------------------------
+
+    var renameAttributeTitleForSpecifics = $('rename-attribute-title-for-specifics');
+    settings['rename-attribute-title-for-specifics'] = renameAttributeTitleForSpecifics.options[renameAttributeTitleForSpecifics.selectedIndex].value;
+
+    //----------------------------------------
+
     settings['ebay-field-magento-attribute'] = e2m.attributes;
 
     //----------------------------------------

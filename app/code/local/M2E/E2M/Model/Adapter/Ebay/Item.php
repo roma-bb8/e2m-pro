@@ -99,7 +99,6 @@ class M2E_E2M_Model_Adapter_Ebay_Item {
         $price['price_start'] = $item['price']['start'];
         $price['price_buy_it_now'] = $item['price']['buy_it_now'];
         $price['price_current'] = $item['price']['current'];
-        $price['price_original'] = $item['price']['original'];
         $price['price_map_value'] = $item['price']['map']['value'];
         $price['price_map_exposure'] = $item['price']['map']['exposure'];
         $price['price_stp_value'] = $item['price']['stp']['value'];
@@ -131,8 +130,8 @@ class M2E_E2M_Model_Adapter_Ebay_Item {
 
         $images = array();
 
-        $images['images_gallery_type'] = $item['images']['gallery']['type'];
-        $images['images_photo_display'] = $item['images']['photo']['display'];
+        $images['images_gallery_type'] = $item['images']['gallery_type'];
+        $images['images_photo_display'] = $item['images']['photo_display'];
         $images['images_urls'] = $item['images']['urls'];
 
         return $images;
@@ -178,7 +177,7 @@ class M2E_E2M_Model_Adapter_Ebay_Item {
 
         $shippingData = array();
 
-        $shippingData['shipping_dispatch_time'] = $item['shipping']['dispatch']['time'];
+        $shippingData['shipping_dispatch_time'] = $item['shipping']['dispatch_time'];
         $shippingData['shipping_package_dimensions_depth'] = $item['shipping']['package']['dimensions']['depth'];
         $shippingData['shipping_package_dimensions_length'] = $item['shipping']['package']['dimensions']['length'];
         $shippingData['shipping_package_dimensions_width'] = $item['shipping']['package']['dimensions']['width'];
@@ -209,7 +208,14 @@ class M2E_E2M_Model_Adapter_Ebay_Item {
             $this->getStore($data),
             $this->getShipping($data)
         );
-        $item['specifics'] = $data['item_specifics'];
+
+        $specifics = array();
+        if (!empty($data['item_specifics'])) {
+            foreach ($data['item_specifics'] as $nameSpecific => $specificData) {
+                $specifics[$specificData['name']] = $specificData['value'];
+            }
+        }
+        $item['specifics'] = $specifics;
         $item['variations'] = $data['variations'];
 
         return $item;
