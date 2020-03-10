@@ -176,7 +176,8 @@ class M2E_E2M_Model_Product_Magento_Configurable extends M2E_E2M_Model_Product_M
         foreach ($data['variations'] as $variation) {
             $dataVariation = $data;
 
-            $dataVariation['identifiers_item_id'] .= '-' . md5(implode(',', $variation['specifics']));
+            $eBayItemId = $dataVariation['identifiers_item_id'];
+            $dataVariation['identifiers_item_id'] = md5(implode(',', $variation['specifics'])) . '-' . $eBayItemId;
             isset($variation['sku']) && $dataVariation['identifiers_sku'] = $variation['sku'];
             isset($variation['details']['ean']) && $dataVariation['identifiers_ean'] = $variation['details']['ean'];
             isset($variation['details']['upc']) && $dataVariation['identifiers_upc'] = $variation['details']['upc'];
