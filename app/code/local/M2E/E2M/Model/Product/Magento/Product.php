@@ -274,7 +274,7 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
         }
 
         if (empty($data['identifiers_sku']) && $this->eBayConfigHelper->isGenerateSku()) {
-            $data['identifiers_sku'] = 'RANDOM_' . md5($data['identifiers_item_id']);
+            $data['identifiers_sku'] = 'SKU_' . md5($data['identifiers_item_id']);
         }
 
         $productID = $this->eBayConfigHelper->getProductIdentifier();
