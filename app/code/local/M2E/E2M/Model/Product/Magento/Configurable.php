@@ -74,8 +74,8 @@ class M2E_E2M_Model_Product_Magento_Configurable extends M2E_E2M_Model_Product_M
             $this->addLog(sprintf(
                 'Create config product: "%s" Store ID: "%s" from eBay Item ID: "%s"',
                 $configProduct->getSku(),
-                $data['identifiers_item_id'],
-                $configProduct->getStoreId()
+                $configProduct->getStoreId(),
+                $data['identifiers_item_id']
             ));
 
         } catch (Exception $e) {
@@ -169,8 +169,6 @@ class M2E_E2M_Model_Product_Magento_Configurable extends M2E_E2M_Model_Product_M
         $productMagentoSimple = Mage::getModel('e2m/Product_Magento_Simple');
         $productMagentoSimple->setTaskId($this->taskId);
 
-        $data = $this->prepareData($data);
-
         //----------------------------------------
 
         $childProducts = array();
@@ -178,6 +176,7 @@ class M2E_E2M_Model_Product_Magento_Configurable extends M2E_E2M_Model_Product_M
         foreach ($data['variations'] as $variation) {
             $dataVariation = $data;
 
+            $dataVariation['identifiers_item_id'] .= '-' . md5(implode(',', $variation['specifics']));
             isset($variation['sku']) && $dataVariation['identifiers_sku'] = $variation['sku'];
             isset($variation['details']['ean']) && $dataVariation['identifiers_ean'] = $variation['details']['ean'];
             isset($variation['details']['upc']) && $dataVariation['identifiers_upc'] = $variation['details']['upc'];

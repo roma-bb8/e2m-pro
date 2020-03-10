@@ -230,6 +230,8 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
             $product->setData($magentoAttribute, $data[$eBayField]);
         }
 
+        $product->setData('sku', $data[$this->eBayConfigHelper->getProductIdentifier()]);
+
         return $product;
     }
 
@@ -242,36 +244,7 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
      * @return Mage_Catalog_Model_Product
      */
     protected function loadProduct(Mage_Catalog_Model_Product $product, array $data) {
-
-        if ($this->eBayConfigHelper->isSKUProductIdentifier()) {
-            $product->load($product->getIdBySku($data['identifiers_sku']));
-            return $product;
-        }
-
-        $products = Mage::getResourceModel('catalog/product_collection');
-        $products->addAttributeToSelect('*');
-        $products->addStoreFilter($product->getStoreId());
-
-        switch (true) {
-            case $this->eBayConfigHelper->isMPNProductIdentifier():
-                $products->addAttributeToFilter('mpn', $data['identifiers_brand_mpn_mpn']);
-                break;
-            case $this->eBayConfigHelper->isUPCProductIdentifier():
-                $products->addAttributeToFilter('upc', $data['identifiers_upc']);
-                break;
-            case $this->eBayConfigHelper->isEANProductIdentifier():
-                $products->addAttributeToFilter('ean', $data['identifiers_ean']);
-                break;
-        }
-
-        /** @var Mage_Catalog_Model_Product $loadProduct */
-        $products->setCurPage(1)->setPageSize(1);
-        $loadProduct = $products->load()->getFirstItem();
-        if ($loadProduct->getId()) {
-            $loadProduct->setData('store_id', $product->getStoreId());
-
-            return $loadProduct;
-        }
+        $product->load($product->getIdBySku($data[$this->eBayConfigHelper->getProductIdentifier()]));
 
         return $product;
     }
@@ -304,25 +277,18 @@ abstract class M2E_E2M_Model_Product_Magento_Product extends Mage_Core_Model_Abs
             $data['identifiers_sku'] = 'RANDOM_' . md5($data['identifiers_item_id']);
         }
 
-        $postfix = 'sku';
-        switch (true) {
-            case $this->eBayConfigHelper->isMPNProductIdentifier():
-                $postfix = 'brand_mpn_mpn';
-                break;
-            case $this->eBayConfigHelper->isUPCProductIdentifier():
-                $postfix = 'upc';
-                break;
-            case $this->eBayConfigHelper->isEANProductIdentifier():
-                $postfix = 'ean';
-                break;
+        $productID = $this->eBayConfigHelper->getProductIdentifier();
+        if (empty($data[$productID])) {
+            $data[$productID] = 'PID_' . md5($data['identifiers_item_id']);
         }
 
-        if (empty($data["identifiers_{$postfix}"])) {
-            $data["identifiers_{$postfix}"] = 'RANDOM_' . md5($data['identifiers_item_id']);
+        if (self::DOES_NOT_APPLY === strtolower($data[$productID])) {
+            $data[$productID] = 'DNA_' . md5($data['identifiers_item_id']);
         }
 
-        if (self::DOES_NOT_APPLY === strtolower($data["identifiers_{$postfix}"])) {
-            $data["identifiers_{$postfix}"] = 'DNA_' . md5($data['identifiers_item_id']);
+        //TODO Delete
+        if ('refer to description' === strtolower($data[$productID])) {
+            $data[$productID] = 'ROD_' . md5($data['identifiers_item_id']);
         }
 
         return $data;

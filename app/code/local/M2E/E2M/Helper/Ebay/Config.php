@@ -24,10 +24,10 @@ class M2E_E2M_Helper_Ebay_Config {
 
     const STORE_SKIP = -1;
 
-    const PRODUCT_IDENTIFIER_SKU = 'SKU';
-    const PRODUCT_IDENTIFIER_MPN = 'MPN';
-    const PRODUCT_IDENTIFIER_EAN = 'EAN';
-    const PRODUCT_IDENTIFIER_UPC = 'UPC';
+    const PRODUCT_IDENTIFIER_SKU = 'identifiers_sku';
+    const PRODUCT_IDENTIFIER_MPN = 'identifiers_brand_mpn_mpn';
+    const PRODUCT_IDENTIFIER_EAN = 'identifiers_ean';
+    const PRODUCT_IDENTIFIER_UPC = 'identifiers_upc';
 
     const ACTION_FOUND_IGNORE = 'IGNORE';
     const ACTION_FOUND_UPDATE = 'UPDATE';
@@ -42,29 +42,36 @@ class M2E_E2M_Helper_Ebay_Config {
     /**
      * @return bool
      */
+    public function getProductIdentifier() {
+        return $this->dataHelper->getConfig(self::XML_PATH_PRODUCT_IDENTIFIER);
+    }
+
+    /**
+     * @return bool
+     */
     public function isSKUProductIdentifier() {
-        return self::PRODUCT_IDENTIFIER_SKU === $this->dataHelper->getConfig(self::XML_PATH_PRODUCT_IDENTIFIER);
+        return self::PRODUCT_IDENTIFIER_SKU === $this->getProductIdentifier();
     }
 
     /**
      * @return bool
      */
     public function isMPNProductIdentifier() {
-        return self::PRODUCT_IDENTIFIER_MPN === $this->dataHelper->getConfig(self::XML_PATH_PRODUCT_IDENTIFIER);
+        return self::PRODUCT_IDENTIFIER_MPN === $this->getProductIdentifier();
     }
 
     /**
      * @return bool
      */
     public function isUPCProductIdentifier() {
-        return self::PRODUCT_IDENTIFIER_UPC === $this->dataHelper->getConfig(self::XML_PATH_PRODUCT_IDENTIFIER);
+        return self::PRODUCT_IDENTIFIER_UPC === $this->getProductIdentifier();
     }
 
     /**
      * @return bool
      */
     public function isEANProductIdentifier() {
-        return self::PRODUCT_IDENTIFIER_EAN === $this->dataHelper->getConfig(self::XML_PATH_PRODUCT_IDENTIFIER);
+        return self::PRODUCT_IDENTIFIER_EAN === $this->getProductIdentifier();
     }
 
     /**

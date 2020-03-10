@@ -269,10 +269,10 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
 
             'qty_total' => 'Quantity',
 
+            'shipping_package_width' => 'Width',
             'shipping_dispatch_time' => 'Dispatch Time',
             'shipping_package_dimensions_depth' => '(Dimensions) Depth',
             'shipping_package_dimensions_length' => '(Dimensions) Length',
-            'shipping_package_dimensions_width' => '(Dimensions) Width',
 
             'condition_type' => 'Condition ID'
         );

@@ -24,9 +24,6 @@ class M2E_E2M_Model_Product_Magento_Simple extends M2E_E2M_Model_Product_Magento
         $product->setData('tax_class_id', Ess_M2ePro_Model_Magento_Product::TAX_CLASS_ID_NONE);
 
         $product = $this->importFields($product, $data);
-        if (empty($product->getSku()) && $this->eBayConfigHelper->isGenerateSku()) {
-            $product->setData('sku', 'RANDOM_' . md5($data['identifiers_item_id']));
-        }
 
         if ($this->eBayConfigHelper->isImportImage()) {
             $product = $this->importImage($product, $data);
@@ -43,8 +40,8 @@ class M2E_E2M_Model_Product_Magento_Simple extends M2E_E2M_Model_Product_Magento
             $this->addLog(sprintf(
                 'Create product: "%s" Store ID: "%s" from eBay Item ID: "%s"',
                 $product->getSku(),
-                $data['identifiers_item_id'],
-                $product->getStoreId()
+                $product->getStoreId(),
+                $data['identifiers_item_id']
             ));
 
         } catch (Exception $e) {
@@ -84,9 +81,6 @@ class M2E_E2M_Model_Product_Magento_Simple extends M2E_E2M_Model_Product_Magento
         )));
 
         $product = $this->importFields($product, $data);
-        if (empty($product->getSku()) && $this->eBayConfigHelper->isGenerateSku()) {
-            $product->setData('sku', 'RANDOM_' . md5($data['identifiers_item_id']));
-        }
 
         if ($this->eBayConfigHelper->isImportImage()) {
             $product = $this->updateImage($product, $data);
@@ -103,8 +97,8 @@ class M2E_E2M_Model_Product_Magento_Simple extends M2E_E2M_Model_Product_Magento
             $this->addLog(sprintf(
                 'Update product: "%s" Store ID: "%s" from eBay Item ID: "%s"',
                 $product->getSku(),
-                $data['identifiers_item_id'],
-                $product->getStoreId()
+                $product->getStoreId(),
+                $data['identifiers_item_id']
             ));
 
         } catch (Exception $e) {

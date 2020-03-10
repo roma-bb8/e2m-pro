@@ -118,25 +118,7 @@
             <table class="form-list" cellspacing="0" cellpadding="0">
                 <tr>
                     <td class="label">
-                        <label for="inventory-settings-product-identifier"><?php echo $this->getDataHelper()->__('Product ID'); ?>
-                            :</label>
-                    </td>
-                    <td class="value">
-                        <select id="inventory-settings-product-identifier" class="config-input">
-                            <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_SKU; ?>" <?php if ($this->getEbayConfigHelper()->isSKUProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('SKU'); ?></option>
-                            <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_MPN; ?>" <?php if ($this->getEbayConfigHelper()->isMPNProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('MPN'); ?></option>
-                            <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_UPC; ?>" <?php if ($this->getEbayConfigHelper()->isUPCProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('UPC'); ?></option>
-                            <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_EAN; ?>" <?php if ($this->getEbayConfigHelper()->isEANProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('EAN'); ?></option>
-                        </select>
-                        <p class="note">
-                            <span><?php echo Mage::helper('e2m')->__('Product identifier on different marketplaces'); ?></span>
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label">
-                        <label for="inventory-settings-action-found"><?php echo $this->getDataHelper()->__('Found a product'); ?>
-                            :</label>
+                        <label for="inventory-settings-action-found"><?php echo $this->getDataHelper()->__('Found a product'); ?>:</label>
                     </td>
                     <td class="value">
                         <select id="inventory-settings-action-found" class="config-input">
@@ -175,6 +157,38 @@
             <table class="form-list" cellspacing="0" cellpadding="0">
                 <tr>
                     <td class="label">
+                        <label for="attribute-set"><?php echo $this->getDataHelper()->__('Attribute Set') ?>:</label>
+                    </td>
+                    <td class="value">
+                        <select id="attribute-set" class="attribute-set config-input">
+                            <option value=""><?php echo $this->getDataHelper()->__('-- Please Select --'); ?></option>
+                            <?php foreach ($this->getDataHelper()->getAllAttributeSet() as $id => $title): ?>
+                                <option value="<?php echo $id; ?>" <?php if ($id == $this->getDataHelper()->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET)) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__($title); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <p class="note">
+                            <span><?php echo Mage::helper('e2m')->__('Attribute Set'); ?></span>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        <label for="inventory-settings-product-identifier"><?php echo $this->getDataHelper()->__('Product SKU'); ?>:</label>
+                    </td>
+                    <td class="value">
+                        <select id="inventory-settings-product-identifier" class="config-input">
+                            <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_SKU; ?>" <?php if ($this->getEbayConfigHelper()->isSKUProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('SKU'); ?></option>
+                            <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_MPN; ?>" <?php if ($this->getEbayConfigHelper()->isMPNProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('(Brand) MPN'); ?></option>
+                            <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_UPC; ?>" <?php if ($this->getEbayConfigHelper()->isUPCProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('UPC'); ?></option>
+                            <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_EAN; ?>" <?php if ($this->getEbayConfigHelper()->isEANProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('EAN'); ?></option>
+                        </select>
+                        <p class="note">
+                            <span><?php echo Mage::helper('e2m')->__('Product identifier on different marketplaces'); ?></span>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
                         <label for="generate-sku"><?php echo $this->getDataHelper()->__('Generate SKU') ?>:</label>
                     </td>
                     <td class="value">
@@ -184,20 +198,6 @@
                         </select>
                         <p class="note">
                             <span><?php echo Mage::helper('e2m')->__('Generate SKU (if empty)'); ?></span>
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label">
-                        <label for="import-image"><?php echo $this->getDataHelper()->__('Import image') ?>:</label>
-                    </td>
-                    <td class="value">
-                        <select id="import-image" class="config-input">
-                            <option value="1" <?php if ($this->getEbayConfigHelper()->isImportImage()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
-                            <option value="0" <?php if (!$this->getEbayConfigHelper()->isImportImage()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
-                        </select>
-                        <p class="note">
-                            <span><?php echo Mage::helper('e2m')->__('Import image'); ?></span>
                         </p>
                     </td>
                 </tr>
@@ -232,7 +232,7 @@
                 </tr>
                 <tr>
                     <td class="label">
-                        <label for="rename-attribute-title-for-specifics"><?php echo $this->getDataHelper()->__('Rename attribute title for Specifics') ?>:</label>
+                        <label for="rename-attribute-title-for-specifics"><?php echo $this->getDataHelper()->__('Rename attribute title') ?>:</label>
                     </td>
                     <td class="value">
                         <select id="rename-attribute-title-for-specifics" class="config-input">
@@ -242,22 +242,6 @@
                         <p class="note">
                                 <span><?php echo Mage::helper('e2m')->__('Rename attribute title for specifics'); ?>
                                 </span>
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label">
-                        <label for="attribute-set"><?php echo $this->getDataHelper()->__('Attribute Set') ?>:</label>
-                    </td>
-                    <td class="value">
-                        <select id="attribute-set" class="attribute-set config-input">
-                            <option value=""><?php echo $this->getDataHelper()->__('-- Please Select --'); ?></option>
-                            <?php foreach ($this->getDataHelper()->getAllAttributeSet() as $id => $title): ?>
-                                <option value="<?php echo $id; ?>" <?php if ($id == $this->getDataHelper()->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET)) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__($title); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                        <p class="note">
-                            <span><?php echo Mage::helper('e2m')->__('Attribute Set'); ?></span>
                         </p>
                     </td>
                 </tr>
@@ -311,6 +295,20 @@
                                 </td>
                             </tr>
                         </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        <label for="import-image"><?php echo $this->getDataHelper()->__('Import image') ?>:</label>
+                    </td>
+                    <td class="value">
+                        <select id="import-image" class="config-input">
+                            <option value="1" <?php if ($this->getEbayConfigHelper()->isImportImage()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
+                            <option value="0" <?php if (!$this->getEbayConfigHelper()->isImportImage()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
+                        </select>
+                        <p class="note">
+                            <span><?php echo Mage::helper('e2m')->__('Import image'); ?></span>
+                        </p>
                     </td>
                 </tr>
             </table>
