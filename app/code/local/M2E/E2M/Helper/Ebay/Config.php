@@ -24,10 +24,10 @@ class M2E_E2M_Helper_Ebay_Config {
 
     const STORE_SKIP = -1;
 
-    const PRODUCT_IDENTIFIER_SKU = 'identifiers_sku';
-    const PRODUCT_IDENTIFIER_MPN = 'identifiers_brand_mpn_mpn';
-    const PRODUCT_IDENTIFIER_EAN = 'identifiers_ean';
-    const PRODUCT_IDENTIFIER_UPC = 'identifiers_upc';
+    const PRODUCT_IDENTIFIER_SKU = 'sku';
+    const PRODUCT_IDENTIFIER_MPN = 'mpn';
+    const PRODUCT_IDENTIFIER_EAN = 'ean';
+    const PRODUCT_IDENTIFIER_UPC = 'upc';
 
     const ACTION_FOUND_IGNORE = 'IGNORE';
     const ACTION_FOUND_UPDATE = 'UPDATE';

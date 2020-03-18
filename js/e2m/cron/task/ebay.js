@@ -11,14 +11,3 @@ function downloadInventoryHandler(data) {
     $('download-inventory-variation-items').innerHTML = data.variation;
     $('download-inventory-simple-items').innerHTML = data.simple;
 }
-
-function importInventoryHandler(data) {
-
-    if (Number(data.process) === 100) {
-        setTimeout(function () {
-            window.location.reload();
-        }, 3000);
-    }
-
-    $('import-inventory-progress').innerHTML = data.process;
-}

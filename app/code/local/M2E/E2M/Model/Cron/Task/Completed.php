@@ -8,7 +8,7 @@
 /**
  * Class M2E_E2M_Model_Cron_Task_Completed
  */
-class M2E_E2M_Model_Cron_Task_Completed implements M2E_E2M_Model_Cron_Task {
+class M2E_E2M_Model_Cron_Task_Completed {
 
     const CACHE_ID = M2E_E2M_Helper_Data::PREFIX . self::class;
 

@@ -3,7 +3,6 @@
 
     Event.observe(window, 'load', function () {
 
-        cron();
         initializeLocalStorage();
         attributeSet();
         configInput();

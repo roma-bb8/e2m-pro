@@ -1,136 +1,67 @@
 <?php
 
-class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseController {
+class M2E_E2M_Adminhtml_E2mController extends Mage_Adminhtml_Controller_Action {
 
-    /**
-     * @return Zend_Controller_Response_Abstract
-     */
-    public function proceedEbayImportInventoryAction() {
+    const HTTP_INTERNAL_ERROR = 500;
+    const DOES_NOT_APPLY = 'does not apply';
 
-        $dataHelper = Mage::helper('e2m');
+    //########################################
 
-        $resource = Mage::getSingleton('core/resource');
-
-        $connWrite = $resource->getConnection('core_write');
-        $connRead = $resource->getConnection('core_read');
-
-        $cronTasksTableName = $resource->getTableName('m2e_e2m_cron_tasks');
-
-        //----------------------------------------
-
-        $taskId = $connRead->select()->from($cronTasksTableName, array('id'))
-            ->where('instance = ?', M2E_E2M_Model_Cron_Task_Magento_ImportInventory::class)
-            ->limit(1)->query()->fetchColumn();
-
-        if (empty($taskId)) {
-            return $this->ajaxResponse(array(
-                'process' => $dataHelper->getConfig(M2E_E2M_Model_Cron_Task_Magento_ImportInventory::CACHE_ID)
-            ));
-        }
-
-        $connWrite->update($cronTasksTableName, array(
-            'pause' => false
-        ), array('id = ?' => $taskId));
-
-        $dataHelper->logReport($taskId, $dataHelper->__('Proceed task of Import Inventory from Magento...'));
-
-        return $this->ajaxResponse(array(
-            'process' => $dataHelper->getConfig(M2E_E2M_Model_Cron_Task_Magento_ImportInventory::CACHE_ID)
-        ));
+    public function ajaxResponse(array $data) {
+        return $this->getResponse()->setBody(Mage::helper('core')->jsonEncode(array(
+            'data' => $data
+        )));
     }
 
-    //----------------------------------------
+    final public function dispatch($action) {
 
-    /**
-     * @return Zend_Controller_Response_Abstract
-     */
-    public function pauseEbayImportInventoryAction() {
+        register_shutdown_function(function () {
+            $error = error_get_last();
+            if ($error === null) {
+                return;
+            }
 
-        $dataHelper = Mage::helper('e2m');
+            if (strpos($error['message'], 'deprecated')) {
+                return;
+            }
 
-        $resource = Mage::getSingleton('core/resource');
+            if (strpos($error['message'], 'Too few arguments')) {
+                return;
+            }
 
-        $connWrite = $resource->getConnection('core_write');
-        $connRead = $resource->getConnection('core_read');
-
-        $cronTasksTableName = $resource->getTableName('m2e_e2m_cron_tasks');
-
-        //----------------------------------------
-
-        $dataHelper->setCacheValue(M2E_E2M_Model_Cron_Task_Magento_ImportInventory::CACHE_ID, 'pause');
-
-        $taskId = $connRead->select()->from($cronTasksTableName, array('id'))
-            ->where('instance = ?', M2E_E2M_Model_Cron_Task_Magento_ImportInventory::class)
-            ->limit(1)->query()->fetchColumn();
-
-        if (empty($taskId)) {
-            return $this->ajaxResponse(array(
-                'process' => $dataHelper->getConfig(M2E_E2M_Model_Cron_Task_Magento_ImportInventory::CACHE_ID)
+            /** @var M2E_E2M_Helper_Data $dataHelper */
+            $dataHelper = Mage::helper('e2m');
+            $dataHelper->logException(new Exception(
+                "Error: {$error['message']}\nFile: {$error['file']}\nLine: {$error['line']}"
             ));
+        });
+
+        try {
+            parent::dispatch($action);
+        } catch (Exception $e) {
+            if ($this->getRequest()->isAjax()) {
+
+                $dataHelper = Mage::helper('e2m');
+                $dataHelper->logException($e);
+
+                $response = $this->getResponse();
+                $response->setHttpResponseCode(self::HTTP_INTERNAL_ERROR);
+                $response->setBody(Mage::helper('core')->jsonEncode(array(
+                    'error' => true,
+                    'message' => $e->getMessage()
+                )));
+            }
+
+            $this->_getSession()->addError($e->getMessage());
+
+            $this->_redirect('*/e2m/index');
         }
-
-        $connWrite->update($cronTasksTableName, array(
-            'pause' => true
-        ), array('id = ?' => $taskId));
-
-        $dataHelper->logReport($taskId, $dataHelper->__('Pause task of Import Inventory from Magento!'));
-
-        return $this->ajaxResponse(array(
-            'process' => $dataHelper->getConfig(M2E_E2M_Model_Cron_Task_Magento_ImportInventory::CACHE_ID)
-        ));
-    }
-
-    //----------------------------------------
-
-    /**
-     * @return Zend_Controller_Response_Abstract
-     */
-    public function startEbayImportInventoryAction() {
-
-        $dataHelper = Mage::helper('e2m');
-
-        $resource = Mage::getSingleton('core/resource');
-
-        $connWrite = $resource->getConnection('core_write');
-        $connRead = $resource->getConnection('core_read');
-
-        $cronTasksTableName = $resource->getTableName('m2e_e2m_cron_tasks');
-
-        //----------------------------------------
-
-        $connWrite->delete($cronTasksTableName, array(
-            'instance = ?' => M2E_E2M_Model_Cron_Task_Magento_ImportInventory::class
-        ));
-
-        //----------------------------------------
-
-        $connWrite->insert($cronTasksTableName, array(
-            'instance' => M2E_E2M_Model_Cron_Task_Magento_ImportInventory::class,
-            'data' => Mage::helper('core')->jsonEncode(array(
-                'last_import_id' => 0
-            )),
-            'progress' => 0
-        ));
-
-        //----------------------------------------
-
-        $taskId = $connRead->select()->from($cronTasksTableName, 'id')
-            ->where('instance = ?', M2E_E2M_Model_Cron_Task_Magento_ImportInventory::class)
-            ->limit(1)->query()->fetchColumn();
-
-        $dataHelper->logReport($taskId, $dataHelper->__('Start task of Import Inventory from Magento...'));
-
-        return $this->ajaxResponse(array(
-            'process' => 0
-        ));
     }
 
     //########################################
 
-    /**
-     * @return Zend_Controller_Response_Abstract
-     * @throws Exception
-     */
+    //########################################
+
     public function setSettingsAction() {
 
         $coreHelper = Mage::helper('core');
@@ -181,9 +112,6 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
         ));
     }
 
-    /**
-     * @return Zend_Controller_Response_Abstract
-     */
     public function getAttributesBySetIdAction() {
 
         $setId = (int)Mage::helper('core')->jsonDecode($this->getRequest()->getParam('set_id'));
@@ -194,10 +122,6 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
 
     //########################################
 
-    /**
-     * @return Zend_Controller_Response_Abstract
-     * @throws Exception
-     */
     public function startEbayDownloadInventoryAction() {
 
         $dataHelper = Mage::helper('e2m');
@@ -249,17 +173,13 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
 
     //########################################
 
-    /**
-     * @return Zend_Controller_Response_Abstract
-     * @throws Exception
-     */
     public function unlinkEbayAccountAction() {
 
         $dataHelper = Mage::helper('e2m');
 
         $resource = Mage::getSingleton('core/resource');
         $connWrite = $resource->getConnection('core_write');
-        $connWrite->truncateTable($resource->getTableName('m2e_e2m_inventory_ebay'));
+        //$connWrite->truncateTable($resource->getTableName('m2e_e2m_inventory_ebay'));
         $connWrite->delete($resource->getTableName('m2e_e2m_cron_tasks'), array(
             'instance <> ?' => M2E_E2M_Model_Cron_Task_Completed::class
         ));
@@ -288,10 +208,6 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
         ));
     }
 
-    /**
-     * @return Zend_Controller_Response_Abstract
-     * @throws Exception
-     */
     public function linkEbayAccountAction() {
 
         $accountId = $this->getRequest()->getParam('account_id');
@@ -316,9 +232,6 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
 
     //########################################
 
-    /**
-     * @return Mage_Core_Controller_Varien_Action|Zend_Controller_Response_Abstract
-     */
     public function indexAction() {
 
         if ($this->getRequest()->isAjax()) {
@@ -362,16 +275,1061 @@ class M2E_E2M_Adminhtml_E2mController extends M2E_E2M_Controller_Adminhtml_BaseC
         return $this->renderLayout();
     }
 
-    /**
-     * @return Zend_Controller_Response_Abstract
-     * @throws Zend_Db_Statement_Exception
-     */
-    public function cronAction() {
+    //########################################
 
-        session_write_close();
+    public function collectInventoryMagmiAction() {
+        $resource = Mage::getSingleton('core/resource');
+        $connRead = $resource->getConnection('core_read');
 
-        $cron = Mage::getSingleton('e2m/Cron');
+        $pathPrefix = BP . DS . 'var' . DS . 'e2m' . DS;
+        $file1 = 'simple_attributes.csv';
+        $file2 = 'config_attributes.csv';
+        $filePostfix = '_inventory.csv';
 
-        return $this->ajaxResponse($cron->process());
+        //----------------------------------------
+
+        $dataHelper = Mage::helper('e2m');
+        $fieldsAttributes = $dataHelper->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_MAP);
+        $eBayItemImagesTableName = $resource->getTableName('m2e_e2m_ebay_item_images');
+        $eBayItemsTableName = $resource->getTableName('m2e_e2m_ebay_items');
+        $eBayItemVariationsTableName = $resource->getTableName('m2e_e2m_ebay_item_variations');
+        $csvHeader = array(
+            'attribute_set_code',
+            'product_type',
+            'visibility',
+            'additional_images',
+            'additional_attributes',
+            'configurable_variations',      // sku=MH01-XS-Black,size=XS,color=Black|sku=MH01-XS-Gray,size=XS,color=Gray|sku=MH01-XS-Orange,size=XS,color=Orange|sku=MH01-S-Black,size=S,color=Black|sku=MH01-S-Gray,size=S,color=Gray|sku=MH01-S-Orange,size=S,color=Orange|sku=MH01-M-Black,size=M,color=Black|sku=MH01-M-Gray,size=M,color=Gray|sku=MH01-M-Orange,size=M,color=Orange|sku=MH01-L-Black,size=L,color=Black|sku=MH01-L-Gray,size=L,color=Gray|sku=MH01-L-Orange,size=L,color=Orange|sku=MH01-XL-Black,size=XL,color=Black|sku=MH01-XL-Gray,size=XL,color=Gray|sku=MH01-XL-Orange,size=XL,color=Orange
+            'configurable_variation_labels' // size=Size,color=Color
+        );
+
+        //----------------------------------------
+
+        $eBayItemSpecificsTableName = $resource->getTableName('m2e_e2m_ebay_item_specifics');
+        $specifics = $connRead->select()->from($eBayItemSpecificsTableName)->reset(Zend_Db_Select::COLUMNS)->columns(array(
+            'name',
+            "GROUP_CONCAT(DISTINCT value SEPARATOR ',') as value"
+        ))->group('name')->query();
+        file_put_contents($pathPrefix . $file1, 'code,title,values' . PHP_EOL);
+        foreach ($specifics->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            if (empty($row['name'])) {
+                continue;
+            }
+
+            $name = $row['name'];
+            $value = $row['value'];
+            $code = $dataHelper->getCode($name);
+            $csvHeader[] = $code;
+
+            file_put_contents($pathPrefix . $file1, "\"{$code}\",\"{$name}\",\"{$value}\"" . PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+
+        $eBayItemVariationSpecificsTableName = $resource->getTableName('m2e_e2m_ebay_item_variation_specifics');
+        $specifics = $connRead->select()->from($eBayItemVariationSpecificsTableName)->reset(Zend_Db_Select::COLUMNS)->columns(array(
+            'name',
+            "GROUP_CONCAT(DISTINCT value SEPARATOR ',') as value"
+        ))->group('name')->query();
+        file_put_contents($pathPrefix . $file2, 'code,title,values' . PHP_EOL);
+        foreach ($specifics->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            if (empty($row['name'])) {
+                continue;
+            }
+
+            $name = $row['name'];
+            $value = $row['value'];
+            $code = $dataHelper->getCode($name);
+            $csvHeader[] = $code;
+
+            file_put_contents($pathPrefix . $file2, "\"{$code}\",\"{$name}\",\"{$value}\"" . PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+
+        $csvHeader = array_merge($csvHeader, array_keys($fieldsAttributes));
+        $csvHeader = array_unique($csvHeader);
+        sort($csvHeader);
+        $productData = array_combine(array_values($csvHeader), array_fill(0, count($csvHeader), '"__EMPTY__VALUE__"'));
+
+        //----------------------------------------
+
+        $sqlI = "SELECT GROUP_CONCAT(`path` SEPARATOR \",\") FROM `{$eBayItemImagesTableName}` WHERE `item_id` = ? GROUP BY `item_id`";
+        $inventory = $connRead->select()
+            ->from(array('items' => $eBayItemsTableName))
+            ->joinLeft(array('variations' => $eBayItemVariationsTableName), '(items.id = variations.item_id)')
+            ->reset(Zend_Db_Select::COLUMNS)
+            ->columns(array(
+                'items.*',
+                'item_variation_id' => 'variations.id',
+                'v_hash' => 'variations.hash',
+                'v_sku' => 'variations.sku',
+                'v_start_price' => 'variations.start_price',
+                'v_quantity' => 'variations.quantity',
+                'v_upc' => 'variations.upc',
+                'v_ean' => 'variations.ean',
+                'v_isbn' => 'variations.isbn',
+                'v_ePID' => 'variations.ePID'
+            ))
+            ->limit(5)
+            ->query();
+
+        $variations = array();
+        while ($item = $inventory->fetch(PDO::FETCH_ASSOC)) {
+            $product = $productData;
+
+            if (!empty($item['v_hash'])) {
+                $variations[$item['sku']] = $item;
+
+                $c = $connRead->select()->from($resource->getTableName('m2e_e2m_ebay_item_variation_specifics'))
+                    ->where('item_variation_id = ?', $item['item_variation_id'])->query()->fetchAll();
+                foreach ($c as $cc) {
+                    $code = $dataHelper->getCode($cc['name']);
+                    $product[$code] = $dataHelper->getValue($cc['value']);
+                    $variations[$item['sku']]['configurable_variations_sku'][$item['v_sku']][$code] = $cc;
+                }
+
+                $item['ebay_item_id'] = $item['v_hash'];
+                $item['sku'] = $item['v_sku'];
+                $item['start_price'] = $item['v_start_price'];
+                $item['start_price'] = $item['v_start_price'];
+                $item['start_price'] = $item['v_start_price'];
+                $item['quantity'] = $item['v_quantity'];
+                $item['upc'] = $item['v_upc'];
+                $item['ean'] = $item['v_ean'];
+                $item['isbn'] = $item['v_isbn'];
+                $item['ePID'] = $item['v_ePID'];
+            }
+
+            $file = $dataHelper->getFile($item['primary_category_name']);
+            if (!file_exists($pathPrefix . $file . $filePostfix)) {
+                file_put_contents($pathPrefix . $file . $filePostfix, implode(',', $csvHeader) . PHP_EOL);
+            }
+            $images = $connRead->query(str_replace('?', $connRead->quote($item['id']), $sqlI))->fetchColumn();
+
+            $product['attribute_set_code'] = '%attribute_set_code%';
+            $product['product_type'] = '"simple"';
+            $product['visibility'] = '"Not Visible Individually"';
+            $product['additional_images'] = $dataHelper->getValue($images);
+            foreach ($fieldsAttributes as $magentoAttribute => $eBayField) {
+                $product[$magentoAttribute] = $dataHelper->getValue($item[$eBayField]);
+            }
+
+            $f = $connRead->select()->from($eBayItemSpecificsTableName)->where('item_id = ?', $item['id'])->query()->fetchAll();
+            foreach ($f as $ff) {
+                $code = $dataHelper->getCode($ff['name']);
+                $product[$code] = $dataHelper->getValue($ff['value']);
+            }
+
+            file_put_contents($pathPrefix . $file . $filePostfix, implode(',', $product) . PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+
+        if (empty($variations)) {
+            return $this->ajaxResponse(array('completed' => true));
+        }
+
+        foreach ($variations as $sku => $parent) {
+            $product = $productData;
+
+            $file = $dataHelper->getFile($parent['primary_category_name']);
+            if (!file_exists($pathPrefix . $file . $filePostfix)) {
+                file_put_contents($pathPrefix . $file . $filePostfix, implode(',', $csvHeader) . PHP_EOL);
+            }
+            $images = $connRead->query(str_replace('?', $connRead->quote($parent['id']), $sqlI))->fetchColumn();
+
+            $product['attribute_set_code'] = '%attribute_set_code%';
+            $product['product_type'] = '"configurable"';
+            $product['visibility'] = '"Not Visible Individually"';
+            $product['additional_images'] = $dataHelper->getValue($images);
+            foreach ($fieldsAttributes as $magentoAttribute => $eBayField) {
+                $product[$magentoAttribute] = $dataHelper->getValue($parent[$eBayField]);
+            }
+
+            $f = $connRead->select()->from($eBayItemSpecificsTableName)->where('item_id = ?', $parent['id'])->query()->fetchAll();
+            foreach ($f as $ff) {
+                $code = $dataHelper->getCode($ff['name']);
+                $product[$code] = $dataHelper->getValue($ff['value']);
+            }
+
+            $configurableVariations = array();
+            $configurableVariationLabels = array();
+            foreach ($parent['configurable_variations_sku'] as $skuV => $dataV) {
+                $tmp = array();
+                $tmp[] = "sku=\"{$skuV}\"";
+                foreach ($dataV as $code => $cc) {
+                    $name = $cc['name'];
+                    $value = $cc['value'];
+                    $configurableVariationLabels[$code] = "{$code}=\"{$name}\"";
+                    $tmp[$code] = "{$code}=\"{$value}\"";
+                }
+                $configurableVariations[$skuV] = implode(',', $tmp);
+            }
+
+            $product['configurable_variation_labels'] = $dataHelper->getValue(implode(',', $configurableVariationLabels));
+            $product['configurable_variations'] = $dataHelper->getValue(implode('|', $configurableVariations));
+
+            file_put_contents($pathPrefix . $file . $filePostfix, implode(',', $product) . PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+
+        return $this->ajaxResponse(array('completed' => true));
+    }
+
+    public function collectInventoryBaseM2Action() {
+        $resource = Mage::getSingleton('core/resource');
+        $connRead = $resource->getConnection('core_read');
+
+        $pathPrefix = BP . DS . 'var' . DS . 'e2m' . DS;
+        $filePostfix = '_inventory.csv';
+
+        //----------------------------------------
+
+        $dataHelper = Mage::helper('e2m');
+        $eBayConfigHelper = Mage::helper('e2m/Ebay_Config');
+        $fieldsAttributes = $dataHelper->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_MAP);
+        $eBayItemImagesTableName = $resource->getTableName('m2e_e2m_ebay_item_images');
+        $eBayItemsTableName = $resource->getTableName('m2e_e2m_ebay_items');
+        $eBayItemVariationsTableName = $resource->getTableName('m2e_e2m_ebay_item_variations');
+        $csvHeader = array(
+            'attribute_set_code',
+            'product_type',
+            'visibility',
+            'additional_images',
+            'additional_attributes',
+            'configurable_variations',      // sku=MH01-XS-Black,size=XS,color=Black|sku=MH01-XS-Gray,size=XS,color=Gray|sku=MH01-XS-Orange,size=XS,color=Orange|sku=MH01-S-Black,size=S,color=Black|sku=MH01-S-Gray,size=S,color=Gray|sku=MH01-S-Orange,size=S,color=Orange|sku=MH01-M-Black,size=M,color=Black|sku=MH01-M-Gray,size=M,color=Gray|sku=MH01-M-Orange,size=M,color=Orange|sku=MH01-L-Black,size=L,color=Black|sku=MH01-L-Gray,size=L,color=Gray|sku=MH01-L-Orange,size=L,color=Orange|sku=MH01-XL-Black,size=XL,color=Black|sku=MH01-XL-Gray,size=XL,color=Gray|sku=MH01-XL-Orange,size=XL,color=Orange
+            'configurable_variation_labels' // size=Size,color=Color
+        );
+
+        //----------------------------------------
+
+        $eBayItemSpecificsTableName = $resource->getTableName('m2e_e2m_ebay_item_specifics');
+        $specifics = $connRead->select()->from($eBayItemSpecificsTableName)->reset(Zend_Db_Select::COLUMNS)->columns(array(
+            'name',
+            "GROUP_CONCAT(DISTINCT value SEPARATOR ',') as value"
+        ))->group('name')->query();
+        foreach ($specifics->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            if (empty($row['name'])) {
+                continue;
+            }
+
+            $name = $row['name'];
+            $code = $dataHelper->getCode($name);
+            $csvHeader[] = $code;
+        }
+
+        $eBayItemVariationSpecificsTableName = $resource->getTableName('m2e_e2m_ebay_item_variation_specifics');
+        $specifics = $connRead->select()->from($eBayItemVariationSpecificsTableName)->reset(Zend_Db_Select::COLUMNS)->columns(array(
+            'name',
+            "GROUP_CONCAT(DISTINCT value SEPARATOR ',') as value"
+        ))->group('name')->query();
+        foreach ($specifics->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            if (empty($row['name'])) {
+                continue;
+            }
+
+            $name = $row['name'];
+            $code = $dataHelper->getCode($name);
+            $csvHeader[] = $code;
+        }
+
+        $csvHeader = array_merge($csvHeader, array_keys($fieldsAttributes));
+        $csvHeader = array_unique($csvHeader);
+        sort($csvHeader);
+        $productData = array_combine(array_values($csvHeader), array_fill(0, count($csvHeader), '"__EMPTY__VALUE__"'));
+
+        //----------------------------------------
+
+        $sqlI = "SELECT GROUP_CONCAT(`path` SEPARATOR \",\") FROM `{$eBayItemImagesTableName}` WHERE `item_id` = ? GROUP BY `item_id`";
+        $inventory = $connRead->select()
+            ->from(array('items' => $eBayItemsTableName))
+            ->joinLeft(array('variations' => $eBayItemVariationsTableName), '(items.id = variations.item_id)')
+            ->reset(Zend_Db_Select::COLUMNS)
+            ->columns(array(
+                'items.*',
+                'item_variation_id' => 'variations.id',
+                'v_hash' => 'variations.hash',
+                'v_sku' => 'variations.sku',
+                'v_start_price' => 'variations.start_price',
+                'v_quantity' => 'variations.quantity',
+                'v_upc' => 'variations.upc',
+                'v_ean' => 'variations.ean',
+                'v_isbn' => 'variations.isbn',
+                'v_ePID' => 'variations.ePID'
+            ))
+            //->limit(5)
+            ->query();
+
+        $variations = array();
+        while ($item = $inventory->fetch(PDO::FETCH_ASSOC)) {
+
+            //---
+            if ($eBayConfigHelper->isDeleteHtml()) {
+                $item['title'] = strip_tags($item['title']);
+                $item['subtitle'] = strip_tags($item['subtitle']);
+                $item['description'] = strip_tags($item['description']);
+            }
+
+            if (empty($data['sku']) && $eBayConfigHelper->isGenerateSku()) {
+                $data['sku'] = 'SKU_' . md5($data['ebay_item_id']);
+            }
+
+            $productID = $eBayConfigHelper->getProductIdentifier();
+            if (empty($data[$productID])) {
+                $data[$productID] = 'PID_' . md5($data['ebay_item_id']);
+            }
+
+            if (self::DOES_NOT_APPLY === strtolower($data[$productID])) {
+                $data[$productID] = 'DNA_' . md5($data['ebay_item_id']);
+            }
+
+            //TODO Delete
+            if ('refer to description' === strtolower($data[$productID])) {
+                $data[$productID] = 'ROD_' . md5($data['ebay_item_id']);
+            }
+            //---
+
+            $product = $productData;
+
+            if (!empty($item['v_hash'])) {
+                $variations[$item['sku']] = $item;
+
+                $c = $connRead->select()->from($resource->getTableName('m2e_e2m_ebay_item_variation_specifics'))
+                    ->where('item_variation_id = ?', $item['item_variation_id'])->query()->fetchAll();
+                foreach ($c as $cc) {
+                    $code = $dataHelper->getCode($cc['name']);
+                    $product[$code] = $dataHelper->getValue($cc['value']);
+                    $variations[$item['sku']]['configurable_variations_sku'][$item['v_sku']][$code] = $cc;
+                }
+
+                $item['ebay_item_id'] = $item['v_hash'];
+                $item['sku'] = $item['v_sku'];
+                $item['start_price'] = $item['v_start_price'];
+                $item['start_price'] = $item['v_start_price'];
+                $item['start_price'] = $item['v_start_price'];
+                $item['quantity'] = $item['v_quantity'];
+                $item['upc'] = $item['v_upc'];
+                $item['ean'] = $item['v_ean'];
+                $item['isbn'] = $item['v_isbn'];
+                $item['ePID'] = $item['v_ePID'];
+            }
+
+            $file = $dataHelper->getFile($item['primary_category_name']);
+            if (!file_exists($pathPrefix . $file . $filePostfix)) {
+                file_put_contents($pathPrefix . $file . $filePostfix, implode(',', $csvHeader) . PHP_EOL);
+            }
+            $images = $connRead->query(str_replace('?', $connRead->quote($item['id']), $sqlI))->fetchColumn();
+
+            $product['attribute_set_code'] = '%attribute_set_code%';
+            $product['product_type'] = '"simple"';
+            $product['visibility'] = '"Not Visible Individually"';
+            $product['additional_images'] = $dataHelper->getValue($images);
+            foreach ($fieldsAttributes as $magentoAttribute => $eBayField) {
+                $product[$magentoAttribute] = $dataHelper->getValue($item[$eBayField]);
+            }
+
+            $f = $connRead->select()->from($eBayItemSpecificsTableName)->where('item_id = ?', $item['id'])->query()->fetchAll();
+            foreach ($f as $ff) {
+                $code = $dataHelper->getCode($ff['name']);
+                $product[$code] = $dataHelper->getValue($ff['value']);
+            }
+
+            file_put_contents($pathPrefix . $file . $filePostfix, implode(',', $product) . PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+
+        if (empty($variations)) {
+            return $this->ajaxResponse(array('completed' => true));
+        }
+
+        foreach ($variations as $sku => $parent) {
+            $product = $productData;
+
+            $file = $dataHelper->getFile($parent['primary_category_name']);
+            if (!file_exists($pathPrefix . $file . $filePostfix)) {
+                file_put_contents($pathPrefix . $file . $filePostfix, implode(',', $csvHeader) . PHP_EOL);
+            }
+            $images = $connRead->query(str_replace('?', $connRead->quote($parent['id']), $sqlI))->fetchColumn();
+
+            $product['attribute_set_code'] = '%attribute_set_code%';
+            $product['product_type'] = '"configurable"';
+            $product['visibility'] = '"Not Visible Individually"';
+            $product['additional_images'] = $dataHelper->getValue($images);
+            foreach ($fieldsAttributes as $magentoAttribute => $eBayField) {
+                $product[$magentoAttribute] = $dataHelper->getValue($parent[$eBayField]);
+            }
+
+            $f = $connRead->select()->from($eBayItemSpecificsTableName)->where('item_id = ?', $parent['id'])->query()->fetchAll();
+            foreach ($f as $ff) {
+                $code = $dataHelper->getCode($ff['name']);
+                $product[$code] = $dataHelper->getValue($ff['value']);
+            }
+
+            $configurableVariations = array();
+            $configurableVariationLabels = array();
+            foreach ($parent['configurable_variations_sku'] as $skuV => $dataV) {
+                $tmp = array();
+                $tmp[] = "sku=\"{$skuV}\"";
+                foreach ($dataV as $code => $cc) {
+                    $name = $cc['name'];
+                    $value = $cc['value'];
+                    $configurableVariationLabels[$code] = "{$code}=\"{$name}\"";
+                    $tmp[$code] = "{$code}=\"{$value}\"";
+                }
+                $configurableVariations[$skuV] = implode(',', $tmp);
+            }
+
+            $product['configurable_variation_labels'] = $dataHelper->getValue(implode(',', $configurableVariationLabels));
+            $product['configurable_variations'] = $dataHelper->getValue(implode('|', $configurableVariations));
+
+            file_put_contents($pathPrefix . $file . $filePostfix, implode(',', $product) . PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+
+        return $this->ajaxResponse(array('completed' => true));
+    }
+
+    public function collectInventoryBaseM1Action() {
+
+        $resource = Mage::getSingleton('core/resource');
+        $connRead = $resource->getConnection('core_read');
+
+        $pathPrefix = BP . DS . 'var' . DS . 'e2m' . DS;
+        $file1 = 'simple_attributes.csv';
+        $file2 = 'config_attributes.csv';
+        $filePostfix = '_inventory.csv';
+
+        //----------------------------------------
+
+        $dataHelper = Mage::helper('e2m');
+        $fieldsAttributes = $dataHelper->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_MAP);
+        $eBayItemImagesTableName = $resource->getTableName('m2e_e2m_ebay_item_images');
+        $eBayItemsTableName = $resource->getTableName('m2e_e2m_ebay_items');
+        $eBayItemVariationsTableName = $resource->getTableName('m2e_e2m_ebay_item_variations');
+        $csvHeader = array(
+            'attribute_set_code',
+            'product_type',
+            'visibility',
+            'additional_images',
+            'additional_attributes',
+            'configurable_variations',      // sku=MH01-XS-Black,size=XS,color=Black|sku=MH01-XS-Gray,size=XS,color=Gray|sku=MH01-XS-Orange,size=XS,color=Orange|sku=MH01-S-Black,size=S,color=Black|sku=MH01-S-Gray,size=S,color=Gray|sku=MH01-S-Orange,size=S,color=Orange|sku=MH01-M-Black,size=M,color=Black|sku=MH01-M-Gray,size=M,color=Gray|sku=MH01-M-Orange,size=M,color=Orange|sku=MH01-L-Black,size=L,color=Black|sku=MH01-L-Gray,size=L,color=Gray|sku=MH01-L-Orange,size=L,color=Orange|sku=MH01-XL-Black,size=XL,color=Black|sku=MH01-XL-Gray,size=XL,color=Gray|sku=MH01-XL-Orange,size=XL,color=Orange
+            'configurable_variation_labels' // size=Size,color=Color
+        );
+
+        //----------------------------------------
+
+        $eBayItemSpecificsTableName = $resource->getTableName('m2e_e2m_ebay_item_specifics');
+        $specifics = $connRead->select()->from($eBayItemSpecificsTableName)->reset(Zend_Db_Select::COLUMNS)->columns(array(
+            'name',
+            "GROUP_CONCAT(DISTINCT value SEPARATOR ',') as value"
+        ))->group('name')->query();
+        file_put_contents($pathPrefix . $file1, 'code,title,values' . PHP_EOL);
+        foreach ($specifics->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            if (empty($row['name'])) {
+                continue;
+            }
+
+            $name = $row['name'];
+            $value = $row['value'];
+            $code = $dataHelper->getCode($name);
+            $csvHeader[] = $code;
+
+            file_put_contents($pathPrefix . $file1, "\"{$code}\",\"{$name}\",\"{$value}\"" . PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+
+        $eBayItemVariationSpecificsTableName = $resource->getTableName('m2e_e2m_ebay_item_variation_specifics');
+        $specifics = $connRead->select()->from($eBayItemVariationSpecificsTableName)->reset(Zend_Db_Select::COLUMNS)->columns(array(
+            'name',
+            "GROUP_CONCAT(DISTINCT value SEPARATOR ',') as value"
+        ))->group('name')->query();
+        file_put_contents($pathPrefix . $file2, 'code,title,values' . PHP_EOL);
+        foreach ($specifics->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            if (empty($row['name'])) {
+                continue;
+            }
+
+            $name = $row['name'];
+            $value = $row['value'];
+            $code = $dataHelper->getCode($name);
+            $csvHeader[] = $code;
+
+            file_put_contents($pathPrefix . $file2, "\"{$code}\",\"{$name}\",\"{$value}\"" . PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+
+        $csvHeader = array_merge($csvHeader, array_keys($fieldsAttributes));
+        $csvHeader = array_unique($csvHeader);
+        sort($csvHeader);
+        $productData = array_combine(array_values($csvHeader), array_fill(0, count($csvHeader), '"__EMPTY__VALUE__"'));
+
+        //----------------------------------------
+
+        $sqlI = "SELECT GROUP_CONCAT(`path` SEPARATOR \",\") FROM `{$eBayItemImagesTableName}` WHERE `item_id` = ? GROUP BY `item_id`";
+        $inventory = $connRead->select()
+            ->from(array('items' => $eBayItemsTableName))
+            ->joinLeft(array('variations' => $eBayItemVariationsTableName), '(items.id = variations.item_id)')
+            ->reset(Zend_Db_Select::COLUMNS)
+            ->columns(array(
+                'items.*',
+                'item_variation_id' => 'variations.id',
+                'v_hash' => 'variations.hash',
+                'v_sku' => 'variations.sku',
+                'v_start_price' => 'variations.start_price',
+                'v_quantity' => 'variations.quantity',
+                'v_upc' => 'variations.upc',
+                'v_ean' => 'variations.ean',
+                'v_isbn' => 'variations.isbn',
+                'v_ePID' => 'variations.ePID'
+            ))
+            ->limit(5)
+            ->query();
+
+        $variations = array();
+        while ($item = $inventory->fetch(PDO::FETCH_ASSOC)) {
+            $product = $productData;
+
+            if (!empty($item['v_hash'])) {
+                $variations[$item['sku']] = $item;
+
+                $c = $connRead->select()->from($resource->getTableName('m2e_e2m_ebay_item_variation_specifics'))
+                    ->where('item_variation_id = ?', $item['item_variation_id'])->query()->fetchAll();
+                foreach ($c as $cc) {
+                    $code = $dataHelper->getCode($cc['name']);
+                    $product[$code] = $dataHelper->getValue($cc['value']);
+                    $variations[$item['sku']]['configurable_variations_sku'][$item['v_sku']][$code] = $cc;
+                }
+
+                $item['ebay_item_id'] = $item['v_hash'];
+                $item['sku'] = $item['v_sku'];
+                $item['start_price'] = $item['v_start_price'];
+                $item['start_price'] = $item['v_start_price'];
+                $item['start_price'] = $item['v_start_price'];
+                $item['quantity'] = $item['v_quantity'];
+                $item['upc'] = $item['v_upc'];
+                $item['ean'] = $item['v_ean'];
+                $item['isbn'] = $item['v_isbn'];
+                $item['ePID'] = $item['v_ePID'];
+            }
+
+            $file = $dataHelper->getFile($item['primary_category_name']);
+            if (!file_exists($pathPrefix . $file . $filePostfix)) {
+                file_put_contents($pathPrefix . $file . $filePostfix, implode(',', $csvHeader) . PHP_EOL);
+            }
+            $images = $connRead->query(str_replace('?', $connRead->quote($item['id']), $sqlI))->fetchColumn();
+
+            $product['attribute_set_code'] = '%attribute_set_code%';
+            $product['product_type'] = '"simple"';
+            $product['visibility'] = '"Not Visible Individually"';
+            $product['additional_images'] = $dataHelper->getValue($images);
+            foreach ($fieldsAttributes as $magentoAttribute => $eBayField) {
+                $product[$magentoAttribute] = $dataHelper->getValue($item[$eBayField]);
+            }
+
+            $f = $connRead->select()->from($eBayItemSpecificsTableName)->where('item_id = ?', $item['id'])->query()->fetchAll();
+            foreach ($f as $ff) {
+                $code = $dataHelper->getCode($ff['name']);
+                $product[$code] = $dataHelper->getValue($ff['value']);
+            }
+
+            file_put_contents($pathPrefix . $file . $filePostfix, implode(',', $product) . PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+
+        if (empty($variations)) {
+            return $this->ajaxResponse(array('completed' => true));
+        }
+
+        foreach ($variations as $sku => $parent) {
+            $product = $productData;
+
+            $file = $dataHelper->getFile($parent['primary_category_name']);
+            if (!file_exists($pathPrefix . $file . $filePostfix)) {
+                file_put_contents($pathPrefix . $file . $filePostfix, implode(',', $csvHeader) . PHP_EOL);
+            }
+            $images = $connRead->query(str_replace('?', $connRead->quote($parent['id']), $sqlI))->fetchColumn();
+
+            $product['attribute_set_code'] = '%attribute_set_code%';
+            $product['product_type'] = '"configurable"';
+            $product['visibility'] = '"Not Visible Individually"';
+            $product['additional_images'] = $dataHelper->getValue($images);
+            foreach ($fieldsAttributes as $magentoAttribute => $eBayField) {
+                $product[$magentoAttribute] = $dataHelper->getValue($parent[$eBayField]);
+            }
+
+            $f = $connRead->select()->from($eBayItemSpecificsTableName)->where('item_id = ?', $parent['id'])->query()->fetchAll();
+            foreach ($f as $ff) {
+                $code = $dataHelper->getCode($ff['name']);
+                $product[$code] = $dataHelper->getValue($ff['value']);
+            }
+
+            $configurableVariations = array();
+            $configurableVariationLabels = array();
+            foreach ($parent['configurable_variations_sku'] as $skuV => $dataV) {
+                $tmp = array();
+                $tmp[] = "sku=\"{$skuV}\"";
+                foreach ($dataV as $code => $cc) {
+                    $name = $cc['name'];
+                    $value = $cc['value'];
+                    $configurableVariationLabels[$code] = "{$code}=\"{$name}\"";
+                    $tmp[$code] = "{$code}=\"{$value}\"";
+                }
+                $configurableVariations[$skuV] = implode(',', $tmp);
+            }
+
+            $product['configurable_variation_labels'] = $dataHelper->getValue(implode(',', $configurableVariationLabels));
+            $product['configurable_variations'] = $dataHelper->getValue(implode('|', $configurableVariations));
+
+            file_put_contents($pathPrefix . $file . $filePostfix, implode(',', $product) . PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+
+        return $this->ajaxResponse(array('completed' => true));
+    }
+
+    public function collectAttributesM2Action() {
+
+        $resource = Mage::getSingleton('core/resource');
+        $connRead = $resource->getConnection('core_read');
+
+        $pathPrefix = BP . DS . 'var' . DS . 'e2m' . DS;
+        $file1 = 'simple_attributes.csv';
+        $file2 = 'config_attributes.csv';
+        $filePostfix = '_inventory.csv';
+
+        //----------------------------------------
+
+        $dataHelper = Mage::helper('e2m');
+        $fieldsAttributes = $dataHelper->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_MAP);
+        $eBayItemImagesTableName = $resource->getTableName('m2e_e2m_ebay_item_images');
+        $eBayItemsTableName = $resource->getTableName('m2e_e2m_ebay_items');
+        $eBayItemVariationsTableName = $resource->getTableName('m2e_e2m_ebay_item_variations');
+        $csvHeader = array(
+            'attribute_set_code',
+            'product_type',
+            'visibility',
+            'additional_images',
+            'additional_attributes',
+            'configurable_variations',      // sku=MH01-XS-Black,size=XS,color=Black|sku=MH01-XS-Gray,size=XS,color=Gray|sku=MH01-XS-Orange,size=XS,color=Orange|sku=MH01-S-Black,size=S,color=Black|sku=MH01-S-Gray,size=S,color=Gray|sku=MH01-S-Orange,size=S,color=Orange|sku=MH01-M-Black,size=M,color=Black|sku=MH01-M-Gray,size=M,color=Gray|sku=MH01-M-Orange,size=M,color=Orange|sku=MH01-L-Black,size=L,color=Black|sku=MH01-L-Gray,size=L,color=Gray|sku=MH01-L-Orange,size=L,color=Orange|sku=MH01-XL-Black,size=XL,color=Black|sku=MH01-XL-Gray,size=XL,color=Gray|sku=MH01-XL-Orange,size=XL,color=Orange
+            'configurable_variation_labels' // size=Size,color=Color
+        );
+
+        //----------------------------------------
+
+        $eBayItemSpecificsTableName = $resource->getTableName('m2e_e2m_ebay_item_specifics');
+        $specifics = $connRead->select()->from($eBayItemSpecificsTableName)->reset(Zend_Db_Select::COLUMNS)->columns(array(
+            'name',
+            "GROUP_CONCAT(DISTINCT value SEPARATOR ',') as value"
+        ))->group('name')->query();
+        file_put_contents($pathPrefix . $file1, 'code,title,values' . PHP_EOL);
+        foreach ($specifics->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            if (empty($row['name'])) {
+                continue;
+            }
+
+            $name = $row['name'];
+            $value = $row['value'];
+            $code = $dataHelper->getCode($name);
+            $csvHeader[] = $code;
+
+            file_put_contents($pathPrefix . $file1, "\"{$code}\",\"{$name}\",\"{$value}\"" . PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+
+        $eBayItemVariationSpecificsTableName = $resource->getTableName('m2e_e2m_ebay_item_variation_specifics');
+        $specifics = $connRead->select()->from($eBayItemVariationSpecificsTableName)->reset(Zend_Db_Select::COLUMNS)->columns(array(
+            'name',
+            "GROUP_CONCAT(DISTINCT value SEPARATOR ',') as value"
+        ))->group('name')->query();
+        file_put_contents($pathPrefix . $file2, 'code,title,values' . PHP_EOL);
+        foreach ($specifics->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            if (empty($row['name'])) {
+                continue;
+            }
+
+            $name = $row['name'];
+            $value = $row['value'];
+            $code = $dataHelper->getCode($name);
+            $csvHeader[] = $code;
+
+            file_put_contents($pathPrefix . $file2, "\"{$code}\",\"{$name}\",\"{$value}\"" . PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+
+        $csvHeader = array_merge($csvHeader, array_keys($fieldsAttributes));
+        $csvHeader = array_unique($csvHeader);
+        sort($csvHeader);
+        $productData = array_combine(array_values($csvHeader), array_fill(0, count($csvHeader), '"__EMPTY__VALUE__"'));
+
+        //----------------------------------------
+
+        $sqlI = "SELECT GROUP_CONCAT(`path` SEPARATOR \",\") FROM `{$eBayItemImagesTableName}` WHERE `item_id` = ? GROUP BY `item_id`";
+        $inventory = $connRead->select()
+            ->from(array('items' => $eBayItemsTableName))
+            ->joinLeft(array('variations' => $eBayItemVariationsTableName), '(items.id = variations.item_id)')
+            ->reset(Zend_Db_Select::COLUMNS)
+            ->columns(array(
+                'items.*',
+                'item_variation_id' => 'variations.id',
+                'v_hash' => 'variations.hash',
+                'v_sku' => 'variations.sku',
+                'v_start_price' => 'variations.start_price',
+                'v_quantity' => 'variations.quantity',
+                'v_upc' => 'variations.upc',
+                'v_ean' => 'variations.ean',
+                'v_isbn' => 'variations.isbn',
+                'v_ePID' => 'variations.ePID'
+            ))
+            ->limit(5)
+            ->query();
+
+        $variations = array();
+        while ($item = $inventory->fetch(PDO::FETCH_ASSOC)) {
+            $product = $productData;
+
+            if (!empty($item['v_hash'])) {
+                $variations[$item['sku']] = $item;
+
+                $c = $connRead->select()->from($resource->getTableName('m2e_e2m_ebay_item_variation_specifics'))
+                    ->where('item_variation_id = ?', $item['item_variation_id'])->query()->fetchAll();
+                foreach ($c as $cc) {
+                    $code = $dataHelper->getCode($cc['name']);
+                    $product[$code] = $dataHelper->getValue($cc['value']);
+                    $variations[$item['sku']]['configurable_variations_sku'][$item['v_sku']][$code] = $cc;
+                }
+
+                $item['ebay_item_id'] = $item['v_hash'];
+                $item['sku'] = $item['v_sku'];
+                $item['start_price'] = $item['v_start_price'];
+                $item['start_price'] = $item['v_start_price'];
+                $item['start_price'] = $item['v_start_price'];
+                $item['quantity'] = $item['v_quantity'];
+                $item['upc'] = $item['v_upc'];
+                $item['ean'] = $item['v_ean'];
+                $item['isbn'] = $item['v_isbn'];
+                $item['ePID'] = $item['v_ePID'];
+            }
+
+            $file = $dataHelper->getFile($item['primary_category_name']);
+            if (!file_exists($pathPrefix . $file . $filePostfix)) {
+                file_put_contents($pathPrefix . $file . $filePostfix, implode(',', $csvHeader) . PHP_EOL);
+            }
+            $images = $connRead->query(str_replace('?', $connRead->quote($item['id']), $sqlI))->fetchColumn();
+
+            $product['attribute_set_code'] = '%attribute_set_code%';
+            $product['product_type'] = '"simple"';
+            $product['visibility'] = '"Not Visible Individually"';
+            $product['additional_images'] = $dataHelper->getValue($images);
+            foreach ($fieldsAttributes as $magentoAttribute => $eBayField) {
+                $product[$magentoAttribute] = $dataHelper->getValue($item[$eBayField]);
+            }
+
+            $f = $connRead->select()->from($eBayItemSpecificsTableName)->where('item_id = ?', $item['id'])->query()->fetchAll();
+            foreach ($f as $ff) {
+                $code = $dataHelper->getCode($ff['name']);
+                $product[$code] = $dataHelper->getValue($ff['value']);
+            }
+
+            file_put_contents($pathPrefix . $file . $filePostfix, implode(',', $product) . PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+
+        if (empty($variations)) {
+            return $this->ajaxResponse(array('completed' => true));
+        }
+
+        foreach ($variations as $sku => $parent) {
+            $product = $productData;
+
+            $file = $dataHelper->getFile($parent['primary_category_name']);
+            if (!file_exists($pathPrefix . $file . $filePostfix)) {
+                file_put_contents($pathPrefix . $file . $filePostfix, implode(',', $csvHeader) . PHP_EOL);
+            }
+            $images = $connRead->query(str_replace('?', $connRead->quote($parent['id']), $sqlI))->fetchColumn();
+
+            $product['attribute_set_code'] = '%attribute_set_code%';
+            $product['product_type'] = '"configurable"';
+            $product['visibility'] = '"Not Visible Individually"';
+            $product['additional_images'] = $dataHelper->getValue($images);
+            foreach ($fieldsAttributes as $magentoAttribute => $eBayField) {
+                $product[$magentoAttribute] = $dataHelper->getValue($parent[$eBayField]);
+            }
+
+            $f = $connRead->select()->from($eBayItemSpecificsTableName)->where('item_id = ?', $parent['id'])->query()->fetchAll();
+            foreach ($f as $ff) {
+                $code = $dataHelper->getCode($ff['name']);
+                $product[$code] = $dataHelper->getValue($ff['value']);
+            }
+
+            $configurableVariations = array();
+            $configurableVariationLabels = array();
+            foreach ($parent['configurable_variations_sku'] as $skuV => $dataV) {
+                $tmp = array();
+                $tmp[] = "sku=\"{$skuV}\"";
+                foreach ($dataV as $code => $cc) {
+                    $name = $cc['name'];
+                    $value = $cc['value'];
+                    $configurableVariationLabels[$code] = "{$code}=\"{$name}\"";
+                    $tmp[$code] = "{$code}=\"{$value}\"";
+                }
+                $configurableVariations[$skuV] = implode(',', $tmp);
+            }
+
+            $product['configurable_variation_labels'] = $dataHelper->getValue(implode(',', $configurableVariationLabels));
+            $product['configurable_variations'] = $dataHelper->getValue(implode('|', $configurableVariations));
+
+            file_put_contents($pathPrefix . $file . $filePostfix, implode(',', $product) . PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+
+        return $this->ajaxResponse(array('completed' => true));
+    }
+
+    public function collectAttributesM1Action() {
+
+        $resource = Mage::getSingleton('core/resource');
+        $connRead = $resource->getConnection('core_read');
+
+        $pathPrefix = BP . DS . 'var' . DS . 'e2m' . DS;
+        $file1 = 'simple_attributes.csv';
+        $file2 = 'config_attributes.csv';
+        $filePostfix = '_inventory.csv';
+
+        //----------------------------------------
+
+        $dataHelper = Mage::helper('e2m');
+        $fieldsAttributes = $dataHelper->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_MAP);
+        $eBayItemImagesTableName = $resource->getTableName('m2e_e2m_ebay_item_images');
+        $eBayItemsTableName = $resource->getTableName('m2e_e2m_ebay_items');
+        $eBayItemVariationsTableName = $resource->getTableName('m2e_e2m_ebay_item_variations');
+        $csvHeader = array(
+            'attribute_set_code',
+            'product_type',
+            'visibility',
+            'additional_images',
+            'additional_attributes',
+            'configurable_variations',      // sku=MH01-XS-Black,size=XS,color=Black|sku=MH01-XS-Gray,size=XS,color=Gray|sku=MH01-XS-Orange,size=XS,color=Orange|sku=MH01-S-Black,size=S,color=Black|sku=MH01-S-Gray,size=S,color=Gray|sku=MH01-S-Orange,size=S,color=Orange|sku=MH01-M-Black,size=M,color=Black|sku=MH01-M-Gray,size=M,color=Gray|sku=MH01-M-Orange,size=M,color=Orange|sku=MH01-L-Black,size=L,color=Black|sku=MH01-L-Gray,size=L,color=Gray|sku=MH01-L-Orange,size=L,color=Orange|sku=MH01-XL-Black,size=XL,color=Black|sku=MH01-XL-Gray,size=XL,color=Gray|sku=MH01-XL-Orange,size=XL,color=Orange
+            'configurable_variation_labels' // size=Size,color=Color
+        );
+
+        //----------------------------------------
+
+        $eBayItemSpecificsTableName = $resource->getTableName('m2e_e2m_ebay_item_specifics');
+        $specifics = $connRead->select()->from($eBayItemSpecificsTableName)->reset(Zend_Db_Select::COLUMNS)->columns(array(
+            'name',
+            "GROUP_CONCAT(DISTINCT value SEPARATOR ',') as value"
+        ))->group('name')->query();
+        file_put_contents($pathPrefix . $file1, 'code,title,values' . PHP_EOL);
+        foreach ($specifics->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            if (empty($row['name'])) {
+                continue;
+            }
+
+            $name = $row['name'];
+            $value = $row['value'];
+            $code = $dataHelper->getCode($name);
+            $csvHeader[] = $code;
+
+            file_put_contents($pathPrefix . $file1, "\"{$code}\",\"{$name}\",\"{$value}\"" . PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+
+        $eBayItemVariationSpecificsTableName = $resource->getTableName('m2e_e2m_ebay_item_variation_specifics');
+        $specifics = $connRead->select()->from($eBayItemVariationSpecificsTableName)->reset(Zend_Db_Select::COLUMNS)->columns(array(
+            'name',
+            "GROUP_CONCAT(DISTINCT value SEPARATOR ',') as value"
+        ))->group('name')->query();
+        file_put_contents($pathPrefix . $file2, 'code,title,values' . PHP_EOL);
+        foreach ($specifics->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            if (empty($row['name'])) {
+                continue;
+            }
+
+            $name = $row['name'];
+            $value = $row['value'];
+            $code = $dataHelper->getCode($name);
+            $csvHeader[] = $code;
+
+            file_put_contents($pathPrefix . $file2, "\"{$code}\",\"{$name}\",\"{$value}\"" . PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+
+        $csvHeader = array_merge($csvHeader, array_keys($fieldsAttributes));
+        $csvHeader = array_unique($csvHeader);
+        sort($csvHeader);
+        $productData = array_combine(array_values($csvHeader), array_fill(0, count($csvHeader), '"__EMPTY__VALUE__"'));
+
+        //----------------------------------------
+
+        $sqlI = "SELECT GROUP_CONCAT(`path` SEPARATOR \",\") FROM `{$eBayItemImagesTableName}` WHERE `item_id` = ? GROUP BY `item_id`";
+        $inventory = $connRead->select()
+            ->from(array('items' => $eBayItemsTableName))
+            ->joinLeft(array('variations' => $eBayItemVariationsTableName), '(items.id = variations.item_id)')
+            ->reset(Zend_Db_Select::COLUMNS)
+            ->columns(array(
+                'items.*',
+                'item_variation_id' => 'variations.id',
+                'v_hash' => 'variations.hash',
+                'v_sku' => 'variations.sku',
+                'v_start_price' => 'variations.start_price',
+                'v_quantity' => 'variations.quantity',
+                'v_upc' => 'variations.upc',
+                'v_ean' => 'variations.ean',
+                'v_isbn' => 'variations.isbn',
+                'v_ePID' => 'variations.ePID'
+            ))
+            ->limit(5)
+            ->query();
+
+        $variations = array();
+        while ($item = $inventory->fetch(PDO::FETCH_ASSOC)) {
+            $product = $productData;
+
+            if (!empty($item['v_hash'])) {
+                $variations[$item['sku']] = $item;
+
+                $c = $connRead->select()->from($resource->getTableName('m2e_e2m_ebay_item_variation_specifics'))
+                    ->where('item_variation_id = ?', $item['item_variation_id'])->query()->fetchAll();
+                foreach ($c as $cc) {
+                    $code = $dataHelper->getCode($cc['name']);
+                    $product[$code] = $dataHelper->getValue($cc['value']);
+                    $variations[$item['sku']]['configurable_variations_sku'][$item['v_sku']][$code] = $cc;
+                }
+
+                $item['ebay_item_id'] = $item['v_hash'];
+                $item['sku'] = $item['v_sku'];
+                $item['start_price'] = $item['v_start_price'];
+                $item['start_price'] = $item['v_start_price'];
+                $item['start_price'] = $item['v_start_price'];
+                $item['quantity'] = $item['v_quantity'];
+                $item['upc'] = $item['v_upc'];
+                $item['ean'] = $item['v_ean'];
+                $item['isbn'] = $item['v_isbn'];
+                $item['ePID'] = $item['v_ePID'];
+            }
+
+            $file = $dataHelper->getFile($item['primary_category_name']);
+            if (!file_exists($pathPrefix . $file . $filePostfix)) {
+                file_put_contents($pathPrefix . $file . $filePostfix, implode(',', $csvHeader) . PHP_EOL);
+            }
+            $images = $connRead->query(str_replace('?', $connRead->quote($item['id']), $sqlI))->fetchColumn();
+
+            $product['attribute_set_code'] = '%attribute_set_code%';
+            $product['product_type'] = '"simple"';
+            $product['visibility'] = '"Not Visible Individually"';
+            $product['additional_images'] = $dataHelper->getValue($images);
+            foreach ($fieldsAttributes as $magentoAttribute => $eBayField) {
+                $product[$magentoAttribute] = $dataHelper->getValue($item[$eBayField]);
+            }
+
+            $f = $connRead->select()->from($eBayItemSpecificsTableName)->where('item_id = ?', $item['id'])->query()->fetchAll();
+            foreach ($f as $ff) {
+                $code = $dataHelper->getCode($ff['name']);
+                $product[$code] = $dataHelper->getValue($ff['value']);
+            }
+
+            file_put_contents($pathPrefix . $file . $filePostfix, implode(',', $product) . PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+
+        if (empty($variations)) {
+            return $this->ajaxResponse(array('completed' => true));
+        }
+
+        foreach ($variations as $sku => $parent) {
+            $product = $productData;
+
+            $file = $dataHelper->getFile($parent['primary_category_name']);
+            if (!file_exists($pathPrefix . $file . $filePostfix)) {
+                file_put_contents($pathPrefix . $file . $filePostfix, implode(',', $csvHeader) . PHP_EOL);
+            }
+            $images = $connRead->query(str_replace('?', $connRead->quote($parent['id']), $sqlI))->fetchColumn();
+
+            $product['attribute_set_code'] = '%attribute_set_code%';
+            $product['product_type'] = '"configurable"';
+            $product['visibility'] = '"Not Visible Individually"';
+            $product['additional_images'] = $dataHelper->getValue($images);
+            foreach ($fieldsAttributes as $magentoAttribute => $eBayField) {
+                $product[$magentoAttribute] = $dataHelper->getValue($parent[$eBayField]);
+            }
+
+            $f = $connRead->select()->from($eBayItemSpecificsTableName)->where('item_id = ?', $parent['id'])->query()->fetchAll();
+            foreach ($f as $ff) {
+                $code = $dataHelper->getCode($ff['name']);
+                $product[$code] = $dataHelper->getValue($ff['value']);
+            }
+
+            $configurableVariations = array();
+            $configurableVariationLabels = array();
+            foreach ($parent['configurable_variations_sku'] as $skuV => $dataV) {
+                $tmp = array();
+                $tmp[] = "sku=\"{$skuV}\"";
+                foreach ($dataV as $code => $cc) {
+                    $name = $cc['name'];
+                    $value = $cc['value'];
+                    $configurableVariationLabels[$code] = "{$code}=\"{$name}\"";
+                    $tmp[$code] = "{$code}=\"{$value}\"";
+                }
+                $configurableVariations[$skuV] = implode(',', $tmp);
+            }
+
+            $product['configurable_variation_labels'] = $dataHelper->getValue(implode(',', $configurableVariationLabels));
+            $product['configurable_variations'] = $dataHelper->getValue(implode('|', $configurableVariations));
+
+            file_put_contents($pathPrefix . $file . $filePostfix, implode(',', $product) . PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+
+        return $this->ajaxResponse(array('completed' => true));
+    }
+
+    public function collectAttributesCSVAction() {
+
+        $resource = Mage::getSingleton('core/resource');
+        $connRead = $resource->getConnection('core_read');
+
+        $pathPrefix = BP . DS . 'var' . DS . 'e2m' . DS;
+        $file1 = 'simple_attributes.csv';
+        $file2 = 'config_attributes.csv';
+        $filePostfix = '_inventory.csv';
+
+        //----------------------------------------
+
+        $dataHelper = Mage::helper('e2m');
+        $fieldsAttributes = $dataHelper->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_MAP);
+        $eBayItemImagesTableName = $resource->getTableName('m2e_e2m_ebay_item_images');
+        $eBayItemsTableName = $resource->getTableName('m2e_e2m_ebay_items');
+        $eBayItemVariationsTableName = $resource->getTableName('m2e_e2m_ebay_item_variations');
+        $csvHeader = array(
+            'attribute_set_code',
+            'product_type',
+            'visibility',
+            'additional_images',
+            'additional_attributes',
+            'configurable_variations',      // sku=MH01-XS-Black,size=XS,color=Black|sku=MH01-XS-Gray,size=XS,color=Gray|sku=MH01-XS-Orange,size=XS,color=Orange|sku=MH01-S-Black,size=S,color=Black|sku=MH01-S-Gray,size=S,color=Gray|sku=MH01-S-Orange,size=S,color=Orange|sku=MH01-M-Black,size=M,color=Black|sku=MH01-M-Gray,size=M,color=Gray|sku=MH01-M-Orange,size=M,color=Orange|sku=MH01-L-Black,size=L,color=Black|sku=MH01-L-Gray,size=L,color=Gray|sku=MH01-L-Orange,size=L,color=Orange|sku=MH01-XL-Black,size=XL,color=Black|sku=MH01-XL-Gray,size=XL,color=Gray|sku=MH01-XL-Orange,size=XL,color=Orange
+            'configurable_variation_labels' // size=Size,color=Color
+        );
+
+        //----------------------------------------
+
+        $eBayItemSpecificsTableName = $resource->getTableName('m2e_e2m_ebay_item_specifics');
+        $specifics = $connRead->select()->from($eBayItemSpecificsTableName)->reset(Zend_Db_Select::COLUMNS)->columns(array(
+            'name',
+            "GROUP_CONCAT(DISTINCT value SEPARATOR ',') as value"
+        ))->group('name')->query();
+        file_put_contents($pathPrefix . $file1, 'code,title,values' . PHP_EOL);
+        foreach ($specifics->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            if (empty($row['name'])) {
+                continue;
+            }
+
+            $name = $row['name'];
+            $value = $row['value'];
+            $code = $dataHelper->getCode($name);
+            $csvHeader[] = $code;
+
+            file_put_contents($pathPrefix . $file1, "\"{$code}\",\"{$name}\",\"{$value}\"" . PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+
+        $eBayItemVariationSpecificsTableName = $resource->getTableName('m2e_e2m_ebay_item_variation_specifics');
+        $specifics = $connRead->select()->from($eBayItemVariationSpecificsTableName)->reset(Zend_Db_Select::COLUMNS)->columns(array(
+            'name',
+            "GROUP_CONCAT(DISTINCT value SEPARATOR ',') as value"
+        ))->group('name')->query();
+        file_put_contents($pathPrefix . $file2, 'code,title,values' . PHP_EOL);
+        foreach ($specifics->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            if (empty($row['name'])) {
+                continue;
+            }
+
+            $name = $row['name'];
+            $value = $row['value'];
+            $code = $dataHelper->getCode($name);
+            $csvHeader[] = $code;
+
+            file_put_contents($pathPrefix . $file2, "\"{$code}\",\"{$name}\",\"{$value}\"" . PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+
+        return $this->ajaxResponse(array('completed' => true));
     }
 }

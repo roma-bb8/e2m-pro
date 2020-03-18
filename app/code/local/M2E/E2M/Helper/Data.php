@@ -4,8 +4,6 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
 
     const PREFIX = 'm2e/e2m/';
 
-    const CACHE_ID_MAINTENANCE = self::PREFIX . 'maintenance';
-
     const CACHE_ID_EBAY_INVENTORY_VARIATION_COUNT = self::PREFIX . 'ebay/inventory/variation/count';
     const CACHE_ID_EBAY_INVENTORY_SIMPLE_COUNT = self::PREFIX . 'ebay/inventory/simple/count';
     const CACHE_ID_EBAY_INVENTORY_TOTAL_COUNT = self::PREFIX . 'ebay/inventory/total/count';
@@ -42,29 +40,100 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
     const MARKETPLACE_UK_TITLE = 'United Kingdom';
     const MARKETPLACE_US_TITLE = 'United States';
 
+    const MARKETPLACE_US_CODE = 'US';
+    const MARKETPLACE_CA_CODE = 'CA';
+    const MARKETPLACE_UK_CODE = 'UK';
+    const MARKETPLACE_AU_CODE = 'AU';
+    const MARKETPLACE_AT_CODE = 'AT';
+    const MARKETPLACE_BE_FR_CODE = 'BE_FR';
+    const MARKETPLACE_FR_CODE = 'FR';
+    const MARKETPLACE_DE_CODE = 'DE';
+    const MARKETPLACE_MOTORS_CODE = 'MOTOR';
+    const MARKETPLACE_IT_CODE = 'IT';
+    const MARKETPLACE_BE_DU_CODE = 'BE_DU';
+    const MARKETPLACE_NL_CODE = 'NL';
+    const MARKETPLACE_SP_CODE = 'SP';
+    const MARKETPLACE_CH_CODE = 'CH';
+    const MARKETPLACE_HK_CODE = 'HK';
+    const MARKETPLACE_IN_CODE = 'IN';
+    const MARKETPLACE_IE_CODE = 'IE';
+    const MARKETPLACE_MY_CODE = 'MY';
+    const MARKETPLACE_CA_FR_CODE = 'CA_FR';
+    const MARKETPLACE_PH_CODE = 'PH';
+    const MARKETPLACE_PL_CODE = 'PL';
+    const MARKETPLACE_SG_CODE = 'SG';
+
+    const MARKETPLACE_AU = 'Australia';
+    const MARKETPLACE_AT = 'Austria';
+    const MARKETPLACE_BE_DU = 'Belgium_Dutch';
+    const MARKETPLACE_BE_FR = 'Belgium_French';
+    const MARKETPLACE_CA = 'Canada';
+    const MARKETPLACE_CA_FR = 'CanadaFrench';
+    const MARKETPLACE_MOTORS = 'eBayMotors';
+    const MARKETPLACE_FR = 'France';
+    const MARKETPLACE_DE = 'Germany';
+    const MARKETPLACE_HK = 'HongKong';
+    const MARKETPLACE_IN = 'India';
+    const MARKETPLACE_IE = 'Ireland';
+    const MARKETPLACE_IT = 'Italy';
+    const MARKETPLACE_MY = 'Malaysia';
+    const MARKETPLACE_NL = 'Netherlands';
+    const MARKETPLACE_PH = 'Philippines';
+    const MARKETPLACE_PL = 'Poland';
+    const MARKETPLACE_SG = 'Singapore';
+    const MARKETPLACE_SP = 'Spain';
+    const MARKETPLACE_CH = 'Switzerland';
+    const MARKETPLACE_UK = 'UK';
+    const MARKETPLACE_US = 'US';
+
+    public static $MARKETPLACE_CODE = array(
+        self::MARKETPLACE_US => self::MARKETPLACE_US_CODE,
+        self::MARKETPLACE_CA => self::MARKETPLACE_CA_CODE,
+        self::MARKETPLACE_UK => self::MARKETPLACE_UK_CODE,
+        self::MARKETPLACE_AU => self::MARKETPLACE_AU_CODE,
+        self::MARKETPLACE_AT => self::MARKETPLACE_AT_CODE,
+        self::MARKETPLACE_BE_FR => self::MARKETPLACE_BE_FR_CODE,
+        self::MARKETPLACE_FR => self::MARKETPLACE_FR_CODE,
+        self::MARKETPLACE_DE => self::MARKETPLACE_DE_CODE,
+        self::MARKETPLACE_MOTORS => self::MARKETPLACE_MOTORS_CODE,
+        self::MARKETPLACE_IT => self::MARKETPLACE_IT_CODE,
+        self::MARKETPLACE_BE_DU => self::MARKETPLACE_BE_DU_CODE,
+        self::MARKETPLACE_NL => self::MARKETPLACE_NL_CODE,
+        self::MARKETPLACE_SP => self::MARKETPLACE_SP_CODE,
+        self::MARKETPLACE_CH => self::MARKETPLACE_CH_CODE,
+        self::MARKETPLACE_HK => self::MARKETPLACE_HK_CODE,
+        self::MARKETPLACE_IN => self::MARKETPLACE_IN_CODE,
+        self::MARKETPLACE_IE => self::MARKETPLACE_IE_CODE,
+        self::MARKETPLACE_MY => self::MARKETPLACE_MY_CODE,
+        self::MARKETPLACE_CA_FR => self::MARKETPLACE_CA_FR_CODE,
+        self::MARKETPLACE_PH => self::MARKETPLACE_PH_CODE,
+        self::MARKETPLACE_PL => self::MARKETPLACE_PL_CODE,
+        self::MARKETPLACE_SG => self::MARKETPLACE_SG_CODE
+    );
+
     private $marketplaceTitle = array(
-        M2E_E2M_Model_Adapter_Ebay_Item::MARKETPLACE_US_ID => self::MARKETPLACE_US_TITLE,
-        M2E_E2M_Model_Adapter_Ebay_Item::MARKETPLACE_CA_ID => self::MARKETPLACE_CA_TITLE,
-        M2E_E2M_Model_Adapter_Ebay_Item::MARKETPLACE_UK_ID => self::MARKETPLACE_UK_TITLE,
-        M2E_E2M_Model_Adapter_Ebay_Item::MARKETPLACE_AU_ID => self::MARKETPLACE_AU_TITLE,
-        M2E_E2M_Model_Adapter_Ebay_Item::MARKETPLACE_AT_ID => self::MARKETPLACE_AT_TITLE,
-        M2E_E2M_Model_Adapter_Ebay_Item::MARKETPLACE_BE_FR_ID => self::MARKETPLACE_BE_FR_TITLE,
-        M2E_E2M_Model_Adapter_Ebay_Item::MARKETPLACE_FR_ID => self::MARKETPLACE_FR_TITLE,
-        M2E_E2M_Model_Adapter_Ebay_Item::MARKETPLACE_DE_ID => self::MARKETPLACE_DE_TITLE,
-        M2E_E2M_Model_Adapter_Ebay_Item::MARKETPLACE_MOTORS_ID => self::MARKETPLACE_MOTORS_TITLE,
-        M2E_E2M_Model_Adapter_Ebay_Item::MARKETPLACE_IT_ID => self::MARKETPLACE_IT_TITLE,
-        M2E_E2M_Model_Adapter_Ebay_Item::MARKETPLACE_BE_DU_ID => self::MARKETPLACE_BE_DU_TITLE,
-        M2E_E2M_Model_Adapter_Ebay_Item::MARKETPLACE_NL_ID => self::MARKETPLACE_NL_TITLE,
-        M2E_E2M_Model_Adapter_Ebay_Item::MARKETPLACE_SP_ID => self::MARKETPLACE_SP_TITLE,
-        M2E_E2M_Model_Adapter_Ebay_Item::MARKETPLACE_CH_ID => self::MARKETPLACE_CH_TITLE,
-        M2E_E2M_Model_Adapter_Ebay_Item::MARKETPLACE_HK_ID => self::MARKETPLACE_HK_TITLE,
-        M2E_E2M_Model_Adapter_Ebay_Item::MARKETPLACE_IN_ID => self::MARKETPLACE_IN_TITLE,
-        M2E_E2M_Model_Adapter_Ebay_Item::MARKETPLACE_IE_ID => self::MARKETPLACE_IE_TITLE,
-        M2E_E2M_Model_Adapter_Ebay_Item::MARKETPLACE_MY_ID => self::MARKETPLACE_MY_TITLE,
-        M2E_E2M_Model_Adapter_Ebay_Item::MARKETPLACE_CA_FR_ID => self::MARKETPLACE_CA_FR_TITLE,
-        M2E_E2M_Model_Adapter_Ebay_Item::MARKETPLACE_PH_ID => self::MARKETPLACE_PH_TITLE,
-        M2E_E2M_Model_Adapter_Ebay_Item::MARKETPLACE_PL_ID => self::MARKETPLACE_PL_TITLE,
-        M2E_E2M_Model_Adapter_Ebay_Item::MARKETPLACE_SG_ID => self::MARKETPLACE_SG_TITLE
+        self::MARKETPLACE_US_CODE => self::MARKETPLACE_US_TITLE,
+        self::MARKETPLACE_CA_CODE => self::MARKETPLACE_CA_TITLE,
+        self::MARKETPLACE_UK_CODE => self::MARKETPLACE_UK_TITLE,
+        self::MARKETPLACE_AU_CODE => self::MARKETPLACE_AU_TITLE,
+        self::MARKETPLACE_AT_CODE => self::MARKETPLACE_AT_TITLE,
+        self::MARKETPLACE_BE_FR_CODE => self::MARKETPLACE_BE_FR_TITLE,
+        self::MARKETPLACE_FR_CODE => self::MARKETPLACE_FR_TITLE,
+        self::MARKETPLACE_DE_CODE => self::MARKETPLACE_DE_TITLE,
+        self::MARKETPLACE_MOTORS_CODE => self::MARKETPLACE_MOTORS_TITLE,
+        self::MARKETPLACE_IT_CODE => self::MARKETPLACE_IT_TITLE,
+        self::MARKETPLACE_BE_DU_CODE => self::MARKETPLACE_BE_DU_TITLE,
+        self::MARKETPLACE_NL_CODE => self::MARKETPLACE_NL_TITLE,
+        self::MARKETPLACE_SP_CODE => self::MARKETPLACE_SP_TITLE,
+        self::MARKETPLACE_CH_CODE => self::MARKETPLACE_CH_TITLE,
+        self::MARKETPLACE_HK_CODE => self::MARKETPLACE_HK_TITLE,
+        self::MARKETPLACE_IN_CODE => self::MARKETPLACE_IN_TITLE,
+        self::MARKETPLACE_IE_CODE => self::MARKETPLACE_IE_TITLE,
+        self::MARKETPLACE_MY_CODE => self::MARKETPLACE_MY_TITLE,
+        self::MARKETPLACE_CA_FR_CODE => self::MARKETPLACE_CA_FR_TITLE,
+        self::MARKETPLACE_PH_CODE => self::MARKETPLACE_PH_TITLE,
+        self::MARKETPLACE_PL_CODE => self::MARKETPLACE_PL_TITLE,
+        self::MARKETPLACE_SG_CODE => self::MARKETPLACE_SG_TITLE
     );
 
     private $magentoAttributeSets = array();
@@ -241,40 +310,40 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
      */
     public function getEbayFields() {
         return array(
-            'identifiers_item_id' => 'Item ID',
-            'identifiers_sku' => 'SKU',
-            'identifiers_ean' => 'EAN',
-            'identifiers_upc' => 'UPC',
-            'identifiers_isbn' => 'ISBN',
-            'identifiers_epid' => 'EPID',
-            'identifiers_brand_mpn_mpn' => '(Brand) MPN',
-            'identifiers_brand_mpn_brand' => '(Brand) Brand',
-
-            'marketplace_id' => '(Site) Marketplace ID',
-            'categories_primary_id' => '(Category) Primary ID',
-            'categories_secondary_id' => '(Category) Secondary ID',
-            'store_categories_primary_id' => '(Store) Category ID',
-            'store_categories_secondary_id' => '(Store) Category 2 ID',
-
-            'description_title' => 'Title',
-            'description_subtitle' => 'SubTitle',
-            'description_description' => 'Description',
-
-            'price_start' => 'Start Price',
-            'price_current' => 'Current Price',
-            'price_buy_it_now' => 'Buy It Now Price',
-            'price_map_value' => '(DPI) Minimum Advertised Price',
-            'price_map_exposure' => '(DPI) Minimum Advertised Price Exposure',
-            'price_stp_value' => '(Discount Price Info) Original Retail Price',
-
-            'qty_total' => 'Quantity',
-
-            'shipping_package_width' => 'Width',
-            'shipping_dispatch_time' => 'Dispatch Time',
-            'shipping_package_dimensions_depth' => '(Dimensions) Depth',
-            'shipping_package_dimensions_length' => '(Dimensions) Length',
-
-            'condition_type' => 'Condition ID'
+            'ebay_item_id' => 'eBya Item ID',
+            'site' => 'Site',
+            'sku' => 'SKU',
+            'upc' => 'UPC',
+            'ean' => 'EAN',
+            'isbn' => 'ISBN',
+            'ePID' => 'ePID',
+            'mpn' => 'MPN',
+            'brand' => 'Brand',
+            'title' => 'Title',
+            'subtitle' => 'Subtitle',
+            'description' => 'Description',
+            'currency' => 'Currency',
+            'start_price' => 'Start price',
+            'current_price' => 'Current price',
+            'buy_it_now' => 'Buy It Now',
+            'quantity' => 'Quantity',
+            'condition_id' => 'Condition id',
+            'condition_name' => 'Condition name',
+            'condition_description' => 'Condition description',
+            'primary_category_id' => 'Primary category id',
+            'primary_category_name' => 'Primary category name',
+            'secondary_category_id' => 'Secondary category id',
+            'secondary_category_name' => 'Secondary category name',
+            'store_category_id' => 'Store category id',
+            'store_category_name' => 'Store category name',
+            'store_category2_id' => 'Store category2 id',
+            'store_category2_name' => 'Store category2 name',
+            'weight' => 'Weight',
+            'dispatch_time_max' => 'Dispatch time max',
+            'dimensions_depth' => 'Dimensions depth',
+            'dimensions_length' => 'Dimensions length',
+            'dimensions_weight' => 'Dimensions weight',
+            'v_hash' => 'Variation eBay Item ID'
         );
     }
 
@@ -330,5 +399,28 @@ Message: {$e->getMessage()}
 EXCEPTION;
 
         Mage::log($exceptionInfo, Zend_Log::ERR, 'e2m.log', true);
+    }
+
+
+    public function getCode($code) {
+        $code = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $code);
+        $code = preg_replace('/[^0-9a-z]/i', '_', $code);
+        $code = preg_replace('/_+/', '_', $code);
+        $abc = 'abcdefghijklmnopqrstuvwxyz';
+        if (preg_match('/^\d/', $code, $matches)) {
+            $index = $matches[0];
+            $code = $abc[$index] . '_' . $code;
+        }
+        return strtolower($code);
+    }
+
+    public function getFile($name) {
+        return str_replace(array(',', '&', '.', "'", '_', ' '), '', strtolower(
+            array_shift(explode(':', $name))
+        ));
+    }
+
+    public function getValue($value) {
+        return empty($value) ? '__EMPTY__VALUE__' : '"' . str_replace("\n", '', trim($value)) . '"';
     }
 }

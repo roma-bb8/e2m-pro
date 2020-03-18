@@ -12,16 +12,20 @@
 
     //----------------------------------------
 
-    e2m.url.cron = '<?php echo $this->getUrl('*/e2m/cron'); ?>';
     e2m.url.skin = '<?php echo $this->getSkinUrl('e2m'); ?>';
     e2m.url.linkEbayAccount = '<?php echo $this->getUrl('*/e2m/linkEbayAccount'); ?>';
     e2m.url.unlinkEbayAccount = '<?php echo $this->getUrl('*/e2m/unlinkEbayAccount'); ?>';
     e2m.url.startEbayDownloadInventory = '<?php echo $this->getUrl('*/e2m/startEbayDownloadInventory'); ?>';
     e2m.url.getAttributesBySetId = '<?php echo $this->getUrl('*/e2m/getAttributesBySetId'); ?>';
     e2m.url.setSettings = '<?php echo $this->getUrl('*/e2m/setSettings') ?>';
-    e2m.url.startEbayImportInventory = '<?php echo $this->getUrl('*/e2m/startEbayImportInventory') ?>';
-    e2m.url.proceedEbayImportInventory = '<?php echo $this->getUrl('*/e2m/proceedEbayImportInventory') ?>';
-    e2m.url.pauseEbayImportInventory = '<?php echo $this->getUrl('*/e2m/pauseEbayImportInventory') ?>';
+    e2m.url.getAttributes = '<?php echo $this->getUrl('*/e2m/getAttributes') ?>';
+
+    e2m.url.collectInventoryMagmi = '<?php echo $this->getUrl('*/e2m/collectInventoryMagmi') ?>';
+    e2m.url.collectInventoryBaseM2 = '<?php echo $this->getUrl('*/e2m/collectInventoryBaseM2') ?>';
+    e2m.url.collectInventoryBaseM1 = '<?php echo $this->getUrl('*/e2m/collectInventoryBaseM1') ?>';
+    e2m.url.collectAttributesM2 = '<?php echo $this->getUrl('*/e2m/collectAttributesM2') ?>';
+    e2m.url.collectAttributesM1 = '<?php echo $this->getUrl('*/e2m/collectAttributesM1') ?>';
+    e2m.url.collectAttributesCSV = '<?php echo $this->getUrl('*/e2m/collectAttributesCSV') ?>';
 
     e2m.eBayFields = JSON.parse('<?php echo $this->getCoreHelper()->jsonEncode($this->getDataHelper()->getEbayFields()); ?>');
     e2m.magentoAttributes = JSON.parse('<?php echo str_replace("'", '', $this->getCoreHelper()->jsonEncode($this->getDataHelper()->getMagentoAttributes($this->getDataHelper()->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET)))); ?>');
@@ -112,45 +116,6 @@
 
     <div class="entry-edit">
         <div class="entry-edit-head">
-            <h4><?php echo $this->getDataHelper()->__('Inventory settings'); ?></h4>
-        </div>
-        <div class="fieldset">
-            <table class="form-list" cellspacing="0" cellpadding="0">
-                <tr>
-                    <td class="label">
-                        <label for="inventory-settings-action-found"><?php echo $this->getDataHelper()->__('Found a product'); ?>:</label>
-                    </td>
-                    <td class="value">
-                        <select id="inventory-settings-action-found" class="config-input">
-                            <option value="<?php echo M2E_E2M_Helper_Ebay_Config::ACTION_FOUND_IGNORE; ?>" <?php if ($this->getEbayConfigHelper()->isIgnoreActionFound()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Ignore'); ?></option>
-                            <option value="<?php echo M2E_E2M_Helper_Ebay_Config::ACTION_FOUND_UPDATE; ?>" <?php if ($this->getEbayConfigHelper()->isUpdateActionFound()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Update'); ?></option>
-                        </select>
-                        <p class="note">
-                            <span><?php echo Mage::helper('e2m')->__('Action found a product in Magento inventory'); ?></span>
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label">
-                        <label for="import-qty"><?php echo $this->getDataHelper()->__('Create Stock item') ?>:</label>
-                    </td>
-                    <td class="value">
-                        <select id="import-qty" class="config-input">
-                            <option value="1" <?php if ($this->getEbayConfigHelper()->isImportQty()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
-                            <option value="0" <?php if (!$this->getEbayConfigHelper()->isImportQty()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
-                        </select>
-                        <p class="note">
-                                <span><?php echo Mage::helper('e2m')->__('Create Stock item (Import QTY)'); ?>
-                                </span>
-                        </p>
-                    </td>
-                </tr>
-            </table>
-        </div>
-    </div>
-
-    <div class="entry-edit">
-        <div class="entry-edit-head">
             <h4><?php echo $this->getDataHelper()->__('Product settings'); ?></h4>
         </div>
         <div class="fieldset">
@@ -215,36 +180,7 @@
                         </p>
                     </td>
                 </tr>
-                <tr>
-                    <td class="label">
-                        <label for="import-specifics"><?php echo $this->getDataHelper()->__('Import Specifics') ?>:</label>
-                    </td>
-                    <td class="value">
-                        <select id="import-specifics" class="config-input">
-                            <option value="1" <?php if ($this->getEbayConfigHelper()->isImportSpecifics()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
-                            <option value="0" <?php if (!$this->getEbayConfigHelper()->isImportSpecifics()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
-                        </select>
-                        <p class="note">
-                                <span><?php echo Mage::helper('e2m')->__('Import Specifics'); ?>
-                                </span>
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label">
-                        <label for="rename-attribute-title-for-specifics"><?php echo $this->getDataHelper()->__('Rename attribute title') ?>:</label>
-                    </td>
-                    <td class="value">
-                        <select id="rename-attribute-title-for-specifics" class="config-input">
-                            <option value="1" <?php if ($this->getEbayConfigHelper()->isImportRenameAttribute()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
-                            <option value="0" <?php if (!$this->getEbayConfigHelper()->isImportRenameAttribute()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
-                        </select>
-                        <p class="note">
-                                <span><?php echo Mage::helper('e2m')->__('Rename attribute title for specifics'); ?>
-                                </span>
-                        </p>
-                    </td>
-                </tr>
+
                 <tr>
                     <td class="label">
                         <label for="magento-attribute"><?php echo $this->getDataHelper()->__('Magento attributes'); ?>
@@ -295,20 +231,6 @@
                                 </td>
                             </tr>
                         </table>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label">
-                        <label for="import-image"><?php echo $this->getDataHelper()->__('Import image') ?>:</label>
-                    </td>
-                    <td class="value">
-                        <select id="import-image" class="config-input">
-                            <option value="1" <?php if ($this->getEbayConfigHelper()->isImportImage()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
-                            <option value="0" <?php if (!$this->getEbayConfigHelper()->isImportImage()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
-                        </select>
-                        <p class="note">
-                            <span><?php echo Mage::helper('e2m')->__('Import image'); ?></span>
-                        </p>
                     </td>
                 </tr>
             </table>
@@ -362,27 +284,44 @@
                 <?php if ($this->getDataHelper()->getConfig(M2E_E2M_Helper_Data::XML_PATH_EBAY_DOWNLOAD_INVENTORY, false)): ?>
                     <tr>
                         <td class="label">
-                            <?php echo $this->getChildHtml('start_import_inventory_button'); ?>
+                            <label><?php echo $this->getDataHelper()->__('Collect attributes (SQL)'); ?>:</label>
                         </td>
-                        <td class="value">
-                            <span id="import-inventory-progress"><?php echo $this->escapeHtml($this->getDataHelper()->getCacheValue(M2E_e2M_Model_Cron_Task_Magento_ImportInventory::CACHE_ID, 0)); ?></span>&nbsp;%
+                        <td class="value block-download-inventory-progress">
+                            <?php echo $this->getChildHtml('collect_attributes_m1_button'); ?>
+                        </td>
+                        <td id="pause-download-inventory-button" class="value">
+                            <?php echo $this->getChildHtml('collect_attributes_m2_button'); ?>
                         </td>
                     </tr>
                     <tr>
-                        <td id="pause-download-inventory-button" class="label">
-                            <?php echo $this->getChildHtml('pause_import_inventory_button'); ?>
+                        <td class="label">
+                            <label><?php echo $this->getDataHelper()->__('Collect attributes (CSV)'); ?>:</label>
+                        </td>
+                        <td class="value block-download-inventory-progress">
+                            <?php echo $this->getChildHtml('collect_attributes_csv_button'); ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">
+                            <label><?php echo $this->getDataHelper()->__('Collect inventory'); ?>:</label>
+                        </td>
+                        <td class="value block-download-inventory-progress">
+                            <?php echo $this->getChildHtml('collect_inventory_magmi_button'); ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">
+                            <label><?php echo $this->getDataHelper()->__('Collect inventory'); ?>:</label>
+                        </td>
+                        <td class="value block-download-inventory-progress">
+                            <?php echo $this->getChildHtml('collect_inventory_base_m1_button'); ?>
+                        </td>
+                        <td id="pause-download-inventory-button" class="value">
+                            <?php echo $this->getChildHtml('collect_inventory_base_m2_button'); ?>
                         </td>
                     </tr>
                 <?php endif; ?>
             </table>
-        </div>
-    </div>
-    <div class="box-right entry-edit" collapseable="no">
-        <div class="entry-edit-head">
-            <h4><?php echo $this->getDataHelper()->__('Logs'); ?></h4>
-        </div>
-        <div class="fieldset">
-            <?php echo $this->getChildHtml('logs_block'); ?>
         </div>
     </div>
 <?php endif; ?>

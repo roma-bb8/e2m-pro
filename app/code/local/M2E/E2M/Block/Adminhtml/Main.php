@@ -2,9 +2,76 @@
 
 class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
 
-    /**
-     * @param Mage_Adminhtml_Block_Widget_Button $button
-     */
+    private function addCollectInventoryMagmiButton(Mage_Adminhtml_Block_Widget_Button $button) {
+
+        /** @var Mage_Adminhtml_Block_Widget_Button $button */
+        $button = clone $button;
+        $button = $button->setData(array(
+            'label' => $this->getDataHelper()->__('for Magmi'),
+            'onclick' => 'collectInventoryMagmi();',
+            'disabled' => true
+        ));
+        $this->setChild('collect_inventory_magmi_button', $button);
+    }
+
+    private function addCollectInventoryBaseM2Button(Mage_Adminhtml_Block_Widget_Button $button) {
+
+        /** @var Mage_Adminhtml_Block_Widget_Button $button */
+        $button = clone $button;
+        $button = $button->setData(array(
+            'label' => $this->getDataHelper()->__('for M2'),
+            'onclick' => 'collectInventoryBaseM2();'
+        ));
+        $this->setChild('collect_inventory_base_m2_button', $button);
+    }
+
+    private function addCollectInventoryBaseM1Button(Mage_Adminhtml_Block_Widget_Button $button) {
+
+        /** @var Mage_Adminhtml_Block_Widget_Button $button */
+        $button = clone $button;
+        $button = $button->setData(array(
+            'label' => $this->getDataHelper()->__('for M1'),
+            'onclick' => 'collectInventoryBaseM1();',
+            'disabled' => true
+        ));
+        $this->setChild('collect_inventory_base_m1_button', $button);
+    }
+
+    private function addCollectAttributesM2Button(Mage_Adminhtml_Block_Widget_Button $button) {
+
+        /** @var Mage_Adminhtml_Block_Widget_Button $button */
+        $button = clone $button;
+        $button = $button->setData(array(
+            'label' => $this->getDataHelper()->__('for M2'),
+            'onclick' => 'collectAttributesM2();',
+            'disabled' => true
+        ));
+        $this->setChild('collect_attributes_m2_button', $button);
+    }
+
+    private function addCollectAttributesM1Button(Mage_Adminhtml_Block_Widget_Button $button) {
+
+        /** @var Mage_Adminhtml_Block_Widget_Button $button */
+        $button = clone $button;
+        $button = $button->setData(array(
+            'label' => $this->getDataHelper()->__('for M1'),
+            'onclick' => 'collectAttributesM1();',
+            'disabled' => true
+        ));
+        $this->setChild('collect_attributes_m1_button', $button);
+    }
+
+    private function addCollectAttributesCSVButton(Mage_Adminhtml_Block_Widget_Button $button) {
+
+        /** @var Mage_Adminhtml_Block_Widget_Button $button */
+        $button = clone $button;
+        $button = $button->setData(array(
+            'label' => $this->getDataHelper()->__('for User'),
+            'onclick' => 'collectAttributesCSV();'
+        ));
+        $this->setChild('collect_attributes_csv_button', $button);
+    }
+
     private function addSettingsButton(Mage_Adminhtml_Block_Widget_Button $button) {
 
         /** @var Mage_Adminhtml_Block_Widget_Button $button */
@@ -17,65 +84,6 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
         $this->setChild('send_settings_button', $button);
     }
 
-    /**
-     * @param Mage_Adminhtml_Block_Widget_Button $button
-     *
-     * @throws Zend_Db_Statement_Exception
-     */
-    private function addStartImportInventoryButton(Mage_Adminhtml_Block_Widget_Button $button) {
-
-        /** @var Mage_Adminhtml_Block_Widget_Button $button */
-
-        $resource = Mage::getSingleton('core/resource');
-        $connRead = $resource->getConnection('core_read');
-        $cronTasksTableName = $resource->getTableName('m2e_e2m_cron_tasks');
-
-        //----------------------------------------
-
-        $label = 'Import inventory (look for settings)';
-        $disabledPause = true;
-        $disabled = true;
-        $task = $connRead->select()->from($cronTasksTableName, array('id', 'pause'))
-            ->where('instance = ?', M2E_E2M_Model_Cron_Task_Magento_ImportInventory::class)
-            ->limit(1)->query()->fetch(PDO::FETCH_ASSOC);
-
-        if ($this->getDataHelper()->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_FULL_SET_SETTING, false)) {
-            $label = 'Start import inventory';
-            $disabled = false;
-        }
-
-        if ($this->getDataHelper()->getConfig(M2E_E2M_Helper_Data::XML_PATH_EBAY_IMPORT_INVENTORY, false)) {
-            $label = 'Reimport inventory (completed)';
-            $disabled = false;
-        }
-
-        if (!empty($task['id'])) {
-            $label = 'Import inventory (in progress...)';
-            $disabledPause = false;
-            $disabled = true;
-        }
-
-        $button = $button->setData(array(
-            'label' => $this->getDataHelper()->__($label),
-            'onclick' => 'startImportInventory(this);',
-            'disabled' => $disabled
-        ));
-        $this->setChild('start_import_inventory_button', $button);
-
-        //----------------------------------------
-
-        $button = clone $button;
-        $button = $button->setData(array(
-            'label' => $this->getDataHelper()->__((!$task['pause'] ? 'Pause' : 'Proceed') . ' Import inventory'),
-            'onclick' => !$task['pause'] ? 'pauseStartImportInventory(this);' : 'pauseFinishImportInventory(this);',
-            'disabled' => $disabledPause
-        ));
-        $this->setChild('pause_import_inventory_button', $button);
-    }
-
-    /**
-     * @param Mage_Adminhtml_Block_Widget_Button $button
-     */
     private function addStartDownloadInventoryButton(Mage_Adminhtml_Block_Widget_Button $button) {
 
         /** @var Mage_Adminhtml_Block_Widget_Button $button */
@@ -111,9 +119,6 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
         $this->setChild('start_download_inventory_button', $button);
     }
 
-    /**
-     * @param Mage_Adminhtml_Block_Widget_Button $button
-     */
     private function addUnlinkAccountButton(Mage_Adminhtml_Block_Widget_Button $button) {
 
         /** @var Mage_Adminhtml_Block_Widget_Button $button */
@@ -124,9 +129,6 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
         $this->setChild('unlink_account_button', $button);
     }
 
-    /**
-     * @param Mage_Adminhtml_Block_Widget_Button $button
-     */
     private function addLinkAccountButton(Mage_Adminhtml_Block_Widget_Button $button) {
 
         /** @var Mage_Adminhtml_Block_Widget_Button $button */
@@ -157,10 +159,13 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
 
         $this->addUnlinkAccountButton(clone $widgetButton);
         $this->addStartDownloadInventoryButton(clone $widgetButton);
-        $this->addStartImportInventoryButton(clone $widgetButton);
         $this->addSettingsButton(clone $widgetButton);
-
-        $this->setChild('logs_block', $this->getLayout()->createBlock('e2m/adminhtml_log_grid'));
+        $this->addCollectAttributesCSVButton(clone $widgetButton);
+        $this->addCollectAttributesM1Button(clone $widgetButton);
+        $this->addCollectAttributesM2Button(clone $widgetButton);
+        $this->addCollectInventoryBaseM1Button(clone $widgetButton);
+        $this->addCollectInventoryBaseM2Button(clone $widgetButton);
+        $this->addCollectInventoryMagmiButton(clone $widgetButton);
     }
 
     //########################################
@@ -201,7 +206,7 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
      * @return Mage_Core_Helper_Data
      */
     public function getCoreHelper() {
-        return  Mage::helper('core');
+        return Mage::helper('core');
     }
 
     //########################################

@@ -34,9 +34,7 @@ class M2E_E2M_Model_Cron {
 
             try {
 
-                /** @var M2E_E2M_Model_Cron_Task $taskModel */
                 $taskModel = Mage::getModel('e2m/' . str_replace('M2E_E2M_Model_', '', $task['instance']));
-
                 $data = $taskModel->process($task['id'], $coreHelper->jsonDecode($task['data']));
                 $instance = lcfirst(substr($task['instance'], strrpos($task['instance'], '_') + 1));
                 $handlers[] = array(

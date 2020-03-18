@@ -4,6 +4,8 @@ class M2E_E2M_Observer_Ebay_StatisticsInventory {
 
     public function process() {
 
+        return;
+
         /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
 

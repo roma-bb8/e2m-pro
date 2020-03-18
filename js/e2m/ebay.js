@@ -102,3 +102,117 @@ function ebayFieldMagentoAttribute() {
         paintImportProperties();
     });
 }
+
+function collectInventoryMagmi() {
+    new Ajax.Request(e2m.url.collectInventoryMagmi, {
+        method: 'get',
+        onCreate: function () {
+            $('loading-mask').setStyle({
+                visibility: 'visible'
+            });
+        },
+        onSuccess: function () {
+
+        },
+        onFailure: function (transport) {
+            console.log(transport);
+
+            alert('Something went wrong...');
+        }
+    });
+}
+
+function collectInventoryBaseM2() {
+    new Ajax.Request(e2m.url.collectInventoryBaseM2, {
+        method: 'get',
+        onCreate: function () {
+            $('loading-mask').setStyle({
+                visibility: 'visible'
+            });
+        },
+        onSuccess: function () {
+
+        },
+        onFailure: function (transport) {
+            console.log(transport);
+
+            alert('Something went wrong...');
+        }
+    });
+}
+
+function collectInventoryBaseM1() {
+    new Ajax.Request(e2m.url.collectInventoryBaseM1, {
+        method: 'get',
+        onCreate: function () {
+            $('loading-mask').setStyle({
+                visibility: 'visible'
+            });
+        },
+        onSuccess: function () {
+
+        },
+        onFailure: function (transport) {
+            console.log(transport);
+
+            alert('Something went wrong...');
+        }
+    });
+}
+
+function collectAttributesM2() {
+    new Ajax.Request(e2m.url.collectAttributesM2, {
+        method: 'get',
+        onCreate: function () {
+            $('loading-mask').setStyle({
+                visibility: 'visible'
+            });
+        },
+        onSuccess: function () {
+
+        },
+        onFailure: function (transport) {
+            console.log(transport);
+
+            alert('Something went wrong...');
+        }
+    });
+}
+
+function collectAttributesM1() {
+    new Ajax.Request(e2m.url.collectAttributesM1, {
+        method: 'get',
+        onCreate: function () {
+            $('loading-mask').setStyle({
+                visibility: 'visible'
+            });
+        },
+        onSuccess: function () {
+
+        },
+        onFailure: function (transport) {
+            console.log(transport);
+
+            alert('Something went wrong...');
+        }
+    });
+}
+
+function collectAttributesCSV() {
+    new Ajax.Request(e2m.url.collectAttributesCSV, {
+        method: 'get',
+        onCreate: function () {
+            $('loading-mask').setStyle({
+                visibility: 'visible'
+            });
+        },
+        onSuccess: function () {
+
+        },
+        onFailure: function (transport) {
+            console.log(transport);
+
+            alert('Something went wrong...');
+        }
+    });
+}
