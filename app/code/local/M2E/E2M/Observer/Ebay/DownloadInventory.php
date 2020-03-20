@@ -4,8 +4,6 @@ class M2E_E2M_Observer_Ebay_DownloadInventory {
 
     public function process() {
 
-        return;
-
         /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
 
@@ -18,9 +16,9 @@ class M2E_E2M_Observer_Ebay_DownloadInventory {
         //----------------------------------------
 
         $marketplaces = array();
-        foreach ($connRead->select()->from($inventoryEbayTableName, 'marketplace_id')
-                     ->group('marketplace_id')->query()->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            $marketplaces[] = $row['marketplace_id'];
+        foreach ($connRead->select()->from($inventoryEbayTableName, 'site')
+                     ->group('site')->distinct()->query()->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $marketplaces[] = $row['site'];
         }
 
         //----------------------------------------

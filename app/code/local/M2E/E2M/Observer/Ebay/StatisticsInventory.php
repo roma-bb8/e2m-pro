@@ -4,8 +4,6 @@ class M2E_E2M_Observer_Ebay_StatisticsInventory {
 
     public function process() {
 
-        return;
-
         /** @var M2E_E2M_Helper_Data $dataHelper */
         $dataHelper = Mage::helper('e2m');
 
@@ -13,15 +11,15 @@ class M2E_E2M_Observer_Ebay_StatisticsInventory {
 
         $connRead = $resource->getConnection('core_read');
 
-        $select = $connRead->select()->from($resource->getTableName('m2e_e2m_inventory_ebay'), 'COUNT(*)');
+        $select = $connRead->select()->from($resource->getTableName('m2e_e2m_ebay_items'), 'COUNT(*)');
 
         //----------------------------------------
 
         $variationSelect = clone $select;
-        $variation = (int)$variationSelect->where('variation = ?', true)->query()->fetchColumn();
+        $variation = (int)$variationSelect->query()->fetchColumn();
 
         $simpleSelect = clone $select;
-        $simple = (int)$simpleSelect->where('variation = ?', false)->query()->fetchColumn();
+        $simple = (int)$simpleSelect->query()->fetchColumn();
 
         $totalSelect = clone $select;
         $total = (int)$totalSelect->query()->fetchColumn();

@@ -8,8 +8,7 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
         $button = clone $button;
         $button = $button->setData(array(
             'label' => $this->getDataHelper()->__('for Magmi'),
-            'onclick' => 'collectInventoryMagmi();',
-            'disabled' => true
+            'onclick' => 'collectInventoryMagmi();'
         ));
         $this->setChild('collect_inventory_magmi_button', $button);
     }
@@ -31,8 +30,7 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
         $button = clone $button;
         $button = $button->setData(array(
             'label' => $this->getDataHelper()->__('for M1'),
-            'onclick' => 'collectInventoryBaseM1();',
-            'disabled' => true
+            'onclick' => 'collectInventoryBaseM1();'
         ));
         $this->setChild('collect_inventory_base_m1_button', $button);
     }
@@ -43,8 +41,7 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
         $button = clone $button;
         $button = $button->setData(array(
             'label' => $this->getDataHelper()->__('for M2'),
-            'onclick' => 'collectAttributesM2();',
-            'disabled' => true
+            'onclick' => 'collectAttributesM2();'
         ));
         $this->setChild('collect_attributes_m2_button', $button);
     }
@@ -55,8 +52,7 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
         $button = clone $button;
         $button = $button->setData(array(
             'label' => $this->getDataHelper()->__('for M1'),
-            'onclick' => 'collectAttributesM1();',
-            'disabled' => true
+            'onclick' => 'collectAttributesM1();'
         ));
         $this->setChild('collect_attributes_m1_button', $button);
     }

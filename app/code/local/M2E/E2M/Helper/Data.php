@@ -298,6 +298,8 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
             foreach ($attributes->getItems() as $attribute) {
                 $sets[$attribute['attribute_code']] = $attribute['frontend_label'];
             }
+
+            $sets['qty'] = 'QTY';
         }
 
         return $this->magentoAttributes[$setId] = $sets;
@@ -421,6 +423,25 @@ EXCEPTION;
     }
 
     public function getValue($value) {
-        return empty($value) ? '__EMPTY__VALUE__' : '"' . str_replace("\n", '', trim($value)) . '"';
+        return empty($value) ? '"__EMPTY__VALUE__"' : '"' . str_replace(array("\n", '"'), '', trim($value)) . '"';
+    }
+
+    public function writeInventoryFile($path, $data, $csvHeader, $source) {
+
+        $i = 0;
+        do {
+
+            $i++;
+            $file = "ebay_{$source}_inventory_part_{$i}.csv";
+
+            if (!file_exists($path . $file)) {
+                file_put_contents($path . $file, implode(',', $csvHeader) . PHP_EOL);
+                break;
+            }
+
+            clearstatcache();
+        } while (filesize($path . $file) > 2000000);
+
+        file_put_contents($path . $file, $data . PHP_EOL, FILE_APPEND | LOCK_EX);
     }
 }

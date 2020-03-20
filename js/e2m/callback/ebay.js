@@ -91,23 +91,8 @@ function sendSettings() {
 
     //----------------------------------------
 
-    var actionFound = $('inventory-settings-action-found');
-    settings['action-found'] = actionFound.options[actionFound.selectedIndex].value;
-
-    //----------------------------------------
-
-    var importQty = $('import-qty');
-    settings['import-qty'] = importQty.options[importQty.selectedIndex].value;
-
-    //----------------------------------------
-
     var generateSku = $('generate-sku');
     settings['generate-sku'] = generateSku.options[generateSku.selectedIndex].value;
-
-    //----------------------------------------
-
-    var importImage = $('import-image');
-    settings['import-image'] = importImage.options[importImage.selectedIndex].value;
 
     //----------------------------------------
 
@@ -118,16 +103,6 @@ function sendSettings() {
 
     var attributeSet = $('attribute-set');
     settings['attribute-set'] = attributeSet.options[attributeSet.selectedIndex].value;
-
-    //----------------------------------------
-
-    var importSpecifics = $('import-specifics');
-    settings['import-specifics'] = importSpecifics.options[importSpecifics.selectedIndex].value;
-
-    //----------------------------------------
-
-    var renameAttributeTitleForSpecifics = $('rename-attribute-title-for-specifics');
-    settings['rename-attribute-title-for-specifics'] = renameAttributeTitleForSpecifics.options[renameAttributeTitleForSpecifics.selectedIndex].value;
 
     //----------------------------------------
 
