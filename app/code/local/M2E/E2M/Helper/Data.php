@@ -137,10 +137,25 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
     );
 
     private $magentoAttributeSets = array();
+    private $attributeSetNames = array();
     private $magentoAttributes = array();
     private $magentoStores = array();
 
     //########################################
+
+    public function getAttributeSetNameById($attributeSetId) {
+
+        if (isset($this->attributeSetNames[$attributeSetId])) {
+            return $this->attributeSetNames[$attributeSetId];
+        }
+
+        $resource = Mage::getSingleton('core/resource');
+        $attributeSetName = $resource->getConnection('core_read')->select()
+            ->from($resource->getTableName('eav_attribute_set'), 'attribute_set_name')
+            ->where('attribute_set_id = ?', $attributeSetId)->query()->fetchColumn();
+
+        return $this->attributeSetNames[$attributeSetId] = $attributeSetName;
+    }
 
     /**
      * @param string $id

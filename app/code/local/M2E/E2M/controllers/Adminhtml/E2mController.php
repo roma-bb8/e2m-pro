@@ -171,7 +171,10 @@ class M2E_E2M_Adminhtml_E2mController extends Mage_Adminhtml_Controller_Action {
 
             $product = $productData;
 
-            $product['attribute_set_code'] = '"%attribute_set_code%"';
+            $attributeSetName = $dataHelper->getAttributeSetNameById(
+                $dataHelper->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET)
+            );
+            $product['attribute_set_code'] = "\"{$attributeSetName}\"";
             $product['status'] = 1;
             $product['tax_class_id'] = '"None"';
             $product['product_type'] = '"simple"';
@@ -229,7 +232,10 @@ class M2E_E2M_Adminhtml_E2mController extends Mage_Adminhtml_Controller_Action {
         foreach ($variations as $parent) {
             $product = $productData;
 
-            $product['attribute_set_code'] = '"%attribute_set_code%"';
+            $attributeSetName = $dataHelper->getAttributeSetNameById(
+                $dataHelper->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET)
+            );
+            $product['attribute_set_code'] = "\"{$attributeSetName}\"";
             $product['status'] = 1;
             $product['tax_class_id'] = '"None"';
             $product['product_type'] = '"configurable"';
@@ -369,7 +375,10 @@ class M2E_E2M_Adminhtml_E2mController extends Mage_Adminhtml_Controller_Action {
 
             $product = $productData;
 
-            $product['attribute_set_code'] = '"%attribute_set_code%"';
+            $attributeSetName = $dataHelper->getAttributeSetNameById(
+                $dataHelper->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET)
+            );
+            $product['attribute_set_code'] = "\"{$attributeSetName}\"";
             $product['status'] = 1;
             $product['tax_class_id'] = '"None"';
             $product['product_type'] = '"simple"';
@@ -426,7 +435,10 @@ class M2E_E2M_Adminhtml_E2mController extends Mage_Adminhtml_Controller_Action {
         foreach ($variations as $parent) {
             $product = $productData;
 
-            $product['attribute_set_code'] = '"%attribute_set_code%"';
+            $attributeSetName = $dataHelper->getAttributeSetNameById(
+                $dataHelper->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET)
+            );
+            $product['attribute_set_code'] = "\"{$attributeSetName}\"";
             $product['status'] = 1;
             $product['tax_class_id'] = '"None"';
             $product['product_type'] = '"configurable"';
@@ -580,7 +592,10 @@ class M2E_E2M_Adminhtml_E2mController extends Mage_Adminhtml_Controller_Action {
 
             $product = $productData;
 
-            $product['_attribute_set'] = '"%attribute_set_code%"';
+            $attributeSetName = $dataHelper->getAttributeSetNameById(
+                $dataHelper->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET)
+            );
+            $product['_attribute_set'] = "\"{$attributeSetName}\"";
             $product['status'] = 1;
             $product['tax_class_id'] = '"None"';
             $product['_type'] = '"simple"';
@@ -638,7 +653,10 @@ class M2E_E2M_Adminhtml_E2mController extends Mage_Adminhtml_Controller_Action {
         foreach ($variations as $parent) {
             $product = $productData;
 
-            $product['_attribute_set'] = '"%attribute_set_code%"';
+            $attributeSetName = $dataHelper->getAttributeSetNameById(
+                $dataHelper->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET)
+            );
+            $product['_attribute_set'] = "\"{$attributeSetName}\"";
             $product['status'] = 1;
             $product['tax_class_id'] = '"None"';
             $product['_type'] = '"configurable"';
