@@ -143,7 +143,7 @@
                     <td class="value">
                         <select id="inventory-settings-product-identifier" class="config-input">
                             <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_SKU; ?>" <?php if ($this->getEbayConfigHelper()->isSKUProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('SKU'); ?></option>
-                            <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_MPN; ?>" <?php if ($this->getEbayConfigHelper()->isMPNProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('(Brand) MPN'); ?></option>
+                            <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_MPN; ?>" <?php if ($this->getEbayConfigHelper()->isMPNProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('MPN'); ?></option>
                             <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_UPC; ?>" <?php if ($this->getEbayConfigHelper()->isUPCProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('UPC'); ?></option>
                             <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_EAN; ?>" <?php if ($this->getEbayConfigHelper()->isEANProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('EAN'); ?></option>
                         </select>

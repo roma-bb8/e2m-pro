@@ -139,10 +139,7 @@ class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory {
             return;
         }
 
-        /** @var Mage_Catalog_Model_Product_Media_Config $productMediaConfig */
-        $productMediaConfig = Mage::getSingleton('catalog/product_media_config');
-        $tmpMediaPath = $productMediaConfig->getBaseTmpMediaPath();
-
+        $importPath = Mage::getBaseDir('media') . DS . 'import';
         $itemImagesTableName = $resource->getTableName('m2e_e2m_ebay_item_images');
         $connRead = $resource->getConnection('core_read');
         $connWrite = $resource->getConnection('core_write');
@@ -156,9 +153,9 @@ class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory {
             $fileName = md5($url) . $ext;
             //------------------------------------------
 
-            if (!is_file($tmpMediaPath . DS . $fileName)) {
+            if (!is_file($importPath . DS . $fileName)) {
                 try {
-                    file_put_contents($tmpMediaPath . DS . $fileName, file_get_contents($url));
+                    file_put_contents($importPath . DS . $fileName, file_get_contents($url));
                 } catch (Exception $e) {
                     continue;
                 }
@@ -288,10 +285,7 @@ class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory {
             return;
         }
 
-        /** @var Mage_Catalog_Model_Product_Media_Config $productMediaConfig */
-        $productMediaConfig = Mage::getSingleton('catalog/product_media_config');
-        $tmpMediaPath = $productMediaConfig->getBaseTmpMediaPath();
-
+        $importPath = Mage::getBaseDir('media') . DS . 'import';
         $itemVariationTableName = $resource->getTableName('m2e_e2m_ebay_item_variations');
         $itemImagesTableName = $resource->getTableName('m2e_e2m_ebay_item_variation_images');
         $connRead = $resource->getConnection('core_read');
@@ -320,9 +314,9 @@ class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory {
                 $fileName = md5($url) . $ext;
                 //------------------------------------------
 
-                if (!is_file($tmpMediaPath . DS . $fileName)) {
+                if (!is_file($importPath . DS . $fileName)) {
                     try {
-                        file_put_contents($tmpMediaPath . DS . $fileName, file_get_contents($url));
+                        file_put_contents($importPath . DS . $fileName, file_get_contents($url));
                     } catch (Exception $e) {
                         continue;
                     }

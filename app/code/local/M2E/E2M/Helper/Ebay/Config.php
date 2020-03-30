@@ -22,6 +22,7 @@ class M2E_E2M_Helper_Ebay_Config {
 
     //########################################
 
+    const STORE_ADMIN = 0;
     const STORE_SKIP = -1;
 
     const PRODUCT_IDENTIFIER_SKU = 'sku';
@@ -36,6 +37,11 @@ class M2E_E2M_Helper_Ebay_Config {
 
     /** @var M2E_E2M_Helper_Data $dataHelper */
     private $dataHelper;
+
+    //########################################
+
+    private $siteId = null;
+    private $storeId = null;
 
     //########################################
 
@@ -143,6 +149,33 @@ class M2E_E2M_Helper_Ebay_Config {
         }
 
         return null;
+    }
+
+    public function getSiteAndStore() {
+
+        if ($this->siteId !== null && $this->storeId !== null) {
+            return array($this->siteId, $this->storeId);
+        }
+
+        $map = Mage::helper('e2m')->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_STORE_MAP);
+        foreach ($map as $site => $store) {
+            if (M2E_E2M_Helper_Ebay_Config::STORE_SKIP === (int)$store) {
+                continue;
+            }
+
+            if ($this->siteId !== null && $this->storeId !== null) {
+                throw new Exception('Two or more store select.');
+            }
+
+            $this->siteId = $site;
+            $this->storeId = $store;
+        }
+
+        if ($this->siteId === null || $this->storeId === null) {
+            throw new Exception('Not select store.');
+        }
+
+        return array($this->siteId, (int)$this->storeId);
     }
 
     /**

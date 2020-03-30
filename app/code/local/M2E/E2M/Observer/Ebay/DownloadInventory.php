@@ -11,7 +11,7 @@ class M2E_E2M_Observer_Ebay_DownloadInventory {
 
         $connRead = $resource->getConnection('core_read');
 
-        $inventoryEbayTableName = $resource->getTableName('m2e_e2m_inventory_ebay');
+        $inventoryEbayTableName = $resource->getTableName('m2e_e2m_ebay_items');
 
         //----------------------------------------
 

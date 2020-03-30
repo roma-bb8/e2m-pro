@@ -2,6 +2,8 @@
 
 class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
 
+    const DOES_NOT_APPLY = 'does not apply';
+
     const PREFIX = 'm2e/e2m/';
 
     const CACHE_ID_EBAY_INVENTORY_VARIATION_COUNT = self::PREFIX . 'ebay/inventory/variation/count';
@@ -141,7 +143,16 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
     private $magentoAttributes = array();
     private $magentoStores = array();
 
+    private $maxUploadSize;
+
     //########################################
+
+    public function getMediaAttributeId() {
+        $resource = Mage::getSingleton('core/resource');
+        return $resource->getConnection('core_read')->select()
+            ->from($resource->getTableName('eav_attribute'), 'attribute_id')
+            ->where('attribute_code = ?', 'media_gallery')->limit(1)->query()->fetchColumn();
+    }
 
     public function getAttributeSetNameById($attributeSetId) {
 
@@ -239,6 +250,21 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
     //########################################
 
     /**
+     * @param $storeId
+     * @return string
+     */
+    public function getStoreCodeById($storeId) {
+        foreach (Mage::app()->getStores(true) as $store) {
+            /** @var Mage_Core_Model_Store $store */
+            if ($storeId === (int)$store->getId()) {
+                return $store->getCode();
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * @return array
      */
     public function getMagentoStores() {
@@ -315,6 +341,7 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
             }
 
             $sets['qty'] = 'QTY';
+            unset($sets['sku']);
         }
 
         return $this->magentoAttributes[$setId] = $sets;
@@ -328,6 +355,7 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
     public function getEbayFields() {
         return array(
             'ebay_item_id' => 'eBya Item ID',
+            'item_variation_id' => 'Variation eBay Item ID',
             'site' => 'Site',
             'sku' => 'SKU',
             'upc' => 'UPC',
@@ -359,8 +387,7 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
             'dispatch_time_max' => 'Dispatch time max',
             'dimensions_depth' => 'Dimensions depth',
             'dimensions_length' => 'Dimensions length',
-            'dimensions_weight' => 'Dimensions weight',
-            'v_hash' => 'Variation eBay Item ID'
+            'dimensions_weight' => 'Dimensions weight'
         );
     }
 
@@ -437,8 +464,16 @@ EXCEPTION;
         ));
     }
 
-    public function getValue($value) {
-        return empty($value) ? '"__EMPTY__VALUE__"' : '"' . str_replace(array("\n", '"'), '', trim($value)) . '"';
+    public function getValue($value, $defaultValue) {
+        if (empty($value)) {
+            return $defaultValue;
+        }
+
+        $value = trim($value);
+        $value = str_replace("\n", '', $value);
+        $value = str_replace('"', '""', $value);
+
+        return "\"{$value}\"";
     }
 
     public function writeInventoryFile($path, $data, $csvHeader, $source) {
@@ -455,8 +490,65 @@ EXCEPTION;
             }
 
             clearstatcache();
-        } while (filesize($path . $file) > 2000000);
+        } while (filesize($path . $file) > $this->getMaxUploadSize());
 
         file_put_contents($path . $file, $data . PHP_EOL, FILE_APPEND | LOCK_EX);
+    }
+
+    public function applySettings($item) {
+
+        if (Mage::helper('e2m/Ebay_Config')->isDeleteHtml()) {
+            $item['title'] = strip_tags($item['title']);
+            $item['subtitle'] = strip_tags($item['subtitle']);
+            $item['description'] = strip_tags($item['description']);
+        }
+
+        $productSKU = Mage::helper('e2m/Ebay_Config')->getProductIdentifier();
+        if (empty($item[$productSKU]) && Mage::helper('e2m/Ebay_Config')->isGenerateSku()) {
+            $item[$productSKU] = 'SKU_' . md5($item['ebay_item_id']);
+        }
+
+        if (self::DOES_NOT_APPLY === strtolower($item[$productSKU]) &&
+            Mage::helper('e2m/Ebay_Config')->isGenerateSku()) {
+            $item[$productSKU] = 'DNA_' . md5($item['ebay_item_id']);
+        }
+
+        //TODO Delete
+        if ('refer to description' === strtolower($item[$productSKU]) &&
+            Mage::helper('e2m/Ebay_Config')->isGenerateSku()) {
+            $item[$productSKU] = 'ROD_' . md5($item['ebay_item_id']);
+        }
+
+        return $item;
+    }
+
+    public function getMaxUploadSize() {
+
+        if (!empty($this->maxUploadSize)) {
+            return $this->maxUploadSize;
+        }
+
+        $maxUploadSize = Mage::helper('importexport')->getMaxUploadSize();
+        if (empty($maxUploadSize)) {
+            return $this->maxUploadSize = 2000000; // 2M
+        }
+
+        $lastMaxUploadSizeLetter = strtolower(substr($maxUploadSize, -1));
+        $maxUploadSize = (int)$maxUploadSize;
+
+        switch($lastMaxUploadSizeLetter) {
+            case 'g':
+                $maxUploadSize *= 1024;
+            case 'm':
+                $maxUploadSize *= 1024;
+            case 'k':
+                $maxUploadSize *= 1024;
+        }
+
+        if ($maxUploadSize <= 0) {
+            return $this->maxUploadSize = 2000000; // 2M
+        }
+
+        return $this->maxUploadSize = $maxUploadSize - 97152; // diff
     }
 }
