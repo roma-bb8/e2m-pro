@@ -32,3 +32,4 @@ RELEASE_NOTES.txt
 !app/etc/modules/M2E_E2M.xml
 !skin/adminhtml/default/default/e2m/*
 access.json
+magmi/

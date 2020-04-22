@@ -2,70 +2,59 @@
 
 class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
 
-    private function addCollectInventoryMagmiButton(Mage_Adminhtml_Block_Widget_Button $button) {
+    private function addMagmiInventoryExportCSVButton(Mage_Adminhtml_Block_Widget_Button $button) {
 
         /** @var Mage_Adminhtml_Block_Widget_Button $button */
         $button = clone $button;
         $button = $button->setData(array(
-            'label' => $this->getDataHelper()->__('for Magmi'),
-            'onclick' => 'collectInventoryMagmi();'
+            'label' => $this->getDataHelper()->__('magmi'),
+            'onclick' => 'getMagmiInventoryExportCSV();'
         ));
-        $this->setChild('collect_inventory_magmi_button', $button);
+        $this->setChild('magmi_inventory_export_csv_button', $button);
     }
 
-    private function addCollectInventoryBaseM2Button(Mage_Adminhtml_Block_Widget_Button $button) {
+    private function addNativeInventoryExportCSVButton(Mage_Adminhtml_Block_Widget_Button $button) {
 
         /** @var Mage_Adminhtml_Block_Widget_Button $button */
         $button = clone $button;
         $button = $button->setData(array(
-            'label' => $this->getDataHelper()->__('for M2'),
-            'onclick' => 'collectInventoryBaseM2();'
+            'label' => $this->getDataHelper()->__('native'),
+            'onclick' => 'getNativeInventoryExportCSV();'
         ));
-        $this->setChild('collect_inventory_base_m2_button', $button);
+        $this->setChild('native_inventory_export_csv_button', $button);
     }
 
-    private function addCollectInventoryBaseM1Button(Mage_Adminhtml_Block_Widget_Button $button) {
+    private function addAttributesSQLButton(Mage_Adminhtml_Block_Widget_Button $button) {
 
         /** @var Mage_Adminhtml_Block_Widget_Button $button */
         $button = clone $button;
         $button = $button->setData(array(
-            'label' => $this->getDataHelper()->__('for M1'),
-            'onclick' => 'collectInventoryBaseM1();'
+            'label' => $this->getDataHelper()->__('build'),
+            'onclick' => 'getAttributesSQL();'
         ));
-        $this->setChild('collect_inventory_base_m1_button', $button);
+        $this->setChild('attributes_sql_button', $button);
     }
 
-    private function addCollectAttributesM2Button(Mage_Adminhtml_Block_Widget_Button $button) {
+    private function addAttributesExportCSVButton(Mage_Adminhtml_Block_Widget_Button $button) {
 
         /** @var Mage_Adminhtml_Block_Widget_Button $button */
         $button = clone $button;
         $button = $button->setData(array(
-            'label' => $this->getDataHelper()->__('for M2'),
-            'onclick' => 'collectAttributesM2();'
+            'label' => $this->getDataHelper()->__('build'),
+            'onclick' => 'getAttributesExportCSV();'
         ));
-        $this->setChild('collect_attributes_m2_button', $button);
+        $this->setChild('attributes_export_csv_button', $button);
     }
 
-    private function addCollectAttributesM1Button(Mage_Adminhtml_Block_Widget_Button $button) {
+    private function addAttributesMatchingCSVButton(Mage_Adminhtml_Block_Widget_Button $button) {
 
         /** @var Mage_Adminhtml_Block_Widget_Button $button */
         $button = clone $button;
         $button = $button->setData(array(
-            'label' => $this->getDataHelper()->__('for M1'),
-            'onclick' => 'collectAttributesM1();'
+            'label' => $this->getDataHelper()->__('build'),
+            'onclick' => 'getAttributesMatchingCSV();'
         ));
-        $this->setChild('collect_attributes_m1_button', $button);
-    }
-
-    private function addCollectAttributesCSVButton(Mage_Adminhtml_Block_Widget_Button $button) {
-
-        /** @var Mage_Adminhtml_Block_Widget_Button $button */
-        $button = clone $button;
-        $button = $button->setData(array(
-            'label' => $this->getDataHelper()->__('for User'),
-            'onclick' => 'collectAttributesCSV();'
-        ));
-        $this->setChild('collect_attributes_csv_button', $button);
+        $this->setChild('attributes_matching_csv_button', $button);
     }
 
     private function addSettingsButton(Mage_Adminhtml_Block_Widget_Button $button) {
@@ -156,12 +145,11 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
         $this->addUnlinkAccountButton(clone $widgetButton);
         $this->addStartDownloadInventoryButton(clone $widgetButton);
         $this->addSettingsButton(clone $widgetButton);
-        $this->addCollectAttributesCSVButton(clone $widgetButton);
-        $this->addCollectAttributesM1Button(clone $widgetButton);
-        $this->addCollectAttributesM2Button(clone $widgetButton);
-        $this->addCollectInventoryBaseM1Button(clone $widgetButton);
-        $this->addCollectInventoryBaseM2Button(clone $widgetButton);
-        $this->addCollectInventoryMagmiButton(clone $widgetButton);
+        $this->addAttributesMatchingCSVButton(clone $widgetButton);
+        $this->addAttributesExportCSVButton(clone $widgetButton);
+        $this->addAttributesSQLButton(clone $widgetButton);
+        $this->addNativeInventoryExportCSVButton(clone $widgetButton);
+        $this->addMagmiInventoryExportCSVButton(clone $widgetButton);
     }
 
     //########################################
@@ -196,13 +184,6 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
      */
     public function getDataHelper() {
         return Mage::helper('e2m');
-    }
-
-    /**
-     * @return Mage_Core_Helper_Data
-     */
-    public function getCoreHelper() {
-        return Mage::helper('core');
     }
 
     //########################################

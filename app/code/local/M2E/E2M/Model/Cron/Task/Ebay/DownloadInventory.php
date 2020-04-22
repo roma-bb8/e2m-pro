@@ -139,7 +139,7 @@ class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory {
             return;
         }
 
-        $importPath = Mage::getBaseDir('media') . DS . 'import';
+        $importPath = Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA) . DS . 'import';
         $itemImagesTableName = $resource->getTableName('m2e_e2m_ebay_item_images');
         $connRead = $resource->getConnection('core_read');
         $connWrite = $resource->getConnection('core_write');
@@ -285,7 +285,7 @@ class M2E_E2M_Model_Cron_Task_Ebay_DownloadInventory {
             return;
         }
 
-        $importPath = Mage::getBaseDir('media') . DS . 'import';
+        $importPath = Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA) . DS . 'import';
         $itemVariationTableName = $resource->getTableName('m2e_e2m_ebay_item_variations');
         $itemImagesTableName = $resource->getTableName('m2e_e2m_ebay_item_variation_images');
         $connRead = $resource->getConnection('core_read');

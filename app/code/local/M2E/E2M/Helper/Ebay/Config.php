@@ -25,10 +25,10 @@ class M2E_E2M_Helper_Ebay_Config {
     const STORE_ADMIN = 0;
     const STORE_SKIP = -1;
 
-    const PRODUCT_IDENTIFIER_SKU = 'sku';
-    const PRODUCT_IDENTIFIER_MPN = 'mpn';
-    const PRODUCT_IDENTIFIER_EAN = 'ean';
-    const PRODUCT_IDENTIFIER_UPC = 'upc';
+    const PRODUCT_IDENTIFIER_SKU = 'ebay_sku';
+    const PRODUCT_IDENTIFIER_MPN = 'ebay_mpn';
+    const PRODUCT_IDENTIFIER_EAN = 'ebay_ean';
+    const PRODUCT_IDENTIFIER_UPC = 'ebay_upc';
 
     const ACTION_FOUND_IGNORE = 'IGNORE';
     const ACTION_FOUND_UPDATE = 'UPDATE';
@@ -143,39 +143,13 @@ class M2E_E2M_Helper_Ebay_Config {
      */
     public function getStoreForMarketplace($marketplaceId) {
 
+        $marketplaceId = strtoupper($marketplaceId);
         $marketplacesStores = $this->dataHelper->getConfig(self::XML_PATH_STORE_MAP, array());
         if (isset($marketplacesStores[$marketplaceId])) {
             return (int)$marketplacesStores[$marketplaceId];
         }
 
         return null;
-    }
-
-    public function getSiteAndStore() {
-
-        if ($this->siteId !== null && $this->storeId !== null) {
-            return array($this->siteId, $this->storeId);
-        }
-
-        $map = Mage::helper('e2m')->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_STORE_MAP);
-        foreach ($map as $site => $store) {
-            if (M2E_E2M_Helper_Ebay_Config::STORE_SKIP === (int)$store) {
-                continue;
-            }
-
-            if ($this->siteId !== null && $this->storeId !== null) {
-                throw new Exception('Two or more store select.');
-            }
-
-            $this->siteId = $site;
-            $this->storeId = $store;
-        }
-
-        if ($this->siteId === null || $this->storeId === null) {
-            throw new Exception('Not select store.');
-        }
-
-        return array($this->siteId, (int)$this->storeId);
     }
 
     /**
@@ -185,6 +159,21 @@ class M2E_E2M_Helper_Ebay_Config {
      */
     public function isSkipStore($marketplaceId) {
         return self::STORE_SKIP === $this->getStoreForMarketplace($marketplaceId);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isUseAdminStore() {
+
+        $map = Mage::helper('e2m')->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_STORE_MAP);
+        foreach ($map as $site => $store) {
+            if (M2E_E2M_Helper_Ebay_Config::STORE_ADMIN === (int)$store) {
+                return strtolower($site);
+            }
+        }
+
+        return false;
     }
 
     //########################################

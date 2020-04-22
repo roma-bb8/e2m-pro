@@ -131,36 +131,8 @@ function sendSettings() {
     });
 }
 
-function startImportInventory(element) {
-    new Ajax.Request(e2m.url.startEbayImportInventory, {
-        method: 'get',
-        onCreate: function () {
-            $('loading-mask').setStyle({
-                visibility: 'visible'
-            });
-        },
-        onSuccess: function (transport) {
-
-            var response = JSON.parse(transport.responseText);
-            importInventoryHandler(response.data);
-
-            var button = $('pause-download-inventory-button').children[0];
-            button.removeClassName('disabled');
-            button.removeAttribute('disabled');
-
-            element.addClassName('disabled');
-            element.innerHTML = 'Import inventory (in progress...)';
-        },
-        onFailure: function (transport) {
-            console.log(transport);
-
-            alert('Something went wrong...');
-        }
-    });
-}
-
-function pauseFinishImportInventory() {
-    new Ajax.Request(e2m.url.proceedEbayImportInventory, {
+function getMagmiInventoryExportCSV() {
+    new Ajax.Request(e2m.url.getMagmiInventoryExportCSV, {
         method: 'get',
         onCreate: function () {
             $('loading-mask').setStyle({
@@ -168,7 +140,7 @@ function pauseFinishImportInventory() {
             });
         },
         onSuccess: function () {
-            window.location.reload();
+
         },
         onFailure: function (transport) {
             console.log(transport);
@@ -178,8 +150,8 @@ function pauseFinishImportInventory() {
     });
 }
 
-function pauseStartImportInventory() {
-    new Ajax.Request(e2m.url.pauseEbayImportInventory, {
+function getNativeInventoryExportCSV() {
+    new Ajax.Request(e2m.url.getNativeInventoryExportCSV, {
         method: 'get',
         onCreate: function () {
             $('loading-mask').setStyle({
@@ -187,7 +159,7 @@ function pauseStartImportInventory() {
             });
         },
         onSuccess: function () {
-            window.location.reload();
+
         },
         onFailure: function (transport) {
             console.log(transport);
@@ -197,8 +169,46 @@ function pauseStartImportInventory() {
     });
 }
 
-function getAttributes() {
-    new Ajax.Request(e2m.url.getAttributes, {
+function getAttributesSQL() {
+    new Ajax.Request(e2m.url.getAttributesSQL, {
+        method: 'get',
+        onCreate: function () {
+            $('loading-mask').setStyle({
+                visibility: 'visible'
+            });
+        },
+        onSuccess: function () {
+
+        },
+        onFailure: function (transport) {
+            console.log(transport);
+
+            alert('Something went wrong...');
+        }
+    });
+}
+
+function getAttributesExportCSV() {
+    new Ajax.Request(e2m.url.getAttributesExportCSV, {
+        method: 'get',
+        onCreate: function () {
+            $('loading-mask').setStyle({
+                visibility: 'visible'
+            });
+        },
+        onSuccess: function () {
+
+        },
+        onFailure: function (transport) {
+            console.log(transport);
+
+            alert('Something went wrong...');
+        }
+    });
+}
+
+function getAttributesMatchingCSV() {
+    new Ajax.Request(e2m.url.getAttributesMatchingCSV, {
         method: 'get',
         onCreate: function () {
             $('loading-mask').setStyle({

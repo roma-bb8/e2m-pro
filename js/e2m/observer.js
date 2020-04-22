@@ -6,7 +6,6 @@
         initializeLocalStorage();
         attributeSet();
         configInput();
-        ebayFieldMagentoAttribute();
         e2mHideBlock();
         noteBlock();
     }, false);

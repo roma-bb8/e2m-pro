@@ -4,6 +4,9 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
 
     const DOES_NOT_APPLY = 'does not apply';
 
+    const TYPE_TEXT = 'text';
+    const TYPE_SELECT = 'select';
+
     const PREFIX = 'm2e/e2m/';
 
     const CACHE_ID_EBAY_INVENTORY_VARIATION_COUNT = self::PREFIX . 'ebay/inventory/variation/count';
@@ -213,7 +216,7 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
         try {
 
             $value = Mage::app()->getStore()->getConfig($path);
-            if (!$value) {
+            if (!$value || $value === 'null' || $value === null) {
                 return $default;
             }
 
@@ -221,10 +224,7 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
             return $default;
         }
 
-        /** @var Mage_Core_Helper_Data $coreHelper */
-        $coreHelper = Mage::helper('core');
-
-        return $coreHelper->jsonDecode($value);
+        return Mage::helper('core')->jsonDecode($value);
     }
 
     /**
@@ -251,6 +251,7 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
 
     /**
      * @param $storeId
+     *
      * @return string
      */
     public function getStoreCodeById($storeId) {
@@ -354,8 +355,8 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
      */
     public function getEbayFields() {
         return array(
-            'ebay_item_id' => 'eBya Item ID',
-            'item_variation_id' => 'Variation eBay Item ID',
+            'ebay_item_id' => 'eBay Item ID',
+            'item_variation_hash' => 'Variation eBay Item ID',
             'site' => 'Site',
             'sku' => 'SKU',
             'upc' => 'UPC',
@@ -498,25 +499,25 @@ EXCEPTION;
     public function applySettings($item) {
 
         if (Mage::helper('e2m/Ebay_Config')->isDeleteHtml()) {
-            $item['title'] = strip_tags($item['title']);
-            $item['subtitle'] = strip_tags($item['subtitle']);
-            $item['description'] = strip_tags($item['description']);
+            $item['ebay_title'] = strip_tags($item['ebay_title']);
+            $item['ebay_subtitle'] = strip_tags($item['ebay_subtitle']);
+            $item['ebay_description'] = strip_tags($item['ebay_description']);
         }
 
         $productSKU = Mage::helper('e2m/Ebay_Config')->getProductIdentifier();
         if (empty($item[$productSKU]) && Mage::helper('e2m/Ebay_Config')->isGenerateSku()) {
-            $item[$productSKU] = 'SKU_' . md5($item['ebay_item_id']);
+            $item[$productSKU] = 'SKU_' . md5($item['ebay_item_id'] . $item['item_variation_id']);
         }
 
         if (self::DOES_NOT_APPLY === strtolower($item[$productSKU]) &&
             Mage::helper('e2m/Ebay_Config')->isGenerateSku()) {
-            $item[$productSKU] = 'DNA_' . md5($item['ebay_item_id']);
+            $item[$productSKU] = 'DNA_' . md5($item['ebay_item_id'] . $item['item_variation_id']);
         }
 
         //TODO Delete
         if ('refer to description' === strtolower($item[$productSKU]) &&
             Mage::helper('e2m/Ebay_Config')->isGenerateSku()) {
-            $item[$productSKU] = 'ROD_' . md5($item['ebay_item_id']);
+            $item[$productSKU] = 'ROD_' . md5($item['ebay_item_id'] . $item['item_variation_id']);
         }
 
         return $item;
@@ -536,7 +537,7 @@ EXCEPTION;
         $lastMaxUploadSizeLetter = strtolower(substr($maxUploadSize, -1));
         $maxUploadSize = (int)$maxUploadSize;
 
-        switch($lastMaxUploadSizeLetter) {
+        switch ($lastMaxUploadSizeLetter) {
             case 'g':
                 $maxUploadSize *= 1024;
             case 'm':
@@ -550,5 +551,112 @@ EXCEPTION;
         }
 
         return $this->maxUploadSize = $maxUploadSize - 97152; // diff
+    }
+
+    public function getFolder($file) {
+
+        $prefixPath = Mage::getBaseDir('var') . DS . 'e2m' . DS;
+        if (is_dir($prefixPath)) {
+            return $prefixPath . $file;
+        }
+
+        if (!mkdir($prefixPath, 0755, true)) {
+            throw new \Exception('"e2m" folder not create.');
+        }
+
+        return $prefixPath . $file;
+    }
+
+    public function getDataForCSVFile($file) {
+
+        $file = $this->getFolder($file);
+        $data = array();
+
+        $file = fopen($file, 'r');
+
+        $header = fgetcsv($file, null, ',');
+        while ($values = fgetcsv($file, null, ',')) {
+            $data[] = array_combine(array_values($header), array_values($values));
+        }
+
+        fclose($file);
+
+        return $data;
+    }
+
+    public function getAttributesMatching() {
+
+        $data = array();
+
+        $csv = $this->getDataForCSVFile('ebay_attributes_matching.csv');
+        foreach ($csv as $datum) {
+            if (self::TYPE_TEXT === $datum['type']) {
+                !isset($data[$datum['name_code']]) && $data[$datum['name_code']]['type'] = $datum['type'];
+
+                $data[$datum['name_code']]['name'][$datum['site']] = $datum['name'];
+
+                continue;
+            }
+
+            if (self::TYPE_SELECT === $datum['type']) {
+                !isset($data[$datum['name_code']]) && $data[$datum['name_code']]['type'] = $datum['type'];
+
+                $data[$datum['name_code']]['name'][$datum['site']] = $datum['name'];
+
+                $data[$datum['name_code']]['value'][$datum['value_code']][$datum['site']] = $datum['value'];
+            }
+        }
+
+        return $data;
+    }
+
+    public function getAttributesExport() {
+
+        $data = array();
+
+        $csv = $this->getDataForCSVFile('ebay_attributes_export.csv');
+        foreach ($csv as $datum) {
+            $data[$datum['ebay_property_code']] = $datum['magento_attribute_code'];
+        }
+
+        return $data;
+    }
+
+    public function getExportAttributes() {
+
+        $data = array();
+
+        $csv = $this->getDataForCSVFile('ebay_attributes_export.csv');
+        foreach ($csv as $datum) {
+            if (empty($datum['magento_attribute_code'])) {
+                $data[$datum['ebay_property_code']] = $datum['ebay_property_code'];
+
+                continue;
+            }
+
+            $data[$datum['magento_attribute_code']] = $datum['ebay_property_code'];
+        }
+
+        return $data;
+    }
+
+    public function getExportSpecifics() {
+
+        $export = $this->getAttributesExport();
+        $csv = $this->getDataForCSVFile('ebay_attributes_matching.csv');
+
+        $data = array();
+        foreach ($csv as $datum) {
+            if (isset($export[$datum['name_code']])) {
+                $data[$datum['name_code']] = empty($export[$datum['name_code']]) ?
+                    $datum['name_code'] : $export[$datum['name_code']];
+
+                continue;
+            }
+
+            $data[$datum['name']] = $datum['name_code'];
+        }
+
+        return $data;
     }
 }
