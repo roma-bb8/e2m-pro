@@ -12,9 +12,9 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
     private function addButton($button, $alias, $label, $onclick, $disabled = false) {
         /** @var Mage_Adminhtml_Block_Widget_Button $button */
         $button = $button->setData(array(
-            'label' => Mage::helper('e2m')->__($label),
+            'label'    => Mage::helper('e2m')->__($label),
             'disabled' => $disabled,
-            'onclick' => $onclick
+            'onclick'  => $onclick
         ));
         $this->setChild($alias, $button);
     }
