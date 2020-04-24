@@ -2,93 +2,40 @@
 
 class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
 
-    private function addMagmiInventoryExportCSVButton(Mage_Adminhtml_Block_Widget_Button $button) {
-
+    /**
+     * @param Mage_Adminhtml_Block_Widget_Button $button
+     * @param string $alias
+     * @param string $label
+     * @param string $onclick
+     * @param bool $disabled
+     */
+    private function addButton($button, $alias, $label, $onclick, $disabled = false) {
         /** @var Mage_Adminhtml_Block_Widget_Button $button */
-        $button = clone $button;
         $button = $button->setData(array(
-            'label' => $this->getDataHelper()->__('magmi'),
-            'onclick' => 'getMagmiInventoryExportCSV();'
+            'label' => Mage::helper('e2m')->__($label),
+            'disabled' => $disabled,
+            'onclick' => $onclick
         ));
-        $this->setChild('magmi_inventory_export_csv_button', $button);
+        $this->setChild($alias, $button);
     }
 
-    private function addNativeInventoryExportCSVButton(Mage_Adminhtml_Block_Widget_Button $button) {
+    /**
+     * @param Mage_Adminhtml_Block_Widget_Button $button
+     * @param string $alias
+     * @param string $label
+     * @param string $onclick
+     */
+    private function addStartDownloadInventoryButton($button, $alias, $label, $onclick) {
 
-        /** @var Mage_Adminhtml_Block_Widget_Button $button */
-        $button = clone $button;
-        $button = $button->setData(array(
-            'label' => $this->getDataHelper()->__('native'),
-            'onclick' => 'getNativeInventoryExportCSV();'
-        ));
-        $this->setChild('native_inventory_export_csv_button', $button);
-    }
-
-    private function addAttributesSQLButton(Mage_Adminhtml_Block_Widget_Button $button) {
-
-        /** @var Mage_Adminhtml_Block_Widget_Button $button */
-        $button = clone $button;
-        $button = $button->setData(array(
-            'label' => $this->getDataHelper()->__('build'),
-            'onclick' => 'getAttributesSQL();'
-        ));
-        $this->setChild('attributes_sql_button', $button);
-    }
-
-    private function addAttributesExportCSVButton(Mage_Adminhtml_Block_Widget_Button $button) {
-
-        /** @var Mage_Adminhtml_Block_Widget_Button $button */
-        $button = clone $button;
-        $button = $button->setData(array(
-            'label' => $this->getDataHelper()->__('build'),
-            'onclick' => 'getAttributesExportCSV();'
-        ));
-        $this->setChild('attributes_export_csv_button', $button);
-    }
-
-    private function addAttributesMatchingCSVButton(Mage_Adminhtml_Block_Widget_Button $button) {
-
-        /** @var Mage_Adminhtml_Block_Widget_Button $button */
-        $button = clone $button;
-        $button = $button->setData(array(
-            'label' => $this->getDataHelper()->__('build'),
-            'onclick' => 'getAttributesMatchingCSV();'
-        ));
-        $this->setChild('attributes_matching_csv_button', $button);
-    }
-
-    private function addSettingsButton(Mage_Adminhtml_Block_Widget_Button $button) {
-
-        /** @var Mage_Adminhtml_Block_Widget_Button $button */
-        $button = clone $button;
-        $button = $button->setData(array(
-            'label' => $this->getDataHelper()->__('Save config'),
-            'class' => 'save',
-            'onclick' => 'sendSettings();'
-        ));
-        $this->setChild('send_settings_button', $button);
-    }
-
-    private function addStartDownloadInventoryButton(Mage_Adminhtml_Block_Widget_Button $button) {
-
-        /** @var Mage_Adminhtml_Block_Widget_Button $button */
-
-        $resource = Mage::getSingleton('core/resource');
-        $connRead = $resource->getConnection('core_read');
-        $cronTasksTableName = $resource->getTableName('m2e_e2m_cron_tasks');
-
-        //----------------------------------------
-
-        $label = 'Start download inventory';
         $disabled = false;
-        $id = $connRead->select()->from($cronTasksTableName, 'id')
+        $id = Mage::getSingleton('core/resource')->getConnection('core_read')
+            ->select()->from(Mage::getSingleton('core/resource')->getTableName('m2e_e2m_cron_tasks'), 'id')
             ->where('instance = ?', M2E_E2M_Model_Cron_Task_eBay_DownloadInventory::class)
             ->limit(1)->query()->fetchColumn();
 
-        if (empty($id) && $this->getDataHelper()
-                ->getConfig(M2E_E2M_Helper_Data::XML_PATH_EBAY_DOWNLOAD_INVENTORY, false)) {
+        $isDownload = Mage::helper('e2m')->getConfig(M2E_E2M_Helper_Data::XML_PATH_EBAY_DOWNLOAD_INVENTORY, false);
+        if (empty($id) && $isDownload) {
             $label = 'Reload inventory (completed)';
-            $disabled = false;
         }
 
         if (!empty($id)) {
@@ -96,39 +43,13 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
             $disabled = true;
         }
 
-        $button = $button->setData(array(
-            'label' => $this->getDataHelper()->__($label),
-            'onclick' => 'startDownloadInventory(this);',
-            'disabled' => $disabled
-        ));
-        $this->setChild('start_download_inventory_button', $button);
-    }
-
-    private function addUnlinkAccountButton(Mage_Adminhtml_Block_Widget_Button $button) {
-
-        /** @var Mage_Adminhtml_Block_Widget_Button $button */
-        $button = $button->setData(array(
-            'label' => $this->getDataHelper()->__('Logout'),
-            'onclick' => 'unlinkAccount();'
-        ));
-        $this->setChild('unlink_account_button', $button);
-    }
-
-    private function addLinkAccountButton(Mage_Adminhtml_Block_Widget_Button $button) {
-
-        /** @var Mage_Adminhtml_Block_Widget_Button $button */
-        $button = $button->setData(array(
-            'label' => $this->getDataHelper()->__('Link'),
-            'onclick' => 'linkAccount();'
-        ));
-        $this->setChild('link_account_button', $button);
+        $this->addButton($button, $alias, $label, $onclick, $disabled);
     }
 
     //########################################
 
     /**
      * @inheritDoc
-     * @throws Zend_Db_Statement_Exception
      */
     protected function _beforeToHtml() {
 
@@ -137,19 +58,72 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
 
         //----------------------------------------
 
-        if (empty($this->getEbayAccount()->getUserId())) {
-            $this->addLinkAccountButton(clone $widgetButton);
+        if (empty(Mage::getSingleton('e2m/Proxy_Ebay_Account')->getUserId())) {
+            $this->addButton(
+                clone $widgetButton,
+                'link_account_button',
+                'Link',
+                'linkAccount();'
+            );
+
             return;
         }
 
-        $this->addUnlinkAccountButton(clone $widgetButton);
-        $this->addStartDownloadInventoryButton(clone $widgetButton);
-        $this->addSettingsButton(clone $widgetButton);
-        $this->addAttributesMatchingCSVButton(clone $widgetButton);
-        $this->addAttributesExportCSVButton(clone $widgetButton);
-        $this->addAttributesSQLButton(clone $widgetButton);
-        $this->addNativeInventoryExportCSVButton(clone $widgetButton);
-        $this->addMagmiInventoryExportCSVButton(clone $widgetButton);
+        $this->addButton(
+            clone $widgetButton,
+            'unlink_account_button',
+            'Logout',
+            'unlinkAccount();'
+        );
+
+        $this->addStartDownloadInventoryButton(
+            clone $widgetButton,
+            'start_download_inventory_button',
+            'Start download inventory',
+            'startDownloadInventory(this);'
+        );
+
+        $this->addButton(
+            clone $widgetButton,
+            'send_settings_button',
+            'Save config',
+            'sendSettings();'
+        );
+
+        $this->addButton(
+            clone $widgetButton,
+            'attributes_matching_csv_button',
+            'build',
+            'getAttributesMatchingCSV();'
+        );
+
+        $this->addButton(
+            clone $widgetButton,
+            'attributes_export_csv_button',
+            'build',
+            'getAttributesExportCSV();'
+        );
+
+        $this->addButton(
+            clone $widgetButton,
+            'attributes_sql_button',
+            'build',
+            'getAttributesSQL();'
+        );
+
+        $this->addButton(
+            clone $widgetButton,
+            'native_inventory_export_csv_button',
+            'native',
+            'getNativeInventoryExportCSV();'
+        );
+
+        $this->addButton(
+            clone $widgetButton,
+            'magmi_inventory_export_csv_button',
+            'magmi',
+            'getMagmiInventoryExportCSV();'
+        );
     }
 
     //########################################
@@ -161,29 +135,6 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
 
         $accountsCollection = Mage::helper('M2ePro/Component_Ebay')->getCollection('Account');
         return $accountsCollection->getItems();
-    }
-
-    /**
-     * @return M2E_E2M_Model_Proxy_Ebay_Account
-     */
-    public function getEbayAccount() {
-        return Mage::getSingleton('e2m/Proxy_Ebay_Account');
-    }
-
-    //########################################
-
-    /**
-     * @return M2E_E2M_Helper_Ebay_Config
-     */
-    public function getEbayConfigHelper() {
-        return Mage::helper('e2m/Ebay_Config');
-    }
-
-    /**
-     * @return M2E_E2M_Helper_Data
-     */
-    public function getDataHelper() {
-        return Mage::helper('e2m');
     }
 
     //########################################
