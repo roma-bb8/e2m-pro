@@ -6,8 +6,8 @@ $installer = $this;
 //########################################
 
 $sql = <<<SQL
-DROP TABLE IF EXISTS `m2e_e2m_ebay_items`;
-CREATE TABLE IF NOT EXISTS `m2e_e2m_ebay_items`
+DROP TABLE IF EXISTS `{$installer->getTable('m2e_e2m_ebay_items')}`;
+CREATE TABLE IF NOT EXISTS `{$installer->getTable('m2e_e2m_ebay_items')}`
 (
     `id`                      INT UNSIGNED         NOT NULL AUTO_INCREMENT,
     `site`                    VARCHAR(5)           NOT NULL, -- alpha-2 code and adding custom two code length 5.
@@ -50,8 +50,8 @@ CREATE TABLE IF NOT EXISTS `m2e_e2m_ebay_items`
     INDEX `item_id` (`ebay_item_id`)
 ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
 
-DROP TABLE IF EXISTS `m2e_e2m_ebay_item_specifics`;
-CREATE TABLE IF NOT EXISTS `m2e_e2m_ebay_item_specifics`
+DROP TABLE IF EXISTS `{$installer->getTable('m2e_e2m_ebay_item_specifics')}`;
+CREATE TABLE IF NOT EXISTS `{$installer->getTable('m2e_e2m_ebay_item_specifics')}`
 (
     `id`      INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `item_id` INT UNSIGNED NOT NULL,
@@ -63,8 +63,8 @@ CREATE TABLE IF NOT EXISTS `m2e_e2m_ebay_item_specifics`
     FOREIGN KEY (`item_id`) REFERENCES `m2e_e2m_ebay_items` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
 
-DROP TABLE IF EXISTS `m2e_e2m_ebay_item_images`;
-CREATE TABLE IF NOT EXISTS `m2e_e2m_ebay_item_images`
+DROP TABLE IF EXISTS `{$installer->getTable('m2e_e2m_ebay_item_images')}`;
+CREATE TABLE IF NOT EXISTS `{$installer->getTable('m2e_e2m_ebay_item_images')}`
 (
     `id`      INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `item_id` INT UNSIGNED NOT NULL,
@@ -75,8 +75,8 @@ CREATE TABLE IF NOT EXISTS `m2e_e2m_ebay_item_images`
     FOREIGN KEY (`item_id`) REFERENCES `m2e_e2m_ebay_items` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
 
-DROP TABLE IF EXISTS `m2e_e2m_ebay_item_variations`;
-CREATE TABLE `m2e_e2m_ebay_item_variations`
+DROP TABLE IF EXISTS `{$installer->getTable('m2e_e2m_ebay_item_variations')}`;
+CREATE TABLE `{$installer->getTable('m2e_e2m_ebay_item_variations')}`
 (
     `id`          INT UNSIGNED   NOT NULL AUTO_INCREMENT,
     `hash`        VARCHAR(53)    NOT NULL,
@@ -94,8 +94,8 @@ CREATE TABLE `m2e_e2m_ebay_item_variations`
     FOREIGN KEY (`item_id`) REFERENCES `m2e_e2m_ebay_items` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
 
-DROP TABLE IF EXISTS `m2e_e2m_ebay_item_variation_specifics`;
-CREATE TABLE IF NOT EXISTS `m2e_e2m_ebay_item_variation_specifics`
+DROP TABLE IF EXISTS `{$installer->getTable('m2e_e2m_ebay_item_variation_specifics')}`;
+CREATE TABLE IF NOT EXISTS `{$installer->getTable('m2e_e2m_ebay_item_variation_specifics')}`
 (
     `id`                INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `item_variation_id` INT UNSIGNED NOT NULL,
@@ -107,8 +107,8 @@ CREATE TABLE IF NOT EXISTS `m2e_e2m_ebay_item_variation_specifics`
     FOREIGN KEY (`item_variation_id`) REFERENCES `m2e_e2m_ebay_item_variations` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
 
-DROP TABLE IF EXISTS `m2e_e2m_ebay_item_variation_images`;
-CREATE TABLE IF NOT EXISTS `m2e_e2m_ebay_item_variation_images`
+DROP TABLE IF EXISTS `{$installer->getTable('m2e_e2m_ebay_item_variation_images')}`;
+CREATE TABLE IF NOT EXISTS `{$installer->getTable('m2e_e2m_ebay_item_variation_images')}`
 (
     `id`                INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `item_variation_id` INT UNSIGNED NOT NULL,
@@ -117,16 +117,6 @@ CREATE TABLE IF NOT EXISTS `m2e_e2m_ebay_item_variation_images`
     `created`           TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     FOREIGN KEY (`item_variation_id`) REFERENCES `m2e_e2m_ebay_item_variations` (`id`) ON DELETE CASCADE
-) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
-
-DROP TABLE IF EXISTS `{$installer->getTable('m2e_e2m_log')}`;
-CREATE TABLE `{$installer->getTable('m2e_e2m_log')}` (
-  `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `task_id` INT(11) UNSIGNED NOT NULL,
-  `type` TINYINT(5) NOT NULL DEFAULT 1,
-  `description` TEXT DEFAULT NULL,
-  `created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
 ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
 
 DROP TABLE IF EXISTS `{$installer->getTable('m2e_e2m_cron_tasks')}`;
@@ -143,7 +133,8 @@ CREATE TABLE `{$installer->getTable('m2e_e2m_cron_tasks')}` (
   UNIQUE KEY (`instance`)
 ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
 
-INSERT INTO `{$installer->getTable('m2e_e2m_cron_tasks')}` (`instance`, `data`)
+INSERT INTO `{$installer->getTable('m2e_e2m_cron_tasks')}`
+    (`instance`, `data`)
 VALUES
     ('M2E_E2M_Model_Cron_Task_Completed', '{}');
 SQL;
