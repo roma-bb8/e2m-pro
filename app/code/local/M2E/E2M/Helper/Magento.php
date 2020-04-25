@@ -2,6 +2,11 @@
 
 class M2E_E2M_Helper_Magento {
 
+    const STORE_ADMIN = 0;
+    const STORE_SKIP = -1;
+
+    //########################################
+
     /** @var array $stores */
     private $stores = array();
 
