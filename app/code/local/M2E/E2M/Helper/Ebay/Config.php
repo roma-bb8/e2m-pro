@@ -6,182 +6,70 @@ class M2E_E2M_Helper_Ebay_Config {
 
     //########################################
 
-    const XML_PATH_PRODUCT_ATTRIBUTE_SET = self::PREFIX . 'product/attribute_set';
-    const XML_PATH_STORE_MAP = self::PREFIX . 'store/map';
-    const XML_PATH_PRODUCT_ATTRIBUTE_MAP = self::PREFIX . 'product/attribute/map';
-    const XML_PATH_PRODUCT_GENERATE_SKU = self::PREFIX . 'product/generate/sku';
-    const XML_PATH_PRODUCT_IDENTIFIER = self::PREFIX . 'product/identifier';
-    const XML_PATH_PRODUCT_FOUND = self::PREFIX . 'product/found';
-    const XML_PATH_PRODUCT_DELETE_HTML = self::PREFIX . 'product/delete/html';
-    const XML_PATH_PRODUCT_IMPORT_IMAGE = self::PREFIX . 'product/import/image';
-    const XML_PATH_PRODUCT_IMPORT_QTY = self::PREFIX . 'product/import/qty';
-    const XML_PATH_PRODUCT_IMPORT_SPECIFICS = self::PREFIX . 'product/import/specifics';
-    const XML_PATH_PRODUCT_IMPORT_RENAME_ATTRIBUTE = self::PREFIX . 'rename/attribute';
+    const XML_PATH_PRODUCT_ATTRIBUTE_MAP = self::PREFIX . 'store/map';
 
-    const XML_PATH_FULL_SET_SETTING = self::PREFIX . 'full';
+    const XML_PATH_PRODUCT_ATTRIBUTE_SET = self::PREFIX . 'product/attribute_set';
+    const XML_PATH_PRODUCT_IDENTIFIER = self::PREFIX . 'product/sku';
+    const XML_PATH_PRODUCT_GENERATE_SKU = self::PREFIX . 'product/sku/generate';
+    const XML_PATH_PRODUCT_DELETE_HTML = self::PREFIX . 'product/delete_html';
 
     //########################################
 
-    const STORE_ADMIN = 0;
-    const STORE_SKIP = -1;
+    const DOES_NOT_APPLY = 'does not apply';
 
     const PRODUCT_IDENTIFIER_SKU = 'ebay_sku';
     const PRODUCT_IDENTIFIER_MPN = 'ebay_mpn';
     const PRODUCT_IDENTIFIER_EAN = 'ebay_ean';
     const PRODUCT_IDENTIFIER_UPC = 'ebay_upc';
 
-    const ACTION_FOUND_IGNORE = 'IGNORE';
-    const ACTION_FOUND_UPDATE = 'UPDATE';
-
-    //########################################
-
-    /** @var M2E_E2M_Helper_Data $dataHelper */
-    private $dataHelper;
-
-    //########################################
-
-    private $siteId = null;
-    private $storeId = null;
-
     //########################################
 
     /**
-     * @return bool
+     * @return string
      */
     public function getProductIdentifier() {
-        return $this->dataHelper->getConfig(self::XML_PATH_PRODUCT_IDENTIFIER);
-    }
-
-    /**
-     * @return bool
-     */
-    public function isSKUProductIdentifier() {
-        return self::PRODUCT_IDENTIFIER_SKU === $this->getProductIdentifier();
-    }
-
-    /**
-     * @return bool
-     */
-    public function isMPNProductIdentifier() {
-        return self::PRODUCT_IDENTIFIER_MPN === $this->getProductIdentifier();
-    }
-
-    /**
-     * @return bool
-     */
-    public function isUPCProductIdentifier() {
-        return self::PRODUCT_IDENTIFIER_UPC === $this->getProductIdentifier();
-    }
-
-    /**
-     * @return bool
-     */
-    public function isEANProductIdentifier() {
-        return self::PRODUCT_IDENTIFIER_EAN === $this->getProductIdentifier();
-    }
-
-    /**
-     * @return bool
-     */
-    public function isIgnoreActionFound() {
-        return self::ACTION_FOUND_IGNORE === $this->dataHelper->getConfig(self::XML_PATH_PRODUCT_FOUND);
-    }
-
-    /**
-     * @return bool
-     */
-    public function isUpdateActionFound() {
-        return self::ACTION_FOUND_UPDATE === $this->dataHelper->getConfig(self::XML_PATH_PRODUCT_FOUND);
-    }
-
-    /**
-     * @return bool
-     */
-    public function isImportQty() {
-        return (bool)$this->dataHelper->getConfig(self::XML_PATH_PRODUCT_IMPORT_QTY);
-    }
-
-    /**
-     * @return bool
-     */
-    public function isImportSpecifics() {
-        return (bool)$this->dataHelper->getConfig(self::XML_PATH_PRODUCT_IMPORT_SPECIFICS);
-    }
-
-    /**
-     * @return bool
-     */
-    public function isImportRenameAttribute() {
-        return (bool)$this->dataHelper->getConfig(self::XML_PATH_PRODUCT_IMPORT_RENAME_ATTRIBUTE);
+        return Mage::helper('e2m')->getConfig(self::XML_PATH_PRODUCT_IDENTIFIER);
     }
 
     /**
      * @return bool
      */
     public function isGenerateSku() {
-        return (bool)$this->dataHelper->getConfig(self::XML_PATH_PRODUCT_GENERATE_SKU);
-    }
-
-    /**
-     * @return bool
-     */
-    public function isImportImage() {
-        return (bool)$this->dataHelper->getConfig(self::XML_PATH_PRODUCT_IMPORT_IMAGE);
+        return (bool)Mage::helper('e2m')->getConfig(self::XML_PATH_PRODUCT_GENERATE_SKU);
     }
 
     /**
      * @return bool
      */
     public function isDeleteHtml() {
-        return (bool)$this->dataHelper->getConfig(self::XML_PATH_PRODUCT_DELETE_HTML);
-    }
-
-    /**
-     * @param int $marketplaceId
-     *
-     * @return int|null
-     */
-    public function getStoreForMarketplace($marketplaceId) {
-
-        $marketplaceId = strtoupper($marketplaceId);
-        $marketplacesStores = $this->dataHelper->getConfig(self::XML_PATH_STORE_MAP, array());
-        if (isset($marketplacesStores[$marketplaceId])) {
-            return (int)$marketplacesStores[$marketplaceId];
-        }
-
-        return null;
-    }
-
-    /**
-     * @param int $marketplaceId
-     *
-     * @return bool
-     */
-    public function isSkipStore($marketplaceId) {
-        return self::STORE_SKIP === $this->getStoreForMarketplace($marketplaceId);
-    }
-
-    /**
-     * @return bool
-     */
-    public function isUseAdminStore() {
-
-        $map = Mage::helper('e2m')->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_STORE_MAP);
-        foreach ($map as $site => $store) {
-            if (M2E_E2M_Helper_Ebay_Config::STORE_ADMIN === (int)$store) {
-                return strtolower($site);
-            }
-        }
-
-        return false;
+        return (bool)Mage::helper('e2m')->getConfig(self::XML_PATH_PRODUCT_DELETE_HTML);
     }
 
     //########################################
 
     /**
-     * M2E_E2M_Helper_Ebay_Config constructor.
+     * @param array $item
+     *
+     * @return mixed
      */
-    public function __construct() {
-        $this->dataHelper = Mage::helper('e2m');
+    public function applySettings(array $item) {
+
+        if (Mage::helper('e2m/Ebay_Config')->isDeleteHtml()) {
+            $item['ebay_title'] = strip_tags($item['ebay_title']);
+            $item['ebay_subtitle'] = strip_tags($item['ebay_subtitle']);
+            $item['ebay_description'] = strip_tags($item['ebay_description']);
+        }
+
+        $productSKU = Mage::helper('e2m/Ebay_Config')->getProductIdentifier();
+        if (empty($item[$productSKU]) && Mage::helper('e2m/Ebay_Config')->isGenerateSku()) {
+            $item[$productSKU] = 'SKU_' . md5($item['ebay_item_id'] . $item['item_variation_id']);
+        }
+
+        if (self::DOES_NOT_APPLY === strtolower($item[$productSKU]) &&
+            Mage::helper('e2m/Ebay_Config')->isGenerateSku()) {
+            $item[$productSKU] = 'DNA_' . md5($item['ebay_item_id'] . $item['item_variation_id']);
+        }
+
+        return $item;
     }
 }
