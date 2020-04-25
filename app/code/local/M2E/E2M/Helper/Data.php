@@ -136,7 +136,7 @@ EXCEPTION;
         }
 
         if (!mkdir($prefixPath, 0755, true)) {
-            throw new \Exception('"e2m" folder not create.');
+            throw new Exception('"e2m" folder not create.');
         }
 
         return $prefixPath . $file;
