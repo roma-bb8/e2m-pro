@@ -787,7 +787,7 @@ SQL;
 
         //----------------------------------------
 
-        $adminStore = Mage::helper('e2m/Ebay_Config')->isUseAdminStore();
+        $adminStore = Mage::helper('e2m/Ebay_Config')->getAdminStore();
         foreach ($attributesMatching as $attributeCode => $attributeData) {
 
             $code = $readConn->quote($attributeCode);
