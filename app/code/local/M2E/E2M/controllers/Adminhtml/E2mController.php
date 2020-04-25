@@ -1284,11 +1284,6 @@ SQL;
      */
     public function unlinkEbayAccountAction() {
 
-        $connWrite = Mage::getSingleton('core/resource')->getConnection('core_write');
-        $connWrite->delete(Mage::getSingleton('core/resource')->getTableName('m2e_e2m_cron_tasks'), array(
-            'instance <> ?' => M2E_E2M_Model_Cron_Task_Completed::class
-        ));
-
         Mage::helper('e2m')->setConfig(M2E_E2M_Model_Proxy_Ebay_Account::XML_PATH_EBAY_ACCOUNT_ID, false, true);
         Mage::helper('e2m')->setConfig(M2E_E2M_Helper_Data::XML_PATH_EBAY_AVAILABLE_MARKETPLACES, array());
         Mage::helper('e2m')->setConfig(M2E_E2M_Helper_Data::XML_PATH_EBAY_DOWNLOAD_INVENTORY, false);
@@ -1335,6 +1330,8 @@ SQL;
 
     /**
      * @inheritDoc
+     *
+     * @throws Exception
      */
     final public function dispatch($action) {
 
