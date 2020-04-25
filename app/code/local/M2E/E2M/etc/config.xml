@@ -17,17 +17,8 @@
             </e2m>
         </helpers>
         <models>
-            <e2m_resource>
-                <class>M2E_E2M_Model_Resource</class>
-                <entities>
-                    <log>
-                        <table>m2e_e2m_log</table>
-                    </log>
-                </entities>
-            </e2m_resource>
             <e2m>
                 <class>M2E_E2M_Model</class>
-                <resourceModel>e2m_resource</resourceModel>
             </e2m>
             <m2e_observer>
                 <class>M2E_E2M_Observer</class>
@@ -81,14 +72,14 @@
     </global>
     <crontab>
         <jobs>
-            <e2m_cron>
+            <e2m_ebay_download_inventory>
                 <schedule>
                     <cron_expr>*/1 * * * *</cron_expr>
                 </schedule>
                 <run>
-                    <model>e2m/Cron::process</model>
+                    <model>e2m/Cron_Job_Ebay_DownloadInventory::process</model>
                 </run>
-            </e2m_cron>
+            </e2m_ebay_download_inventory>
         </jobs>
     </crontab>
     <adminhtml>
