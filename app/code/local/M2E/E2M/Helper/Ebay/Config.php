@@ -6,12 +6,12 @@ class M2E_E2M_Helper_Ebay_Config {
 
     //########################################
 
-    const XML_PATH_PRODUCT_ATTRIBUTE_MAP = self::PREFIX . 'store/map';
+    const XML_PATH_STORE_MAP = self::PREFIX . 'store/map';
 
     const XML_PATH_PRODUCT_ATTRIBUTE_SET = self::PREFIX . 'product/attribute_set';
-    const XML_PATH_PRODUCT_IDENTIFIER = self::PREFIX . 'product/sku';
-    const XML_PATH_PRODUCT_GENERATE_SKU = self::PREFIX . 'product/sku/generate';
-    const XML_PATH_PRODUCT_DELETE_HTML = self::PREFIX . 'product/delete_html';
+    const XML_PATH_PRODUCT_SKU = self::PREFIX . 'product/sku';
+    const XML_PATH_PRODUCT_SKU_GENERATE = self::PREFIX . 'product/sku/generate';
+    const XML_PATH_PRODUCT_HTML_DELETE = self::PREFIX . 'product/html_delete';
 
     //########################################
 
@@ -28,21 +28,21 @@ class M2E_E2M_Helper_Ebay_Config {
      * @return string
      */
     public function getProductIdentifier() {
-        return Mage::helper('e2m')->getConfig(self::XML_PATH_PRODUCT_IDENTIFIER);
+        return Mage::helper('e2m')->getConfig(self::XML_PATH_PRODUCT_SKU);
     }
 
     /**
      * @return bool
      */
     public function isGenerateSku() {
-        return (bool)Mage::helper('e2m')->getConfig(self::XML_PATH_PRODUCT_GENERATE_SKU);
+        return (bool)Mage::helper('e2m')->getConfig(self::XML_PATH_PRODUCT_SKU_GENERATE);
     }
 
     /**
      * @return bool
      */
     public function isDeleteHtml() {
-        return (bool)Mage::helper('e2m')->getConfig(self::XML_PATH_PRODUCT_DELETE_HTML);
+        return (bool)Mage::helper('e2m')->getConfig(self::XML_PATH_PRODUCT_HTML_DELETE);
     }
 
     //########################################
