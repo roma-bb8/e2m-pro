@@ -5,6 +5,9 @@ class M2E_E2M_Helper_Magento {
     const STORE_ADMIN = 0;
     const STORE_SKIP = -1;
 
+    const TYPE_SELECT = 'select';
+    const TYPE_TEXT = 'text';
+
     //########################################
 
     /** @var array $stores */
@@ -41,7 +44,7 @@ class M2E_E2M_Helper_Magento {
      *
      * @return string
      */
-    public function getCodeStoreById($storeId) {
+    public function getStoreCodeById($storeId) {
 
         foreach (Mage::app()->getStores(true) as $store) {
 
