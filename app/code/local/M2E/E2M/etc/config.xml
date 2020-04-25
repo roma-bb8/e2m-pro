@@ -72,14 +72,14 @@
     </global>
     <crontab>
         <jobs>
-            <e2m_ebay_download_inventory>
+            <m2e_e2m_ebay_download_inventory>
                 <schedule>
                     <cron_expr>*/1 * * * *</cron_expr>
                 </schedule>
                 <run>
                     <model>e2m/Cron_Job_Ebay_DownloadInventory::process</model>
                 </run>
-            </e2m_ebay_download_inventory>
+            </m2e_e2m_ebay_download_inventory>
         </jobs>
     </crontab>
     <adminhtml>
