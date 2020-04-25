@@ -4,9 +4,6 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
 
     const PREFIX = 'm2e/e2m/';
 
-    const TYPE_SELECT = 'select';
-    const TYPE_TEXT = 'text';
-
     //########################################
 
     /** @var int $maxUploadSize */
@@ -192,80 +189,5 @@ EXCEPTION;
         } while (filesize($path . $file) > $this->getMaxUploadSize());
 
         file_put_contents($path . $file, $data . PHP_EOL, FILE_APPEND | LOCK_EX);
-    }
-
-    //########################################
-
-    /**
-     * @return array
-     * @throws Exception
-     */
-    public function getAttributesExport() {
-
-        $ebayAttributesExport = $this->getDataCSVFile('ebay_attributes_export.csv');
-
-        $data = array();
-        foreach ($ebayAttributesExport as $item) {
-            if (empty($item['magento_attribute_code'])) {
-                $data[$item['ebay_property_code']] = $item['ebay_property_code'];
-
-                continue;
-            }
-
-            $data[$item['ebay_property_code']] = $item['magento_attribute_code'];
-        }
-
-        return $data;
-    }
-
-    /**
-     * @return array
-     * @throws Exception
-     */
-    public function getAttributesMatching() {
-
-        $ebayAttributesMatching = $this->getDataCSVFile('ebay_attributes_matching.csv');
-
-        $data = array();
-        foreach ($ebayAttributesMatching as $item) {
-            if (!isset($data[$item['name_code']])) {
-                $data[$item['name_code']]['type'] = $item['type'];
-            }
-
-            $data[$item['name_code']]['name'][$item['site']] = $item['name'];
-
-            if (self::TYPE_TEXT === $item['type']) {
-                continue;
-            }
-
-            if (self::TYPE_SELECT === $item['type']) {
-                $data[$item['name_code']]['value'][$item['value_code']][$item['site']] = $item['value'];
-            }
-        }
-
-        return $data;
-    }
-
-    /**
-     * @return array
-     * @throws Exception
-     */
-    public function getExportSpecifics() {
-
-        $ebayAttributesMatching = $this->getDataCSVFile('ebay_attributes_matching.csv');
-        $attributesExport = $this->getAttributesExport();
-
-        $data = array();
-        foreach ($ebayAttributesMatching as $item) {
-            if (isset($attributesExport[$item['name_code']])) {
-                $data[$item['name_code']] = $attributesExport[$item['name_code']];
-
-                continue;
-            }
-
-            $data[$item['name']] = $item['name_code'];
-        }
-
-        return $data;
     }
 }
