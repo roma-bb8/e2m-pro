@@ -1,8 +1,8 @@
 <?php
 
-class M2E_E2M_Helper_Ebay_Config {
+class M2E_E2M_Helper_Ebay_Config extends M2E_E2M_Helper_Config {
 
-    const PREFIX = M2E_E2M_Helper_Data::PREFIX . 'ebay/setting/';
+    const PREFIX = parent::PREFIX . 'ebay/';
 
     //########################################
 
@@ -28,21 +28,21 @@ class M2E_E2M_Helper_Ebay_Config {
      * @return string
      */
     public function getProductIdentifier() {
-        return Mage::getModel('e2m/Config')->get(self::XML_PATH_PRODUCT_SKU);
+        return $this->get(self::XML_PATH_PRODUCT_SKU);
     }
 
     /**
      * @return bool
      */
     public function isGenerateSku() {
-        return (bool)Mage::getModel('e2m/Config')->get(self::XML_PATH_PRODUCT_SKU_GENERATE);
+        return (bool)$this->get(self::XML_PATH_PRODUCT_SKU_GENERATE);
     }
 
     /**
      * @return bool
      */
     public function isDeleteHtml() {
-        return (bool)Mage::getModel('e2m/Config')->get(self::XML_PATH_PRODUCT_HTML_DELETE);
+        return (bool)$this->get(self::XML_PATH_PRODUCT_HTML_DELETE);
     }
 
     //########################################
@@ -54,7 +54,7 @@ class M2E_E2M_Helper_Ebay_Config {
      */
     public function getStoreIdByMarketplaceCode($marketplaceCode) {
 
-        $map = Mage::getModel('e2m/Config')->get(self::XML_PATH_STORE_MAP, array());
+        $map = $this->get(self::XML_PATH_STORE_MAP, array());
 
         $marketplaceCode = strtoupper($marketplaceCode);
         if (isset($map[$marketplaceCode])) {
@@ -69,7 +69,7 @@ class M2E_E2M_Helper_Ebay_Config {
      */
     public function getMarketplaceCodeUseAdminStore() {
 
-        $map = Mage::getModel('e2m/Config')->get(self::XML_PATH_STORE_MAP, array());
+        $map = $this->get(self::XML_PATH_STORE_MAP, array());
         $site = array_search(M2E_E2M_Helper_Magento::STORE_ADMIN, $map);
         if (!empty($site)) {
             return strtolower($site);

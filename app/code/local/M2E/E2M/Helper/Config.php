@@ -1,7 +1,10 @@
 <?php
 
+class M2E_E2M_Helper_Config {
 
-class M2E_E2M_Model_Config {
+    const PREFIX = M2E_E2M_Helper_Data::PREFIX . 'setting/';
+
+    //########################################
 
     /**
      * @param string $path
