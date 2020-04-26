@@ -2,7 +2,7 @@
 
 class M2E_E2M_Model_Lock_Item {
 
-    const MAX_UPDATE = 600000; // 10 minutes
+    const MAX_UPDATE = 1800000; // 30 minutes
 
     //########################################
 
