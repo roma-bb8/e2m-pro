@@ -8,23 +8,23 @@ class M2E_E2M_Adminhtml_E2mController extends Mage_Adminhtml_Controller_Action {
      */
     public function getMagmiInventoryExportCSVAction() {
 
-        $prefixPath = Mage::helper('e2m')->getFolder();
+        $prefixPath = Mage::helper('e2m')->getFullPath();
         $defaultValue = '""';
 
         $readConn = Mage::getSingleton('core/resource')->getConnection('core_read');
-        $attributeSetName = $readConn->quote(Mage::helper('e2m')->getAttributeSetNameById(
+        $attributeSetName = $readConn->quote(Mage::helper('e2m/Magento')->getAttributeSetNameById(
             Mage::helper('e2m')->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET)
         ));
 
-        if (!file_exists(Mage::helper('e2m')->getFolder('ebay_attributes_export.csv'))) {
+        if (!file_exists(Mage::helper('e2m')->getFullPath('ebay_attributes_export.csv'))) {
             $this->getAttributesExportCSVAction();
         }
-        $exportAttributes = Mage::helper('e2m')->getExportAttributes();
+        $exportAttributes = array_flip(Mage::helper('e2m/Ebay')->getExportAttributes());
 
-        if (!file_exists(Mage::helper('e2m')->getFolder('ebay_attributes_matching.csv'))) {
+        if (!file_exists(Mage::helper('e2m')->getFullPath('ebay_attributes_matching.csv'))) {
             $this->getAttributesMatchingCSVAction();
         }
-        $exportSpecifics = Mage::helper('e2m')->getExportSpecifics();
+        $exportSpecifics = Mage::helper('e2m/Ebay')->getExportSpecifics();
 
         //----------------------------------------
 
@@ -268,14 +268,14 @@ SQL;
 
         $items = $readConn->query($getItemsSQL);
         while ($item = $items->fetch(PDO::FETCH_ASSOC)) {
-            $item = Mage::helper('e2m')->applySettings($item);
+            $item = Mage::helper('e2m/Ebay_Config')->applySettings($item);
 
             $parentAndChildIds = array($item['id'], $item['item_variation_id']);
 
             $product = $productSkeleton;
             $product['sku'] = $item[Mage::helper('e2m/Ebay_Config')->getProductIdentifier()];
-            $product['store'] = Mage::helper('e2m')->getStoreCodeById(
-                Mage::helper('e2m/Ebay_Config')->getStoreForMarketplace($item['ebay_site'])
+            $product['store'] = Mage::helper('e2m/Magento')->getStoreCodeById(
+                Mage::helper('e2m/Ebay_Config')->getStoreIdByMarketplaceCode($item['ebay_site'])
             );
 
             $specifics = $readConn->query($getSpecificsForItemSQL, $parentAndChildIds);
@@ -336,7 +336,7 @@ SQL;
             $product['visibility'] = 1;
             $product['tax_class_id'] = 0;
 
-            Mage::helper('e2m')->writeInventoryFile($prefixPath, implode(',', $product), $csvHeader, 'magmi');
+            Mage::helper('e2m')->writeCSVFile($prefixPath, implode(',', $product), $csvHeader, 'magmi');
         }
 
         return $this->getResponse()->setBody(Mage::helper('core')->jsonEncode(array('data' => array(
@@ -350,24 +350,24 @@ SQL;
      */
     public function getNativeInventoryExportCSVAction() {
 
-        $prefixPath = Mage::helper('e2m')->getFolder();
+        $prefixPath = Mage::helper('e2m')->getFullPath();
         $defaultValue = '""';
 
         $readConn = Mage::getSingleton('core/resource')->getConnection('core_read');
-        $mediaAttributeId = Mage::helper('e2m')->getMediaAttributeId();
-        $attributeSetName = $readConn->quote(Mage::helper('e2m')->getAttributeSetNameById(
+        $mediaAttributeId = Mage::helper('e2m/Magento')->getMediaAttributeId();
+        $attributeSetName = $readConn->quote(Mage::helper('e2m/Magento')->getAttributeSetNameById(
             Mage::helper('e2m')->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET)
         ));
 
-        if (!file_exists(Mage::helper('e2m')->getFolder('ebay_attributes_export.csv'))) {
+        if (!file_exists(Mage::helper('e2m')->getFullPath('ebay_attributes_export.csv'))) {
             $this->getAttributesExportCSVAction();
         }
-        $exportAttributes = Mage::helper('e2m')->getExportAttributes();
+        $exportAttributes = array_flip(Mage::helper('e2m/Ebay')->getExportAttributes());
 
-        if (!file_exists(Mage::helper('e2m')->getFolder('ebay_attributes_matching.csv'))) {
+        if (!file_exists(Mage::helper('e2m')->getFullPath('ebay_attributes_matching.csv'))) {
             $this->getAttributesMatchingCSVAction();
         }
-        $exportSpecifics = Mage::helper('e2m')->getExportSpecifics();
+        $exportSpecifics = Mage::helper('e2m/Ebay')->getExportSpecifics();
 
         //----------------------------------------
 
@@ -614,14 +614,14 @@ SQL;
 
         $items = $readConn->query($getItemsSQL);
         while ($item = $items->fetch(PDO::FETCH_ASSOC)) {
-            $item = Mage::helper('e2m')->applySettings($item);
+            $item = Mage::helper('e2m/Ebay_Config')->applySettings($item);
 
             $parentAndChildIds = array($item['id'], $item['item_variation_id']);
 
             $product = $productSkeleton;
             $product['sku'] = $item[Mage::helper('e2m/Ebay_Config')->getProductIdentifier()];
-            $product['_store'] = Mage::helper('e2m')->getStoreCodeById(
-                Mage::helper('e2m/Ebay_Config')->getStoreForMarketplace($item['ebay_site'])
+            $product['_store'] = Mage::helper('e2m/Magento')->getStoreCodeById(
+                Mage::helper('e2m/Ebay_Config')->getStoreIdByMarketplaceCode($item['ebay_site'])
             );
 
             $specifics = $readConn->query($getSpecificsForItemSQL, $parentAndChildIds);
@@ -737,7 +737,7 @@ SQL;
             !empty($images) && $product .= PHP_EOL . implode(PHP_EOL, $images);
             !empty($variations) && $product .= PHP_EOL . implode(PHP_EOL, $variations);
 
-            Mage::helper('e2m')->writeInventoryFile($prefixPath, $product, $csvHeader, 'm1');
+            Mage::helper('e2m')->writeCSVFile($prefixPath, $product, $csvHeader, 'm1');
         }
 
         return $this->getResponse()->setBody(Mage::helper('core')->jsonEncode(array('data' => array(
@@ -751,23 +751,23 @@ SQL;
      */
     public function getAttributesSQLAction() {
 
-        $file = Mage::helper('e2m')->getFolder('ebay_attributes.sql');
+        $file = Mage::helper('e2m')->getFullPath('ebay_attributes.sql');
         $transactionSQL = '';
 
         $readConn = Mage::getSingleton('core/resource')->getConnection('core_read');
-        $attributeSetName = $readConn->quote(Mage::helper('e2m')->getAttributeSetNameById(
+        $attributeSetName = $readConn->quote(Mage::helper('e2m/Magento')->getAttributeSetNameById(
             Mage::helper('e2m')->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET)
         ));
 
-        if (!file_exists(Mage::helper('e2m')->getFolder('ebay_attributes_export.csv'))) {
+        if (!file_exists(Mage::helper('e2m')->getFullPath('ebay_attributes_export.csv'))) {
             $this->getAttributesExportCSVAction();
         }
-        $attributesExport = Mage::helper('e2m')->getAttributesExport();
+        $attributesExport = Mage::helper('e2m/Ebay')->getExportAttributes();
 
-        if (!file_exists(Mage::helper('e2m')->getFolder('ebay_attributes_matching.csv'))) {
+        if (!file_exists(Mage::helper('e2m')->getFullPath('ebay_attributes_matching.csv'))) {
             $this->getAttributesMatchingCSVAction();
         }
-        $attributesMatching = Mage::helper('e2m')->getAttributesMatching();
+        $attributesMatching = Mage::helper('e2m/Ebay')->getMatchingAttributes();
 
         //----------------------------------------
 
@@ -787,13 +787,13 @@ SQL;
 
         //----------------------------------------
 
-        $adminStore = Mage::helper('e2m/Ebay_Config')->getAdminStore();
+        $adminStore = Mage::helper('e2m/Ebay_Config')->getMarketplaceCodeUseAdminStore();
         foreach ($attributesMatching as $attributeCode => $attributeData) {
 
             $code = $readConn->quote($attributeCode);
 
             $type = $attributeData['type'];
-            $isSelect = (int)(M2E_E2M_Helper_Data::TYPE_SELECT === $type);
+            $isSelect = (int)(M2E_E2M_Helper_Magento::TYPE_SELECT === $type);
             $sourceModel = $isSelect ? $readConn->quote('eav/entity_attribute_source_table') : 'NULL';
             $group = $isSelect ? 'main_group_id' : 'specific_group_id';
 
@@ -826,7 +826,7 @@ SQL;
 SQL;
 
             foreach ($attributeData['name'] as $site => $value) {
-                $storeId = Mage::helper('e2m/Ebay_Config')->getStoreForMarketplace($site);
+                $storeId = Mage::helper('e2m/Ebay_Config')->getStoreIdByMarketplaceCode($site);
                 $name = $readConn->quote($value);
 
                 $transactionSQL .= <<<SQL
@@ -839,7 +839,7 @@ SQL;
             }
 
             if (!isset($attributeData['name'][$adminStore])) {
-                $storeId = M2E_E2M_Helper_Ebay_Config::STORE_ADMIN;
+                $storeId = M2E_E2M_Helper_Magento::STORE_ADMIN;
 
                 $transactionSQL .= <<<SQL
 
@@ -881,8 +881,8 @@ SQL;
                 $adminValue = false;
                 foreach ($attributeValueData as $site => $value) {
                     $adminValue = $value = $readConn->quote($value);
-                    $storeId = Mage::helper('e2m/Ebay_Config')->getStoreForMarketplace($site);
-                    if (M2E_E2M_Helper_Ebay_Config::STORE_ADMIN === $storeId) {
+                    $storeId = Mage::helper('e2m/Ebay_Config')->getStoreIdByMarketplaceCode($site);
+                    if (M2E_E2M_Helper_Magento::STORE_ADMIN === $storeId) {
                         $addingAdminValue = true;
                     }
 
@@ -910,7 +910,7 @@ SQL;
         }
 
         $stores = array_unique(array_merge(
-            array(M2E_E2M_Helper_Ebay_Config::STORE_ADMIN),
+            array(M2E_E2M_Helper_Magento::STORE_ADMIN),
             array_values(Mage::helper('e2m')->getConfig(
                 M2E_E2M_Helper_Ebay_Config::XML_PATH_STORE_MAP, array()
             ))
@@ -1023,7 +1023,7 @@ SQL;
      */
     public function getAttributesMatchingCSVAction() {
 
-        $file = Mage::helper('e2m')->getFolder('ebay_attributes_matching.csv');
+        $file = Mage::helper('e2m')->getFullPath('ebay_attributes_matching.csv');
         $defaultValue = '';
         $attributes = array();
 
@@ -1040,7 +1040,7 @@ SQL;
         while ($specific = $specifics->fetch(PDO::FETCH_ASSOC)) {
             $code = Mage::helper('e2m')->getCode($specific['name']);
 
-            $attributes[$code]['type'] = M2E_E2M_Helper_Data::TYPE_SELECT;
+            $attributes[$code]['type'] = M2E_E2M_Helper_Magento::TYPE_SELECT;
             $attributes[$code]['name'][$specific['site']] = $specific['name'];
             $attributes[$code]['values'][$specific['site']][] = $specific['value'];
         }
@@ -1055,21 +1055,21 @@ SQL;
         $specifics = Mage::getSingleton('core/resource')->getConnection('core_read')->query($sql);
         while ($specific = $specifics->fetch(PDO::FETCH_ASSOC)) {
             $code = Mage::helper('e2m')->getCode($specific['name']);
-            if (isset($attributes[$code]) && $attributes[$code]['type'] === M2E_E2M_Helper_Data::TYPE_SELECT) {
+            if (isset($attributes[$code]) && $attributes[$code]['type'] === M2E_E2M_Helper_Magento::TYPE_SELECT) {
                 $attributes[$code]['name'][$specific['site']] = $specific['name'];
                 $attributes[$code]['values'][$specific['site']][] = $specific['value'];
 
                 continue;
             }
 
-            $attributes[$code]['type'] = M2E_E2M_Helper_Data::TYPE_TEXT;
+            $attributes[$code]['type'] = M2E_E2M_Helper_Magento::TYPE_TEXT;
             $attributes[$code]['name'][$specific['site']] = $specific['name'];
         }
 
         file_put_contents($file, 'type,site,name_code,name,value_code,value' . PHP_EOL, LOCK_EX);
         $fp = fopen($file, 'a');
         foreach ($attributes as $code => $data) {
-            if (M2E_E2M_Helper_Data::TYPE_TEXT === $data['type']) {
+            if (M2E_E2M_Helper_Magento::TYPE_TEXT === $data['type']) {
                 foreach ($attributes[$code]['name'] as $site => $name) {
                     fputcsv($fp, array(
                         /** type       => */ $data['type'],
@@ -1110,7 +1110,7 @@ SQL;
      */
     public function getAttributesExportCSVAction() {
 
-        $file = Mage::helper('e2m')->getFolder('ebay_attributes_export.csv');
+        $file = Mage::helper('e2m')->getFullPath('ebay_attributes_export.csv');
         $defaultValue = '';
         $attributes = array(
             'ebay_item_id',
@@ -1213,62 +1213,30 @@ SQL;
             $this->getRequest()->getParam('settings', array())
         );
 
-        isset($settings['attribute-set']) && Mage::helper('e2m')->setConfig(
+        isset($settings['attribute-set']) && Mage::helper('e2m/Config')->set(
             M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET,
             $settings['attribute-set']
         );
 
-        isset($settings['marketplace-store']) && Mage::helper('e2m')->setConfig(
+        isset($settings['marketplace-store']) && Mage::helper('e2m/Config')->set(
             M2E_E2M_Helper_Ebay_Config::XML_PATH_STORE_MAP,
             $settings['marketplace-store']
         );
 
-        isset($settings['ebay-field-magento-attribute']) && Mage::helper('e2m')->setConfig(
-            M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_MAP,
-            $settings['ebay-field-magento-attribute']
-        );
-
-        isset($settings['generate-sku']) && Mage::helper('e2m')->setConfig(
-            M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_GENERATE_SKU,
+        isset($settings['generate-sku']) && Mage::helper('e2m/Config')->set(
+            M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_SKU_GENERATE,
             $settings['generate-sku']
         );
 
-        isset($settings['product-identifier']) && Mage::helper('e2m')->setConfig(
-            M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_IDENTIFIER,
+        isset($settings['product-identifier']) && Mage::helper('e2m/Config')->set(
+            M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_SKU,
             $settings['product-identifier']
         );
 
-        isset($settings['delete-html']) && Mage::helper('e2m')->setConfig(
-            M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_DELETE_HTML,
+        isset($settings['delete-html']) && Mage::helper('e2m/Config')->set(
+            M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_HTML_DELETE,
             $settings['delete-html']
         );
-
-        isset($settings['action-found']) && Mage::helper('e2m')->setConfig(
-            M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_FOUND,
-            $settings['action-found']
-        );
-
-        isset($settings['import-image']) && Mage::helper('e2m')->setConfig(
-            M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_IMPORT_IMAGE,
-            $settings['import-image']
-        );
-
-        isset($settings['import-qty']) && Mage::helper('e2m')->setConfig(
-            M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_IMPORT_QTY,
-            $settings['import-qty']
-        );
-
-        isset($settings['import-specifics']) && Mage::helper('e2m')->setConfig(
-            M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_IMPORT_SPECIFICS,
-            $settings['import-specifics']
-        );
-
-        isset($settings['rename-attribute-title-for-specifics']) && Mage::helper('e2m')->setConfig(
-            M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_IMPORT_RENAME_ATTRIBUTE,
-            $settings['rename-attribute-title-for-specifics']
-        );
-
-        Mage::dispatchEvent('m2e_e2m_change_ebay_settings');
 
         $this->_getSession()->addSuccess(Mage::helper('e2m')->__('Save settings'));
 
@@ -1284,16 +1252,21 @@ SQL;
      */
     public function unlinkEbayAccountAction() {
 
-        Mage::helper('e2m')->setConfig(M2E_E2M_Model_Proxy_Ebay_Account::XML_PATH_EBAY_ACCOUNT_ID, false, true);
-        Mage::helper('e2m')->setConfig(M2E_E2M_Helper_Data::XML_PATH_EBAY_AVAILABLE_MARKETPLACES, array());
-        Mage::helper('e2m')->setConfig(M2E_E2M_Helper_Data::XML_PATH_EBAY_DOWNLOAD_INVENTORY, false);
-        Mage::helper('e2m')->setConfig(M2E_E2M_Helper_Data::XML_PATH_EBAY_IMPORT_INVENTORY, false);
+        Mage::helper('e2m/Config')->set(M2E_E2M_Helper_Ebay_Config::XML_PATH_STORE_MAP, array());
+        Mage::helper('e2m/Config')->set(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET, false);
+        Mage::helper('e2m/Config')->set(
+            M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_SKU,
+            M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_SKU
+        );
+        Mage::helper('e2m/Config')->set(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_SKU_GENERATE, false);
+        Mage::helper('e2m/Config')->set(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_HTML_DELETE, false);
 
-        Mage::helper('e2m')->setCacheValue(M2E_E2M_Helper_Data::CACHE_ID_EBAY_INVENTORY_VARIATION_COUNT, 0);
-        Mage::helper('e2m')->setCacheValue(M2E_E2M_Helper_Data::CACHE_ID_EBAY_INVENTORY_SIMPLE_COUNT, 0);
-        Mage::helper('e2m')->setCacheValue(M2E_E2M_Helper_Data::CACHE_ID_EBAY_INVENTORY_TOTAL_COUNT, 0);
+        Mage::helper('e2m/Config')->set(M2E_E2M_Helper_Ebay::XML_PATH_AVAILABLE_MARKETPLACES, array());
+        Mage::helper('e2m/Config')->set(M2E_E2M_Helper_Ebay::XML_PATH_INVENTORY_VARIATION_COUNT, 0);
+        Mage::helper('e2m/Config')->set(M2E_E2M_Helper_Ebay::XML_PATH_INVENTORY_SIMPLE_COUNT, 0);
+        Mage::helper('e2m/Config')->set(M2E_E2M_Helper_Ebay::XML_PATH_INVENTORY_TOTAL_COUNT, 0);
 
-        Mage::helper('e2m')->setCacheValue(M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::CACHE_ID, 0);
+        Mage::helper('e2m/Config')->set(M2E_E2M_Model_Proxy_Ebay_Account::XML_PATH_EBAY_ACCOUNT_ID, 0, true);
 
         $this->_getSession()->addSuccess(Mage::helper('e2m')->__('Account unlink.'));
 
@@ -1313,7 +1286,7 @@ SQL;
             throw new Exception('Account invalid.');
         }
 
-        Mage::helper('e2m')->setConfig(
+        Mage::helper('e2m/Config')->set(
             M2E_E2M_Model_Proxy_Ebay_Account::XML_PATH_EBAY_ACCOUNT_ID,
             $accountId,
             true
@@ -1349,7 +1322,7 @@ SQL;
                 return;
             }
 
-            Mage::helper('e2m')->logException(new Exception(
+            Mage::helper('e2m')->writeExceptionLog(new Exception(
                 "Error: {$error['message']}\nFile: {$error['file']}\nLine: {$error['line']}"
             ));
         });
@@ -1360,7 +1333,7 @@ SQL;
 
         } catch (Exception $e) {
 
-            Mage::helper('e2m')->logException($e);
+            Mage::helper('e2m')->writeExceptionLog($e);
 
             if (!$this->getRequest()->isAjax()) {
 
