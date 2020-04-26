@@ -4,28 +4,29 @@ class M2E_E2M_Observer_Ebay_StatisticsInventory {
 
     public function process() {
 
-        /** @var M2E_E2M_Helper_Data $dataHelper */
-        $dataHelper = Mage::helper('e2m');
-
         $resource = Mage::getSingleton('core/resource');
-
-        $connRead = $resource->getConnection('core_read');
-
-        $select = $connRead->select()->from($resource->getTableName('m2e_e2m_ebay_items'), 'COUNT(*)');
+        $readConn = $resource->getConnection('core_read');
+        $itemsTableName = $resource->getTableName('m2e_e2m_ebay_items');
+        $itemVariationsTableName = $resource->getTableName('m2e_e2m_ebay_item_variations');
 
         //----------------------------------------
 
-        $variationSelect = clone $select;
-        $variation = (int)$variationSelect->query()->fetchColumn();
+        $total = (int)$readConn->select()->from($itemsTableName, 'COUNT(*)')->query()->fetchColumn();
 
-        $simpleSelect = clone $select;
-        $simple = (int)$simpleSelect->query()->fetchColumn();
+        $simple = (int)$readConn->select()->from(array('i' => $itemsTableName), 'COUNT(*)')
+            ->join(array('iv' => $itemVariationsTableName), 'i.id = iv.item_id')
+            ->where('iv.item_id IS NULL')
+            ->group('i.ebay_item_id')
+            ->query()->fetchColumn();
 
-        $totalSelect = clone $select;
-        $total = (int)$totalSelect->query()->fetchColumn();
+        $variation = (int)$readConn->select()->from(array('i' => $itemsTableName), 'COUNT(*)')
+            ->join(array('iv' => $itemVariationsTableName), 'i.id = iv.item_id')
+            ->where('iv.item_id IS NOT NULL')
+            ->group('i.ebay_item_id')
+            ->query()->fetchColumn();
 
-        $dataHelper->setCacheValue(M2E_E2M_Helper_Data::CACHE_ID_EBAY_INVENTORY_VARIATION_COUNT, $variation);
-        $dataHelper->setCacheValue(M2E_E2M_Helper_Data::CACHE_ID_EBAY_INVENTORY_SIMPLE_COUNT, $simple);
-        $dataHelper->setCacheValue(M2E_E2M_Helper_Data::CACHE_ID_EBAY_INVENTORY_TOTAL_COUNT, $total);
+        Mage::helper('e2m/Config')->set(M2E_E2M_Helper_Ebay::XML_PATH_INVENTORY_VARIATION_COUNT, $variation);
+        Mage::helper('e2m/Config')->set(M2E_E2M_Helper_Ebay::XML_PATH_INVENTORY_SIMPLE_COUNT, $simple);
+        Mage::helper('e2m/Config')->set(M2E_E2M_Helper_Ebay::XML_PATH_INVENTORY_TOTAL_COUNT, $total, true);
     }
 }
