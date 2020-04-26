@@ -28,17 +28,16 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
     private function addStartDownloadInventoryButton($button, $alias, $label, $onclick) {
 
         $disabled = false;
-        $id = Mage::getSingleton('core/resource')->getConnection('core_read')
-            ->select()->from(Mage::getSingleton('core/resource')->getTableName('m2e_e2m_cron_tasks'), 'id')
-            ->where('instance = ?', M2E_E2M_Model_Cron_Task_eBay_DownloadInventory::class)
-            ->limit(1)->query()->fetchColumn();
-
-        $isDownload = Mage::helper('e2m')->getConfig(M2E_E2M_Helper_Data::XML_PATH_EBAY_DOWNLOAD_INVENTORY, false);
-        if (empty($id) && $isDownload) {
+        $percentage = (int)Mage::helper('e2m/Config')->get(
+            M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::XML_PATH_PROCESS_DOWNLOAD_INVENTORY,
+            0
+        );
+        $isDownload = M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::PERCENTAGE_COMPLETED === $percentage;
+        if ($isDownload) {
             $label = 'Reload inventory (completed)';
         }
 
-        if (!empty($id)) {
+        if (Mage::getModel('e2m/Lock_Item', array('ebay_download_inventory'))->isLocked()) {
             $label = 'Download inventory (in progress...)';
             $disabled = true;
         }
