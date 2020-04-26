@@ -1,6 +1,6 @@
 <?php
 
-class M2E_E2M_Model_Cron_Lock_Item {
+class M2E_E2M_Model_Lock_Item {
 
     const MAX_UPDATE = 600000; // 10 minutes
 
