@@ -56,7 +56,7 @@ class M2E_E2M_Model_Lock_Item {
      * @return bool
      */
     public function activate() {
-        return (bool)fwrite($this->lockItemFile, time());
+        return (bool)fwrite($this->lockItemFile, date('r'));
     }
 
     /**
