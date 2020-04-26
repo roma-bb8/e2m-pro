@@ -184,6 +184,8 @@
             'core/hint' instanceof \Mage_Core_Helper_Hint,
             'media' instanceof \Mage_Media_Helper_Data,
             'e2m/Config' instanceof \M2E_E2M_Helper_Config,
+            'e2m/Magento' instanceof \M2E_E2M_Helper_Magento,
+            'e2m/Ebay' instanceof \M2E_E2M_Helper_Ebay,
             'M2ePro/Magento_Store' instanceof \Ess_M2ePro_Helper_Magento_Store,
             'M2ePro/Module_Log' instanceof \Ess_M2ePro_Helper_Module_Log,
             'M2ePro/Component_' instanceof \Ess_M2ePro_Helper_Component_,
