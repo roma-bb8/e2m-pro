@@ -1,40 +1,45 @@
-<?php /** @var M2E_E2M_Block_Adminhtml_Main $this */ // @codingStandardsIgnoreFile ?>
-
+<?php /** @var M2E_E2M_Block_Adminhtml_Main $this */ ?>
 <script type="text/javascript">
+    (function () {
+        'use strict';
 
-    var e2m = {};
+        window.e2m = {};
+        window.e2m.localStorage = {};
+        window.e2m.prefix = 'm2e_e2m';
+        window.e2m.url = {};
 
-    //----------------------------------------
+        window.e2m.url.skin = '<?php echo $this->getSkinUrl('e2m'); ?>';
+        window.e2m.url.linkEbayAccount = '<?php echo $this->getUrl('*/e2m/linkEbayAccount'); ?>';
+        window.e2m.url.unlinkEbayAccount = '<?php echo $this->getUrl('*/e2m/unlinkEbayAccount'); ?>';
+        window.e2m.url.startEbayDownloadInventory = '<?php echo $this->getUrl('*/e2m/startEbayDownloadInventory'); ?>';
+        window.e2m.url.getAttributesBySetId = '<?php echo $this->getUrl('*/e2m/getAttributesBySetId'); ?>';
+        window.e2m.url.setSettings = '<?php echo $this->getUrl('*/e2m/setSettings') ?>';
+        window.e2m.url.getMagmiInventoryExportCSV = '<?php echo $this->getUrl('*/e2m/getMagmiInventoryExportCSV') ?>';
+        window.e2m.url.getNativeInventoryExportCSV = '<?php echo $this->getUrl('*/e2m/getNativeInventoryExportCSV') ?>';
+        window.e2m.url.getAttributesSQL = '<?php echo $this->getUrl('*/e2m/getAttributesSQL') ?>';
+        window.e2m.url.getAttributesMatchingCSV = '<?php echo $this->getUrl('*/e2m/getAttributesMatchingCSV') ?>';
+        window.e2m.url.getAttributesExportCSV = '<?php echo $this->getUrl('*/e2m/getAttributesExportCSV') ?>';
 
-    e2m.localStorage = {};
-    e2m.prefix = 'm2e_e2m';
-    e2m.url = {};
-
-    //----------------------------------------
-
-    e2m.url.skin = '<?php echo $this->getSkinUrl('e2m'); ?>';
-    e2m.url.linkEbayAccount = '<?php echo $this->getUrl('*/e2m/linkEbayAccount'); ?>';
-    e2m.url.unlinkEbayAccount = '<?php echo $this->getUrl('*/e2m/unlinkEbayAccount'); ?>';
-    e2m.url.startEbayDownloadInventory = '<?php echo $this->getUrl('*/e2m/startEbayDownloadInventory'); ?>';
-    e2m.url.getAttributesBySetId = '<?php echo $this->getUrl('*/e2m/getAttributesBySetId'); ?>';
-    e2m.url.setSettings = '<?php echo $this->getUrl('*/e2m/setSettings') ?>';
-    e2m.url.getMagmiInventoryExportCSV = '<?php echo $this->getUrl('*/e2m/getMagmiInventoryExportCSV') ?>';
-    e2m.url.getNativeInventoryExportCSV = '<?php echo $this->getUrl('*/e2m/getNativeInventoryExportCSV') ?>';
-    e2m.url.getAttributesSQL = '<?php echo $this->getUrl('*/e2m/getAttributesSQL') ?>';
-    e2m.url.getAttributesMatchingCSV = '<?php echo $this->getUrl('*/e2m/getAttributesMatchingCSV') ?>';
-    e2m.url.getAttributesExportCSV = '<?php echo $this->getUrl('*/e2m/getAttributesExportCSV') ?>';
+        Event.observe(window, 'load', function () {
+            initializeLocalStorage();
+            attributeSet();
+            configInput();
+            e2mHideBlock();
+            noteBlock();
+        }, false);
+    })();
 </script>
 
 <div class="content-header">
     <table cellspacing="0">
         <tr>
             <td>
-                <h3><?php echo $this->getDataHelper()->__('eBay Data Import'); ?></h3>
-                <?php if (!empty($this->getEbayAccount()->getUserId())): ?>
+                <h3><?php echo Mage::helper('e2m')->__('eBay Data Import'); ?></h3>
+                <?php if (!empty(Mage::getSingleton('e2m/Proxy_Ebay_Account')->getUserId())): ?>
                     <div style="float: right">
-                        <label><?php echo $this->getDataHelper()->__('eBay User ID'); ?>&nbsp;</label>
-                        <span>(<a href="<?php echo $this->escapeHtml($this->getEbayAccount()->getAccountUrl()); ?>"
-                                  target="_blank"><?php echo $this->escapeHtml($this->getEbayAccount()->getUserId()); ?></a>)</span>
+                        <label><?php echo Mage::helper('e2m')->__('eBay User ID'); ?>&nbsp;</label>
+                        <span>(<a href="<?php echo $this->escapeHtml(Mage::getSingleton('e2m/Proxy_Ebay_Account')->getAccountUrl()); ?>"
+                                  target="_blank"><?php echo $this->escapeHtml(Mage::getSingleton('e2m/Proxy_Ebay_Account')->getUserId()); ?></a>)</span>
                         <span><?php echo $this->getChildHtml('unlink_account_button'); ?></span>
                     </div>
                 <?php endif; ?>
@@ -43,31 +48,32 @@
     </table>
 </div>
 
-<?php if (empty($this->getEbayAccount()->getUserId())): ?>
+<?php if (empty(Mage::getSingleton('e2m/Proxy_Ebay_Account')->getUserId())): ?>
     <div class="entry-edit" collapseable="no">
         <div class="entry-edit-head">
-            <h4><?php echo $this->getDataHelper()->__('Account links'); ?></h4>
+            <h4><?php echo Mage::helper('e2m')->__('Account links'); ?></h4>
         </div>
         <div class="fieldset">
             <table class="form-list" cellspacing="0" cellpadding="0">
                 <tr>
                     <td class="label">
-                        <label for="account-mode"><?php echo $this->getDataHelper()->__('Account'); ?>:
+                        <label for="account-mode"><?php echo Mage::helper('e2m')->__('Account'); ?>:
                             <span class="required">*</span>
                         </label>
                     </td>
                     <td class="value">
                         <select id="account-mode">
-                            <option value=""><?php echo $this->getDataHelper()->__('-- Please Select --'); ?></option>
+                            <option value=""><?php echo Mage::helper('e2m')->__('-- Please Select --'); ?></option>
                             <?php foreach ($this->getEbayAccounts() as $eBayAccount): ?>
-                                <option value="<?php echo $eBayAccount->getId(); ?>"><?php echo $this->escapeHtml($eBayAccount->getChildObject()->getUserId()) ?></option>
+                                <option
+                                    value="<?php echo $eBayAccount->getId(); ?>"><?php echo $this->escapeHtml($eBayAccount->getChildObject()->getUserId()) ?></option>
                             <?php endforeach; ?>
                         </select>
                     </td>
                 </tr>
                 <tr>
                     <td class="label">
-                        <label><?php echo $this->getDataHelper()->__('Grant Access'); ?>:</label>
+                        <label><?php echo Mage::helper('e2m')->__('Grant Access'); ?>:</label>
                     </td>
                     <td class="value">
                         <?php echo $this->getChildHtml('link_account_button'); ?>
@@ -78,26 +84,30 @@
     </div>
 <?php endif; ?>
 
-<?php if ($this->getDataHelper()->getConfig(M2E_E2M_Helper_Data::XML_PATH_EBAY_DOWNLOAD_INVENTORY, false)): ?>
+<?php if (M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::PERCENTAGE_COMPLETED === (int)Mage::helper('e2m/Config')->get(M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::XML_PATH_PROCESS_DOWNLOAD_INVENTORY, 0)): ?>
     <div class="entry-edit">
         <div class="entry-edit-head">
-            <h4><?php echo $this->getDataHelper()->__('Store settings'); ?></h4>
+            <h4><?php echo Mage::helper('e2m')->__('Store settings'); ?></h4>
         </div>
         <div class="fieldset">
             <table class="form-list" cellspacing="0" cellpadding="0">
-                <?php foreach ($this->getDataHelper()->getConfig(M2E_E2M_Helper_Data::XML_PATH_EBAY_AVAILABLE_MARKETPLACES, array()) as $marketplaceId): ?>
+                <?php foreach (Mage::helper('e2m')->getConfig(M2E_E2M_Helper_Ebay::XML_PATH_AVAILABLE_MARKETPLACES, array()) as $marketplaceCode): ?>
                     <tr>
                         <td class="label">
-                            <label for="<?php echo $marketplaceId; ?>"><?php echo $this->getDataHelper()->__($this->getDataHelper()->getMarketplaceTitle($marketplaceId)); ?></label>
+                            <label
+                                for="<?php echo $marketplaceCode; ?>"><?php echo Mage::helper('e2m')->__(Mage::helper('e2m/Ebay')->getMarketplaceTitleByCode($marketplaceCode)); ?></label>
                         </td>
                         <td class="value">
-                            <select id="<?php echo $marketplaceId; ?>" class="marketplace-store config-input">
-                                <option value=""><?php echo $this->getDataHelper()->__('-- Please Select --'); ?></option>
-                                <option value="<?php echo M2E_E2M_Helper_Ebay_Config::STORE_SKIP ?>" <?php if ($this->getEbayConfigHelper()->isSkipStore($marketplaceId)) echo ' selected="selected"'; ?>>
+                            <select id="<?php echo $marketplaceCode; ?>" class="marketplace-store config-input">
+                                <option
+                                    value=""><?php echo Mage::helper('e2m')->__('-- Please Select --'); ?></option>
+                                <option
+                                    value="<?php echo M2E_E2M_Helper_Magento::STORE_SKIP ?>" <?php if (Mage::helper('e2m/Ebay_Config')->isMarketplaceSkip($marketplaceCode)) echo ' selected="selected"'; ?>>
                                     Skip
                                 </option>
-                                <?php foreach ($this->getDataHelper()->getMagentoStores() as $id => $store): ?>
-                                    <option value="<?php echo $id; ?>" <?php if ($this->getEbayConfigHelper()->getStoreForMarketplace($marketplaceId) === $id) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__($store); ?></option>
+                                <?php foreach (Mage::helper('e2m/Magento')->getStores() as $storeId => $storeName): ?>
+                                    <option
+                                        value="<?php echo $storeId; ?>" <?php if (Mage::helper('e2m/Ebay_Config')->getStoreIdByMarketplaceCode($marketplaceCode) === $storeId) echo ' selected="selected"'; ?>><?php echo Mage::helper('e2m')->__($storeName); ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </td>
@@ -109,19 +119,20 @@
 
     <div class="entry-edit">
         <div class="entry-edit-head">
-            <h4><?php echo $this->getDataHelper()->__('Product settings'); ?></h4>
+            <h4><?php echo Mage::helper('e2m')->__('Product settings'); ?></h4>
         </div>
         <div class="fieldset">
             <table class="form-list" cellspacing="0" cellpadding="0">
                 <tr>
                     <td class="label">
-                        <label for="attribute-set"><?php echo $this->getDataHelper()->__('Attribute Set') ?>:</label>
+                        <label for="attribute-set"><?php echo Mage::helper('e2m')->__('Attribute Set') ?>:</label>
                     </td>
                     <td class="value">
                         <select id="attribute-set" class="attribute-set config-input">
-                            <option value=""><?php echo $this->getDataHelper()->__('-- Please Select --'); ?></option>
-                            <?php foreach ($this->getDataHelper()->getAllAttributeSet() as $id => $title): ?>
-                                <option value="<?php echo $id; ?>" <?php if ($id == $this->getDataHelper()->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET)) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__($title); ?></option>
+                            <option value=""><?php echo Mage::helper('e2m')->__('-- Please Select --'); ?></option>
+                            <?php foreach (Mage::helper('e2m/Magento')->getAllAttributeSet() as $attributeSetId => $attributeSetName): ?>
+                                <option
+                                    value="<?php echo $attributeSetId; ?>" <?php if ($attributeSetId === (int)Mage::helper('e2m/Config')->get(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET)) echo ' selected="selected"'; ?>><?php echo Mage::helper('e2m')->__($attributeSetName); ?></option>
                             <?php endforeach; ?>
                         </select>
                         <p class="note">
@@ -131,14 +142,16 @@
                 </tr>
                 <tr>
                     <td class="label">
-                        <label for="inventory-settings-product-identifier"><?php echo $this->getDataHelper()->__('Product SKU'); ?>:</label>
+                        <label
+                            for="inventory-settings-product-identifier"><?php echo Mage::helper('e2m')->__('Product SKU'); ?>
+                            :</label>
                     </td>
                     <td class="value">
                         <select id="inventory-settings-product-identifier" class="config-input">
-                            <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_SKU; ?>" <?php if ($this->getEbayConfigHelper()->isSKUProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('SKU'); ?></option>
-                            <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_MPN; ?>" <?php if ($this->getEbayConfigHelper()->isMPNProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('MPN'); ?></option>
-                            <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_UPC; ?>" <?php if ($this->getEbayConfigHelper()->isUPCProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('UPC'); ?></option>
-                            <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_EAN; ?>" <?php if ($this->getEbayConfigHelper()->isEANProductIdentifier()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('EAN'); ?></option>
+                            <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_SKU; ?>" <?php if (M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_SKU === Mage::helper('e2m/Ebay_Config')->getProductIdentifier()) echo ' selected="selected"'; ?>><?php echo Mage::helper('e2m')->__('SKU'); ?></option>
+                            <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_MPN; ?>" <?php if (M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_MPN === Mage::helper('e2m/Ebay_Config')->getProductIdentifier()) echo ' selected="selected"'; ?>><?php echo Mage::helper('e2m')->__('MPN'); ?></option>
+                            <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_UPC; ?>" <?php if (M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_UPC === Mage::helper('e2m/Ebay_Config')->getProductIdentifier()) echo ' selected="selected"'; ?>><?php echo Mage::helper('e2m')->__('UPC'); ?></option>
+                            <option value="<?php echo M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_EAN; ?>" <?php if (M2E_E2M_Helper_Ebay_Config::PRODUCT_IDENTIFIER_EAN === Mage::helper('e2m/Ebay_Config')->getProductIdentifier()) echo ' selected="selected"'; ?>><?php echo Mage::helper('e2m')->__('EAN'); ?></option>
                         </select>
                         <p class="note">
                             <span><?php echo Mage::helper('e2m')->__('Product identifier on different marketplaces'); ?></span>
@@ -147,12 +160,12 @@
                 </tr>
                 <tr>
                     <td class="label">
-                        <label for="generate-sku"><?php echo $this->getDataHelper()->__('Generate SKU') ?>:</label>
+                        <label for="generate-sku"><?php echo Mage::helper('e2m')->__('Generate SKU') ?>:</label>
                     </td>
                     <td class="value">
                         <select id="generate-sku" class="config-input">
-                            <option value="1" <?php if ($this->getEbayConfigHelper()->isGenerateSku()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
-                            <option value="0" <?php if (!$this->getEbayConfigHelper()->isGenerateSku()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
+                            <option value="1" <?php if (Mage::helper('e2m/Ebay_Config')->isGenerateSku()) echo ' selected="selected"'; ?>><?php echo Mage::helper('e2m')->__('Yes'); ?></option>
+                            <option value="0" <?php if (!Mage::helper('e2m/Ebay_Config')->isGenerateSku()) echo ' selected="selected"'; ?>><?php echo Mage::helper('e2m')->__('No'); ?></option>
                         </select>
                         <p class="note">
                             <span><?php echo Mage::helper('e2m')->__('Generate SKU (if empty)'); ?></span>
@@ -161,12 +174,12 @@
                 </tr>
                 <tr>
                     <td class="label">
-                        <label for="delete-html"><?php echo $this->getDataHelper()->__('Delete HTML') ?>:</label>
+                        <label for="delete-html"><?php echo Mage::helper('e2m')->__('Delete HTML') ?>:</label>
                     </td>
                     <td class="value">
                         <select id="delete-html" class="config-input">
-                            <option value="1" <?php if ($this->getEbayConfigHelper()->isDeleteHtml()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('Yes'); ?></option>
-                            <option value="0" <?php if (!$this->getEbayConfigHelper()->isDeleteHtml()) echo ' selected="selected"'; ?>><?php echo $this->getDataHelper()->__('No'); ?></option>
+                            <option value="1" <?php if (Mage::helper('e2m/Ebay_Config')->isDeleteHtml()) echo ' selected="selected"'; ?>><?php echo Mage::helper('e2m')->__('Yes'); ?></option>
+                            <option value="0" <?php if (!Mage::helper('e2m/Ebay_Config')->isDeleteHtml()) echo ' selected="selected"'; ?>><?php echo Mage::helper('e2m')->__('No'); ?></option>
                         </select>
                         <p class="note">
                             <span><?php echo Mage::helper('e2m')->__('Clean HTML in Description'); ?></span>
@@ -182,35 +195,35 @@
     </div>
 <?php endif; ?>
 
-<?php if (!empty($this->getEbayAccount()->getUserId())): ?>
+<?php if (!empty(Mage::getSingleton('e2m/Proxy_Ebay_Account')->getUserId())): ?>
     <div class="box-left entry-edit" collapseable="no">
         <div class="entry-edit-head">
-            <h4><?php echo $this->getDataHelper()->__('Summary inventory'); ?></h4>
+            <h4><?php echo Mage::helper('e2m')->__('Summary inventory'); ?></h4>
         </div>
         <div class="fieldset">
             <table class="form-list" cellspacing="0" cellpadding="0">
                 <tr>
                     <td class="label">
-                        <label><?php echo $this->getDataHelper()->__('Variation items'); ?>:</label>
+                        <label><?php echo Mage::helper('e2m')->__('Variation items'); ?>:</label>
                     </td>
                     <td class="value">
-                        <span id="download-inventory-variation-items"><?php echo $this->escapeHtml($this->getDataHelper()->getCacheValue(M2E_E2M_Helper_Data::CACHE_ID_EBAY_INVENTORY_VARIATION_COUNT, 0)); ?></span>
+                        <span id="download-inventory-variation-items"><?php echo $this->escapeHtml(Mage::helper('e2m/Config')->get(M2E_E2M_Helper_Ebay::XML_PATH_INVENTORY_VARIATION_COUNT, 0)); ?></span>
                     </td>
                 </tr>
                 <tr>
                     <td class="label">
-                        <label><?php echo $this->getDataHelper()->__('Simple items'); ?>:</label>
+                        <label><?php echo Mage::helper('e2m')->__('Simple items'); ?>:</label>
                     </td>
                     <td class="value">
-                        <span id="download-inventory-simple-items"><?php echo $this->escapeHtml($this->getDataHelper()->getCacheValue(M2E_E2M_Helper_Data::CACHE_ID_EBAY_INVENTORY_SIMPLE_COUNT, 0)); ?></span>
+                        <span id="download-inventory-simple-items"><?php echo $this->escapeHtml(Mage::helper('e2m/Config')->get(M2E_E2M_Helper_Ebay::XML_PATH_INVENTORY_SIMPLE_COUNT, 0)); ?></span>
                     </td>
                 </tr>
                 <tr>
                     <td class="label">
-                        <label><?php echo $this->getDataHelper()->__('Total items'); ?>:</label>
+                        <label><?php echo Mage::helper('e2m')->__('Total items'); ?>:</label>
                     </td>
                     <td class="value">
-                        <span id="download-inventory-total-items"><?php echo $this->escapeHtml($this->getDataHelper()->getCacheValue(M2E_E2M_Helper_Data::CACHE_ID_EBAY_INVENTORY_TOTAL_COUNT, 0)) ?></span>
+                        <span id="download-inventory-total-items"><?php echo $this->escapeHtml(Mage::helper('e2m/Config')->get(M2E_E2M_Helper_Ebay::XML_PATH_INVENTORY_TOTAL_COUNT, 0)) ?></span>
                     </td>
                 </tr>
                 <tr>
@@ -218,13 +231,13 @@
                         <?php echo $this->getChildHtml('start_download_inventory_button'); ?>
                     </td>
                     <td class="value block-download-inventory-progress">
-                        <span id="download-inventory-progress"><?php echo $this->escapeHtml($this->getDataHelper()->getCacheValue(M2E_e2M_Model_Cron_Task_Ebay_DownloadInventory::CACHE_ID, 0)); ?></span>&nbsp;%
+                        <span id="download-inventory-progress"><?php echo $this->escapeHtml(Mage::helper('e2m/Config')->get(M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::XML_PATH_PROCESS_DOWNLOAD_INVENTORY, 0)); ?></span>&nbsp;%
                     </td>
                 </tr>
-                <?php if ($this->getDataHelper()->getConfig(M2E_E2M_Helper_Data::XML_PATH_EBAY_DOWNLOAD_INVENTORY, false)): ?>
+                <?php if (M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::PERCENTAGE_COMPLETED === (int)Mage::helper('e2m/Config')->get(M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::XML_PATH_PROCESS_DOWNLOAD_INVENTORY, 0)): ?>
                     <tr>
                         <td class="label">
-                            <label><?php echo $this->getDataHelper()->__('eBay Attributes Export (CSV)'); ?>:</label>
+                            <label><?php echo Mage::helper('e2m')->__('eBay Attributes Export (CSV)'); ?>:</label>
                         </td>
                         <td class="value block-download-inventory-progress">
                             <?php echo $this->getChildHtml('attributes_export_csv_button'); ?>
@@ -232,7 +245,7 @@
                     </tr>
                     <tr>
                         <td class="label">
-                            <label><?php echo $this->getDataHelper()->__('eBay Attributes Matching (CSV)'); ?>:</label>
+                            <label><?php echo Mage::helper('e2m')->__('eBay Attributes Matching (CSV)'); ?>:</label>
                         </td>
                         <td class="value block-download-inventory-progress">
                             <?php echo $this->getChildHtml('attributes_matching_csv_button'); ?>
@@ -240,7 +253,7 @@
                     </tr>
                     <tr>
                         <td class="label">
-                            <label><?php echo $this->getDataHelper()->__('eBay Attributes (SQL)'); ?>:</label>
+                            <label><?php echo Mage::helper('e2m')->__('eBay Attributes (SQL)'); ?>:</label>
                         </td>
                         <td class="value block-download-inventory-progress">
                             <?php echo $this->getChildHtml('attributes_sql_button'); ?>
@@ -248,7 +261,7 @@
                     </tr>
                     <tr>
                         <td class="label">
-                            <label><?php echo $this->getDataHelper()->__('eBay Inventory Export (CSV)'); ?>:</label>
+                            <label><?php echo Mage::helper('e2m')->__('eBay Inventory Export (CSV)'); ?>:</label>
                         </td>
                         <td class="value block-download-inventory-progress">
                             <?php echo $this->getChildHtml('native_inventory_export_csv_button'); ?>
