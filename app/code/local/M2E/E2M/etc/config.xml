@@ -34,36 +34,18 @@
         <events>
             <m2e_e2m_cron_task_ebay_inventory_download_after>
                 <observers>
-                    <m2e_observer>
+                    <e2m_statistics_inventory_observer>
                         <type>singleton</type>
                         <class>M2E_E2M_Observer_Ebay_StatisticsInventory</class>
                         <method>process</method>
-                    </m2e_observer>
-                    <m2e_observer>
+                    </e2m_statistics_inventory_observer>
+                    <e2m_statistics_download_observer>
                         <type>singleton</type>
                         <class>M2E_E2M_Observer_Ebay_DownloadInventory</class>
                         <method>process</method>
-                    </m2e_observer>
+                    </e2m_statistics_download_observer>
                 </observers>
             </m2e_e2m_cron_task_ebay_inventory_download_after>
-            <m2e_e2m_change_ebay_settings>
-                <observers>
-                    <m2e_observer>
-                        <type>singleton</type>
-                        <class>M2E_E2M_Observer_Ebay_Settings</class>
-                        <method>process</method>
-                    </m2e_observer>
-                </observers>
-            </m2e_e2m_change_ebay_settings>
-            <m2e_e2m_available_marketplaces>
-                <observers>
-                    <m2e_observer>
-                        <type>singleton</type>
-                        <class>M2E_E2M_Observer_Ebay_Settings</class>
-                        <method>process</method>
-                    </m2e_observer>
-                </observers>
-            </m2e_e2m_available_marketplaces>
         </events>
     </global>
     <crontab>
