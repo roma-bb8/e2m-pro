@@ -19,7 +19,7 @@ class M2E_E2M_Adminhtml_E2mController extends Mage_Adminhtml_Controller_Action {
         if (!file_exists(Mage::helper('e2m')->getFullPath('ebay_attributes_export.csv'))) {
             $this->getAttributesExportCSVAction();
         }
-        $exportAttributes = array_flip(Mage::helper('e2m/Ebay')->getExportAttributes());
+        $exportAttributes = Mage::helper('e2m/Ebay')->getExportAttributes(true);
 
         if (!file_exists(Mage::helper('e2m')->getFullPath('ebay_attributes_matching.csv'))) {
             $this->getAttributesMatchingCSVAction();
@@ -362,7 +362,7 @@ SQL;
         if (!file_exists(Mage::helper('e2m')->getFullPath('ebay_attributes_export.csv'))) {
             $this->getAttributesExportCSVAction();
         }
-        $exportAttributes = array_flip(Mage::helper('e2m/Ebay')->getExportAttributes());
+        $exportAttributes = Mage::helper('e2m/Ebay')->getExportAttributes(true);
 
         if (!file_exists(Mage::helper('e2m')->getFullPath('ebay_attributes_matching.csv'))) {
             $this->getAttributesMatchingCSVAction();
@@ -1172,27 +1172,29 @@ SQL;
      */
     public function startEbayDownloadInventoryAction() {
 
-        $cronTasksTableName = Mage::getSingleton('core/resource')->getTableName('m2e_e2m_cron_tasks');
-        $connWrite = Mage::getSingleton('core/resource')->getConnection('core_write');
-        $connWrite->delete($cronTasksTableName, array(
-            'instance = ?' => M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::class
-        ));
-
-        //----------------------------------------
-
         $toDateTime = new DateTime('now', new DateTimeZone('UTC'));
 
         $fromDatetime = clone $toDateTime;
         $fromDatetime->setTimestamp(M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::MAX_DOWNLOAD_TIME);
 
-        $connWrite->insert($cronTasksTableName, array(
-            'instance' => M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::class,
-            'data' => Mage::helper('core')->jsonEncode(array(
-                'from' => $fromDatetime->getTimestamp(),
-                'to' => $toDateTime->getTimestamp()
-            )),
-            'progress' => 0
-        ));
+        Mage::helper('e2m/Config')->set(
+            M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::XML_PATH_PROCESS_DOWNLOAD_INVENTORY,
+            0
+        );
+        Mage::helper('e2m/Config')->set(
+            M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::XML_PATH_FROM_DOWNLOAD_INVENTORY,
+            $fromDatetime->getTimestamp()
+        );
+        Mage::helper('e2m/Config')->set(
+            M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::XML_PATH_TO_DOWNLOAD_INVENTORY,
+            $toDateTime->getTimestamp()
+        );
+
+        Mage::helper('e2m/Config')->set(
+            M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::XML_PATH_WORK_DOWNLOAD_INVENTORY,
+            true,
+            true
+        );
 
         return $this->getResponse()->setBody(Mage::helper('core')->jsonEncode(array('data' => array(
             'simple' => 0,
@@ -1215,27 +1217,27 @@ SQL;
 
         isset($settings['attribute-set']) && Mage::helper('e2m/Config')->set(
             M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET,
-            $settings['attribute-set']
+            $settings['attribute-set'], true
         );
 
         isset($settings['marketplace-store']) && Mage::helper('e2m/Config')->set(
             M2E_E2M_Helper_Ebay_Config::XML_PATH_STORE_MAP,
-            $settings['marketplace-store']
+            $settings['marketplace-store'], true
         );
 
         isset($settings['generate-sku']) && Mage::helper('e2m/Config')->set(
             M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_SKU_GENERATE,
-            $settings['generate-sku']
+            $settings['generate-sku'], true
         );
 
         isset($settings['product-identifier']) && Mage::helper('e2m/Config')->set(
             M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_SKU,
-            $settings['product-identifier']
+            $settings['product-identifier'], true
         );
 
         isset($settings['delete-html']) && Mage::helper('e2m/Config')->set(
             M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_HTML_DELETE,
-            $settings['delete-html']
+            $settings['delete-html'], true
         );
 
         $this->_getSession()->addSuccess(Mage::helper('e2m')->__('Save settings'));

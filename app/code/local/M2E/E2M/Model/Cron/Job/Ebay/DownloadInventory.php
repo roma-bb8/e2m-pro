@@ -2,6 +2,7 @@
 
 class M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory {
 
+    const XML_PATH_WORK_DOWNLOAD_INVENTORY = M2E_E2M_Helper_Data::PREFIX . 'job/ebay/download/inventory/work';
     const XML_PATH_PROCESS_DOWNLOAD_INVENTORY = M2E_E2M_Helper_Data::PREFIX . 'job/ebay/download/inventory/process';
     const XML_PATH_FROM_DOWNLOAD_INVENTORY = M2E_E2M_Helper_Data::PREFIX . 'job/ebay/download/inventory/from';
     const XML_PATH_TO_DOWNLOAD_INVENTORY = M2E_E2M_Helper_Data::PREFIX . 'job/ebay/download/inventory/to';
@@ -43,8 +44,8 @@ class M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory {
      */
     public function process() {
 
-        $percentage = (int)Mage::helper('e2m/Config')->get(self::XML_PATH_PROCESS_DOWNLOAD_INVENTORY, 0);
-        if (self::PERCENTAGE_COMPLETED === $percentage) {
+        $isWork = (bool)Mage::helper('e2m/Config')->get(self::XML_PATH_WORK_DOWNLOAD_INVENTORY, false);
+        if (!$isWork) {
             return;
         }
 

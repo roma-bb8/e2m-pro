@@ -36,9 +36,7 @@ class M2E_E2M_Model_Proxy_Ebay_Account {
     public function __construct() {
 
         $this->eBayAccount = Mage::getModel('M2ePro/Ebay_Account');
-        $dataHelper = Mage::helper('e2m');
-
-        $id = $dataHelper->getConfig(self::XML_PATH_EBAY_ACCOUNT_ID);
+        $id = Mage::helper('e2m/Config')->get(self::XML_PATH_EBAY_ACCOUNT_ID);
         if (!empty($id)) {
             $this->eBayAccount->load($id);
         }

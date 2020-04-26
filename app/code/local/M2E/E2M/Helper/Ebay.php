@@ -147,10 +147,12 @@ class M2E_E2M_Helper_Ebay {
     //########################################
 
     /**
+     * @param bool $revers
+     *
      * @return array
      * @throws Exception
      */
-    public function getExportAttributes() {
+    public function getExportAttributes($revers = false) {
 
         $ebayAttributesExport = Mage::helper('e2m')->getDataCSVFile('ebay_attributes_export.csv');
 
@@ -162,7 +164,11 @@ class M2E_E2M_Helper_Ebay {
                 continue;
             }
 
-            $data[$item['ebay_property_code']] = $item['magento_attribute_code'];
+            if ($revers) {
+                $data[$item['magento_attribute_code']] = $item['ebay_property_code'];
+            } else {
+                $data[$item['ebay_property_code']] = $item['magento_attribute_code'];
+            }
         }
 
         return $data;

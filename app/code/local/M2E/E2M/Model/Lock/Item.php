@@ -56,6 +56,9 @@ class M2E_E2M_Model_Lock_Item {
      * @return bool
      */
     public function activate() {
+
+        rewind($this->lockItemFile);
+
         return (bool)fwrite($this->lockItemFile, date('r'));
     }
 
@@ -80,14 +83,14 @@ class M2E_E2M_Model_Lock_Item {
     /**
      * M2E_E2M_Model_Cron_Lock_Item constructor.
      *
-     * @param string $lockItemName
+     * @param array $args
      *
      * @throws Exception
      */
-    public function __construct($lockItemName) {
+    public function __construct($args) {
 
         $locksPath = Mage::getConfig()->getVarDir('locks');
-        $this->lockItemName = $locksPath . DS . strtolower($lockItemName) . '.lock';
+        $this->lockItemName = $locksPath . DS . strtolower($args[0]) . '.lock';
         $this->lockItemFile = fopen($this->lockItemName, is_file($this->lockItemName) ? 'w' : 'x');
         if (!$this->lockItemFile) {
             throw new Exception('Not create lock file.');
