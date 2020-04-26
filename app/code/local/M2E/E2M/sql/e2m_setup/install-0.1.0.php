@@ -118,25 +118,6 @@ CREATE TABLE IF NOT EXISTS `{$installer->getTable('m2e_e2m_ebay_item_variation_i
     PRIMARY KEY (`id`),
     FOREIGN KEY (`item_variation_id`) REFERENCES `m2e_e2m_ebay_item_variations` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
-
-DROP TABLE IF EXISTS `{$installer->getTable('m2e_e2m_cron_tasks')}`;
-CREATE TABLE `{$installer->getTable('m2e_e2m_cron_tasks')}` (
-  `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `is_running` BOOL NOT NULL DEFAULT FALSE,
-  `pause` BOOL NOT NULL DEFAULT FALSE,
-  `instance` VARCHAR(255) NOT NULL,
-  `data` TEXT DEFAULT NULL,
-  `progress` TINYINT DEFAULT 0,
-  `updated` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY (`instance`)
-) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
-
-INSERT INTO `{$installer->getTable('m2e_e2m_cron_tasks')}`
-    (`instance`, `data`)
-VALUES
-    ('M2E_E2M_Model_Cron_Task_Completed', '{}');
 SQL;
 
 $installer->run($sql);
