@@ -1,8 +1,11 @@
 function md5(str) {
+
+    /** @return {number} */
     var RotateLeft = function (lValue, iShiftBits) {
         return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits));
     };
 
+    /** @return {number} */
     var AddUnsigned = function (lX, lY) {
         var lX4, lY4, lX8, lY8, lResult;
         lX8 = (lX & 0x80000000);
@@ -24,34 +27,45 @@ function md5(str) {
         }
     };
 
+    /** @return {number} */
     var F = function (x, y, z) {
         return (x & y) | ((~x) & z);
     };
+
+    /** @return {number} */
     var G = function (x, y, z) {
         return (x & z) | (y & (~z));
     };
+
+    /** @return {number} */
     var H = function (x, y, z) {
         return (x ^ y ^ z);
     };
+
+    /** @return {number} */
     var I = function (x, y, z) {
         return (y ^ (x | (~z)));
     };
 
+    /** @return {number} */
     var FF = function (a, b, c, d, x, s, ac) {
         a = AddUnsigned(a, AddUnsigned(AddUnsigned(F(b, c, d), x), ac));
         return AddUnsigned(RotateLeft(a, s), b);
     };
 
+    /** @return {number} */
     var GG = function (a, b, c, d, x, s, ac) {
         a = AddUnsigned(a, AddUnsigned(AddUnsigned(G(b, c, d), x), ac));
         return AddUnsigned(RotateLeft(a, s), b);
     };
 
+    /** @return {number} */
     var HH = function (a, b, c, d, x, s, ac) {
         a = AddUnsigned(a, AddUnsigned(AddUnsigned(H(b, c, d), x), ac));
         return AddUnsigned(RotateLeft(a, s), b);
     };
 
+    /** @return {number} */
     var II = function (a, b, c, d, x, s, ac) {
         a = AddUnsigned(a, AddUnsigned(AddUnsigned(I(b, c, d), x), ac));
         return AddUnsigned(RotateLeft(a, s), b);
@@ -77,9 +91,11 @@ function md5(str) {
         lWordArray[lWordCount] = lWordArray[lWordCount] | (0x80 << lBytePosition);
         lWordArray[lNumberOfWords - 2] = lMessageLength << 3;
         lWordArray[lNumberOfWords - 1] = lMessageLength >>> 29;
+
         return lWordArray;
     };
 
+    /** @return {string} */
     var WordToHex = function (lValue) {
         var WordToHexValue = "", WordToHexValue_temp = "", lByte, lCount;
         for (lCount = 0; lCount <= 3; lCount++) {
@@ -90,7 +106,7 @@ function md5(str) {
         return WordToHexValue;
     };
 
-    var x = Array();
+    var x = array();
     var k, AA, BB, CC, DD, a, b, c, d;
     var S11 = 7, S12 = 12, S13 = 17, S14 = 22;
     var S21 = 5, S22 = 9, S23 = 14, S24 = 20;
@@ -109,7 +125,7 @@ function md5(str) {
         BB = b;
         CC = c;
         DD = d;
-        a = FF(a, b, c, d, x[k + 0], S11, 0xD76AA478);
+        a = FF(a, b, c, d, x[k], S11, 0xD76AA478);
         d = FF(d, a, b, c, x[k + 1], S12, 0xE8C7B756);
         c = FF(c, d, a, b, x[k + 2], S13, 0x242070DB);
         b = FF(b, c, d, a, x[k + 3], S14, 0xC1BDCEEE);
@@ -128,7 +144,7 @@ function md5(str) {
         a = GG(a, b, c, d, x[k + 1], S21, 0xF61E2562);
         d = GG(d, a, b, c, x[k + 6], S22, 0xC040B340);
         c = GG(c, d, a, b, x[k + 11], S23, 0x265E5A51);
-        b = GG(b, c, d, a, x[k + 0], S24, 0xE9B6C7AA);
+        b = GG(b, c, d, a, x[k], S24, 0xE9B6C7AA);
         a = GG(a, b, c, d, x[k + 5], S21, 0xD62F105D);
         d = GG(d, a, b, c, x[k + 10], S22, 0x2441453);
         c = GG(c, d, a, b, x[k + 15], S23, 0xD8A1E681);
@@ -150,14 +166,14 @@ function md5(str) {
         c = HH(c, d, a, b, x[k + 7], S33, 0xF6BB4B60);
         b = HH(b, c, d, a, x[k + 10], S34, 0xBEBFBC70);
         a = HH(a, b, c, d, x[k + 13], S31, 0x289B7EC6);
-        d = HH(d, a, b, c, x[k + 0], S32, 0xEAA127FA);
+        d = HH(d, a, b, c, x[k], S32, 0xEAA127FA);
         c = HH(c, d, a, b, x[k + 3], S33, 0xD4EF3085);
         b = HH(b, c, d, a, x[k + 6], S34, 0x4881D05);
         a = HH(a, b, c, d, x[k + 9], S31, 0xD9D4D039);
         d = HH(d, a, b, c, x[k + 12], S32, 0xE6DB99E5);
         c = HH(c, d, a, b, x[k + 15], S33, 0x1FA27CF8);
         b = HH(b, c, d, a, x[k + 2], S34, 0xC4AC5665);
-        a = II(a, b, c, d, x[k + 0], S41, 0xF4292244);
+        a = II(a, b, c, d, x[k], S41, 0xF4292244);
         d = II(d, a, b, c, x[k + 7], S42, 0x432AFF97);
         c = II(c, d, a, b, x[k + 14], S43, 0xAB9423A7);
         b = II(b, c, d, a, x[k + 5], S44, 0xFC93A039);
@@ -210,19 +226,19 @@ function utf8Encode(data) {
     return result;
 }
 
-function deleteHashedStorage(id) {
-    removeLocalStorage(e2m.prefix + '_' + md5(id).substr(0, 10));
-    removeLocalStorage(id);
-}
+function initializeLocalStorage() {
 
-function getHashedStorage(id) {
-
-    var hashedStorageKey = e2m.prefix + '_' + md5(id).substr(0, 10);
-    if (typeof e2m.localStorage[hashedStorageKey] === 'undefined') {
-        return '';
+    var data = localStorage.getItem(e2m.prefix);
+    if (data === null) {
+        localStorage.setItem(e2m.prefix, JSON.stringify({}));
+        return;
     }
 
-    return e2m.localStorage[hashedStorageKey];
+    try {
+        e2m.localStorage = JSON.parse(data);
+    } catch (exception) {
+        localStorage.setItem(e2m.prefix, JSON.stringify({}));
+    }
 }
 
 function removeLocalStorage(key) {
@@ -240,17 +256,17 @@ function setHashedStorage(id) {
     localStorage.setItem(e2m.prefix, JSON.stringify(e2m.localStorage));
 }
 
-function initializeLocalStorage() {
+function getHashedStorage(id) {
 
-    var data = localStorage.getItem(e2m.prefix);
-    if (data === null) {
-        localStorage.setItem(e2m.prefix, JSON.stringify({}));
-        return;
+    var hashedStorageKey = e2m.prefix + '_' + md5(id).substr(0, 10);
+    if (typeof e2m.localStorage[hashedStorageKey] === 'undefined') {
+        return '';
     }
 
-    try {
-        e2m.localStorage = JSON.parse(data);
-    } catch (exception) {
-        localStorage.setItem(e2m.prefix, JSON.stringify({}));
-    }
+    return e2m.localStorage[hashedStorageKey];
+}
+
+function deleteHashedStorage(id) {
+    removeLocalStorage(e2m.prefix + '_' + md5(id).substr(0, 10));
+    removeLocalStorage(id);
 }
