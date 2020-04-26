@@ -39,17 +39,13 @@
                         <class>M2E_E2M_Observer_Ebay_StatisticsInventory</class>
                         <method>process</method>
                     </m2e_observer>
-                </observers>
-            </m2e_e2m_cron_task_ebay_inventory_download_after>
-            <m2e_e2m_cron_task_ebay_inventory_download_completed>
-                <observers>
                     <m2e_observer>
                         <type>singleton</type>
                         <class>M2E_E2M_Observer_Ebay_DownloadInventory</class>
                         <method>process</method>
                     </m2e_observer>
                 </observers>
-            </m2e_e2m_cron_task_ebay_inventory_download_completed>
+            </m2e_e2m_cron_task_ebay_inventory_download_after>
             <m2e_e2m_change_ebay_settings>
                 <observers>
                     <m2e_observer>
