@@ -143,6 +143,10 @@ class M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory {
 
         $percentage = $this->getProcessAsPercentage($fromDateTime, $toDateTime);
         Mage::helper('e2m/Config')->set(self::XML_PATH_PROCESS_DOWNLOAD_INVENTORY, $percentage);
+        if (self::PERCENTAGE_COMPLETED === $percentage) {
+            Mage::helper('e2m/Config')->set(self::XML_PATH_WORK_DOWNLOAD_INVENTORY, false);
+        }
+
         Mage::helper('e2m/Config')->set(
             self::XML_PATH_FROM_DOWNLOAD_INVENTORY,
             $fromDateTime->getTimestamp(),
