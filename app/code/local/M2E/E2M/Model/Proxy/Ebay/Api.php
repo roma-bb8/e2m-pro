@@ -13,6 +13,12 @@ class M2E_E2M_Model_Proxy_Ebay_Api {
 
     //########################################
 
+    /**
+     * @param array $request
+     *
+     * @return array
+     * @throws Exception
+     */
     public function sendRequest(array $request) {
 
         $this->connectorConnectionRequest->setComponentVersion($this->eBayConnectorProtocol->getComponentVersion());
