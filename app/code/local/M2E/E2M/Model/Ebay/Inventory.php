@@ -380,14 +380,4 @@ class M2E_E2M_Model_Ebay_Inventory {
             $this->updateItemVariationImages($resource, $item);
         }
     }
-
-    //########################################
-
-    /**
-     * @param array $items
-     */
-    public function process(array $items) {
-        $items = $this->updateItems(Mage::getSingleton('core/resource'), $items);
-        $this->createItems(Mage::getSingleton('core/resource'), $items);
-    }
 }

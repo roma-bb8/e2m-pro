@@ -113,9 +113,20 @@ class M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory {
                     }
 
                     if (!empty($items)) {
-                        Mage::getSingleton('e2m/Ebay_Inventory')->process($items);
+                        foreach (array_chunk($items, 5, true) as $inventory) {
 
-                        $this->lockItem->activate();
+                            $inventory = Mage::getSingleton('e2m/Ebay_Inventory')->updateItems(
+                                Mage::getSingleton('core/resource'),
+                                $inventory
+                            );
+
+                            Mage::getSingleton('e2m/Ebay_Inventory')->createItems(
+                                Mage::getSingleton('core/resource'),
+                                $inventory
+                            );
+
+                            $this->lockItem->activate();
+                        }
                     }
                 }
 
