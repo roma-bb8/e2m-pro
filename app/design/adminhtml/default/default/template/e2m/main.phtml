@@ -91,7 +91,7 @@
         </div>
         <div class="fieldset">
             <table class="form-list" cellspacing="0" cellpadding="0">
-                <?php foreach (Mage::helper('e2m')->getConfig(M2E_E2M_Helper_Ebay::XML_PATH_AVAILABLE_MARKETPLACES, array()) as $marketplaceCode): ?>
+                <?php foreach (Mage::helper('e2m/Config')->get(M2E_E2M_Helper_Ebay::XML_PATH_AVAILABLE_MARKETPLACES, array()) as $marketplaceCode): ?>
                     <tr>
                         <td class="label">
                             <label
