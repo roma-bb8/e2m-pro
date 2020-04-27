@@ -123,6 +123,20 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
             'magmi',
             'getMagmiInventoryExportCSV();'
         );
+
+        $this->addButton(
+            clone $widgetButton,
+            'm2_attributes_sql_button',
+            'm2',
+            'getM2AttributesSQL();'
+        );
+
+        $this->addButton(
+            clone $widgetButton,
+            'm2_inventory_export_csv_button',
+            'm2',
+            'getM2InventoryExportCSV();'
+        );
     }
 
     //########################################

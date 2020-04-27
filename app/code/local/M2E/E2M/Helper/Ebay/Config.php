@@ -10,7 +10,7 @@ class M2E_E2M_Helper_Ebay_Config extends M2E_E2M_Helper_Config {
 
     const XML_PATH_PRODUCT_ATTRIBUTE_SET = self::PREFIX . 'product/attribute_set';
     const XML_PATH_PRODUCT_SKU = self::PREFIX . 'product/sku';
-    const XML_PATH_PRODUCT_SKU_GENERATE = self::PREFIX . 'product/sku/generate';
+    const XML_PATH_PRODUCT_SKU_GENERATE = self::PREFIX . 'product/sku_generate';
     const XML_PATH_PRODUCT_HTML_DELETE = self::PREFIX . 'product/html_delete';
 
     //########################################
@@ -61,7 +61,7 @@ class M2E_E2M_Helper_Ebay_Config extends M2E_E2M_Helper_Config {
             return (int)$map[$marketplaceCode];
         }
 
-        return false;
+        return M2E_E2M_Helper_Magento::STORE_SKIP;
     }
 
     /**

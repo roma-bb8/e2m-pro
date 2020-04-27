@@ -6,15 +6,658 @@ class M2E_E2M_Adminhtml_E2mController extends Mage_Adminhtml_Controller_Action {
      * @return Zend_Controller_Response_Abstract
      * @throws Exception
      */
-    public function getMagmiInventoryExportCSVAction() {
+    public function getM2InventoryExportCSVAction() {
 
         $prefixPath = Mage::helper('e2m')->getFullPath();
-        $defaultValue = '""';
+        $defaultValue = '__EMPTY__VALUE__';
+
+        $readConn = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $attributeSetName = Mage::helper('e2m')->getValue(Mage::helper('e2m/Magento')->getAttributeSetNameById(
+            Mage::helper('e2m/Config')->get(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET)
+        ), $defaultValue);
+
+        if (!file_exists(Mage::helper('e2m')->getFullPath('ebay_attributes_export.csv'))) {
+            $this->getAttributesExportCSVAction();
+        }
+        $exportAttributes = Mage::helper('e2m/Ebay')->getExportAttributes(true);
+
+        if (!file_exists(Mage::helper('e2m')->getFullPath('ebay_attributes_matching.csv'))) {
+            $this->getAttributesMatchingCSVAction();
+        }
+        $exportSpecifics = Mage::helper('e2m/Ebay')->getExportSpecifics();
+
+        //----------------------------------------
+
+        $csvHeader = array(
+            // required
+            'attribute_set_code',
+            'product_type',
+            'name',
+            'description',
+            'short_description',
+            'sku',
+            'weight',
+            'status',
+            'visibility',
+            'price',
+            'tax_class_id',
+            'qty',
+            'is_in_stock',
+            // required end
+
+            'configurable_variations',
+            'configurable_variation_labels',
+
+            'store_view_code',
+            'base_image',
+            'small_image',
+            'thumbnail_image',
+            'additional_images'
+        );
+
+        $csvHeader = array_unique(array_merge(
+            $csvHeader,
+            array_keys($exportAttributes),
+            array_values($exportSpecifics)
+        ));
+        $csvHeader = array_filter($csvHeader);
+        sort($csvHeader);
+
+        $productSkeleton = array_combine(
+            array_values($csvHeader),
+            array_fill(0, count($csvHeader), $defaultValue)
+        );
+
+        //----------------------------------------
+
+        $getItemsSQL = <<<SQL
+SELECT `type`,
+       `id`,
+       `item_variation_id`,
+       `item_variation_hash` AS `ebay_item_variation_hash`,
+       `site` AS `ebay_site`,
+       `ebay_item_id`,
+       `sku` AS `ebay_sku`,
+       `upc` AS `ebay_upc`,
+       `ean` AS `ebay_ean`,
+       `isbn` AS `ebay_isbn`,
+       `ePID` AS `ebay_epid`,
+       `mpn` AS `ebay_mpn`,
+       `brand` AS `ebay_brand`,
+       `title` AS `ebay_title`,
+       `subtitle` AS `ebay_subtitle`,
+       `description` AS `ebay_description`,
+       `currency` AS `ebay_currency`,
+       `start_price` AS `ebay_start_price`,
+       `current_price` AS `ebay_current_price`,
+       `buy_it_now` AS `ebay_buy_it_now`,
+       `quantity` AS `ebay_quantity`,
+       `condition_id` AS `ebay_condition_id`,
+       `condition_name` AS `ebay_condition_name`,
+       `condition_description` AS `ebay_condition_description`,
+       `primary_category_id` AS `ebay_primary_category_id`,
+       `primary_category_name` AS `ebay_primary_category_name`,
+       `secondary_category_id` AS `ebay_secondary_category_id`,
+       `secondary_category_name` AS `ebay_secondary_category_name`,
+       `store_category_id` AS `ebay_store_category_id`,
+       `store_category_name` AS `ebay_store_category_name`,
+       `store_category2_id` AS `ebay_store_category2_id`,
+       `store_category2_name` AS `ebay_store_category2_name`,
+       `weight` AS `ebay_weight`,
+       `dispatch_time_max` AS `ebay_dispatch_time_max`,
+       `dimensions_depth` AS `ebay_dimensions_depth`,
+       `dimensions_length` AS `ebay_dimensions_length`,
+       `dimensions_weight` AS `ebay_dimensions_weight`
+FROM (
+         SELECT (SELECT 'simple') AS `type`,
+                `m2e_e2m_ebay_items`.`id`,
+                (SELECT NULL)     AS `item_variation_id`,
+                (SELECT NULL)     AS `item_variation_hash`,
+                `site`,
+                `ebay_item_id`,
+                `m2e_e2m_ebay_items`.`sku`,
+                `m2e_e2m_ebay_items`.`upc`,
+                `m2e_e2m_ebay_items`.`ean`,
+                `m2e_e2m_ebay_items`.`isbn`,
+                `m2e_e2m_ebay_items`.`ePID`,
+                `mpn`,
+                `brand`,
+                `title`,
+                `subtitle`,
+                `description`,
+                `currency`,
+                `m2e_e2m_ebay_items`.`start_price`,
+                `current_price`,
+                `buy_it_now`,
+                `m2e_e2m_ebay_items`.`quantity`,
+                `condition_id`,
+                `condition_name`,
+                `condition_description`,
+                `primary_category_id`,
+                `primary_category_name`,
+                `secondary_category_id`,
+                `secondary_category_name`,
+                `store_category_id`,
+                `store_category_name`,
+                `store_category2_id`,
+                `store_category2_name`,
+                `weight`,
+                `dispatch_time_max`,
+                `dimensions_depth`,
+                `dimensions_length`,
+                `dimensions_weight`
+         FROM `m2e_e2m_ebay_items`
+                  LEFT JOIN `m2e_e2m_ebay_item_variations`
+                            ON `m2e_e2m_ebay_items`.id = `m2e_e2m_ebay_item_variations`.`item_id`
+         WHERE `m2e_e2m_ebay_item_variations`.`id` IS NULL
+
+         UNION
+
+         SELECT (SELECT 'simple')                     AS `type`,
+                `m2e_e2m_ebay_items`.`id`             AS `id`,
+                `m2e_e2m_ebay_item_variations`.`id`   AS `item_variation_id`,
+                `m2e_e2m_ebay_item_variations`.`hash` AS `item_variation_hash`,
+                `site`,
+                `ebay_item_id`,
+                `m2e_e2m_ebay_item_variations`.`sku`,
+                `m2e_e2m_ebay_item_variations`.`upc`,
+                `m2e_e2m_ebay_item_variations`.`ean`,
+                `m2e_e2m_ebay_item_variations`.`isbn`,
+                `m2e_e2m_ebay_item_variations`.`ePID`,
+                `mpn`,
+                `brand`,
+                `title`,
+                `subtitle`,
+                `description`,
+                `currency`,
+                `m2e_e2m_ebay_item_variations`.`start_price`,
+                `current_price`,
+                `buy_it_now`,
+                `m2e_e2m_ebay_item_variations`.`quantity`,
+                `condition_id`,
+                `condition_name`,
+                `condition_description`,
+                `primary_category_id`,
+                `primary_category_name`,
+                `secondary_category_id`,
+                `secondary_category_name`,
+                `store_category_id`,
+                `store_category_name`,
+                `store_category2_id`,
+                `store_category2_name`,
+                `weight`,
+                `dispatch_time_max`,
+                `dimensions_depth`,
+                `dimensions_length`,
+                `dimensions_weight`
+         FROM `m2e_e2m_ebay_item_variations`
+                  LEFT JOIN `m2e_e2m_ebay_items`
+                            ON `m2e_e2m_ebay_item_variations`.`item_id` = `m2e_e2m_ebay_items`.`id`
+
+         UNION
+
+         SELECT (SELECT 'configurable') AS `type`,
+                `m2e_e2m_ebay_items`.`id`,
+                (SELECT NULL)           AS `item_variation_id`,
+                (SELECT NULL)           AS `item_variation_hash`,
+                `site`,
+                `ebay_item_id`,
+                `m2e_e2m_ebay_items`.`sku`,
+                `m2e_e2m_ebay_items`.`upc`,
+                `m2e_e2m_ebay_items`.`ean`,
+                `m2e_e2m_ebay_items`.`isbn`,
+                `m2e_e2m_ebay_items`.`ePID`,
+                `mpn`,
+                `brand`,
+                `title`,
+                `subtitle`,
+                `description`,
+                `currency`,
+                `m2e_e2m_ebay_items`.`start_price`,
+                `current_price`,
+                `buy_it_now`,
+                `m2e_e2m_ebay_items`.`quantity`,
+                `condition_id`,
+                `condition_name`,
+                `condition_description`,
+                `primary_category_id`,
+                `primary_category_name`,
+                `secondary_category_id`,
+                `secondary_category_name`,
+                `store_category_id`,
+                `store_category_name`,
+                `store_category2_id`,
+                `store_category2_name`,
+                `weight`,
+                `dispatch_time_max`,
+                `dimensions_depth`,
+                `dimensions_length`,
+                `dimensions_weight`
+         FROM `m2e_e2m_ebay_items`
+                  LEFT JOIN `m2e_e2m_ebay_item_variations`
+                            ON `m2e_e2m_ebay_items`.id = `m2e_e2m_ebay_item_variations`.`item_id`
+         WHERE `m2e_e2m_ebay_item_variations`.`id` IS NOT NULL
+         GROUP BY `m2e_e2m_ebay_items`.`id`
+
+     ) as `items`
+ORDER BY `type` DESC, `ebay_sku`, `ebay_site` DESC;
+SQL;
+
+        $getImagesForItemSQL = <<<SQL
+SELECT GROUP_CONCAT(DISTINCT `path` SEPARATOR ',') AS `images`
+FROM (
+         SELECT `path` FROM `m2e_e2m_ebay_item_images` WHERE `item_id` = ?
+
+         UNION
+
+         SELECT `path` FROM `m2e_e2m_ebay_item_variation_images` WHERE `item_variation_id` = ?
+     ) as `images`
+SQL;
+
+        $getSpecificsForItemSQL = <<<SQL
+SELECT `type`, `name`, `value`
+FROM (
+         SELECT (SELECT 'specific') as `type`, `name`, `value` FROM `m2e_e2m_ebay_item_specifics` WHERE `item_id` = ?
+
+         UNION
+
+         SELECT (SELECT 'variation') as `type`, `name`, `value` FROM `m2e_e2m_ebay_item_variation_specifics` WHERE `item_variation_id` = ?
+     ) as `specifics`
+SQL;
+
+        $variationData = array();
+
+        $items = $readConn->query($getItemsSQL);
+        while ($item = $items->fetch(PDO::FETCH_ASSOC)) {
+            if (Mage::helper('e2m/Ebay_Config')->isMarketplaceSkip($item['ebay_site'])) {
+                continue;
+            }
+
+            $item = Mage::helper('e2m/Ebay_Config')->applySettings($item);
+
+            $parentAndChildIds = array($item['id'], $item['item_variation_id']);
+
+            $product = $productSkeleton;
+            $product['sku'] = $item[Mage::helper('e2m/Ebay_Config')->getProductIdentifier()];
+            $product['store_view_code'] = Mage::helper('e2m/Magento')->getStoreCodeById(
+                Mage::helper('e2m/Ebay_Config')->getStoreIdByMarketplaceCode($item['ebay_site'])
+            );
+
+            $specifics = $readConn->query($getSpecificsForItemSQL, $parentAndChildIds);
+            while ($specific = $specifics->fetch(PDO::FETCH_ASSOC)) {
+                if (empty($specific['name'])) {
+                    continue;
+                }
+
+                $item[$specific['name']] = $specific['value'];
+                if ('variation' !== $specific['type']) {
+                    continue;
+                }
+
+                $name = $specific['name'];
+                $code = Mage::helper('e2m')->getCode($name);
+
+                $variationData[$item['id']]['configurable_variations'][$product['sku']] = 'sku=' . $product['sku'];
+                $variationData[$item['id']]['configurable_variation_labels'][$code] = "{$code}={$name}";
+            }
+
+            foreach ($exportSpecifics as $specificName => $magentoAttribute) {
+                if (!isset($item[$specificName])) {
+                    continue;
+                }
+
+                $product[$magentoAttribute] = Mage::helper('e2m')->getValue($item[$specificName], $defaultValue);
+            }
+
+            foreach ($exportAttributes as $magentoAttribute => $eBayField) {
+                if (!isset($item[$eBayField])) {
+                    continue;
+                }
+
+                if ('ebay_quantity' === $eBayField) {
+                    $product['is_in_stock'] = (int)(0 < (int)$item[$eBayField]);
+                }
+
+                $product[$magentoAttribute] = Mage::helper('e2m')->getValue($item[$eBayField], $defaultValue);
+            }
+
+            $media = $readConn->query($getImagesForItemSQL, $parentAndChildIds)->fetchColumn();
+            if (!empty($media)) {
+                $product['additional_images'] = Mage::helper('e2m')->getValue($media, $defaultValue);
+
+                $image = array_shift(explode(',', $media));
+                $product['base_image'] = $image;
+                $product['small_image'] = $image;
+                $product['thumbnail_image'] = $image;
+            }
+
+            if ('configurable' === $item['type']) {
+
+                $product['configurable_variation_labels'] = Mage::helper('e2m')->getValue(implode(',',
+                    $variationData[$item['id']]['configurable_variation_labels']
+                ), $defaultValue);
+
+                $product['configurable_variations'] = Mage::helper('e2m')->getValue(implode('|',
+                    $variationData[$item['id']]['configurable_variations']
+                ), $defaultValue);
+            }
+
+            $product['attribute_set_code'] = Mage::helper('e2m')->getValue($attributeSetName, $defaultValue);
+            $product['product_type'] = $item['type'];
+            $product['status'] = 1;
+            $product['visibility'] = Mage::helper('e2m')->getValue('Not Visible Individually', $defaultValue);
+            $product['tax_class_id'] = Mage::helper('e2m')->getValue('None', $defaultValue);
+
+            Mage::helper('e2m')->writeCSVFile($prefixPath, implode(',', $product), $csvHeader, 'm2');
+        }
+
+        return $this->getResponse()->setBody(Mage::helper('core')->jsonEncode(array('data' => array(
+            'completed' => true
+        ))));
+    }
+
+    /**
+     * @return Zend_Controller_Response_Abstract
+     * @throws Exception
+     */
+    public function getM2AttributesSQLAction() {
+
+        $file = Mage::helper('e2m')->getFullPath('ebay_attributes_m2.sql');
+        $transactionSQL = '';
 
         $readConn = Mage::getSingleton('core/resource')->getConnection('core_read');
         $attributeSetName = $readConn->quote(Mage::helper('e2m/Magento')->getAttributeSetNameById(
-            Mage::helper('e2m')->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET)
+            Mage::helper('e2m/Config')->get(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET)
         ));
+
+        if (!file_exists(Mage::helper('e2m')->getFullPath('ebay_attributes_export.csv'))) {
+            $this->getAttributesExportCSVAction();
+        }
+        $attributesExport = Mage::helper('e2m/Ebay')->getExportAttributes();
+
+        if (!file_exists(Mage::helper('e2m')->getFullPath('ebay_attributes_matching.csv'))) {
+            $this->getAttributesMatchingCSVAction();
+        }
+        $attributesMatching = Mage::helper('e2m/Ebay')->getMatchingAttributes();
+
+        //----------------------------------------
+
+        foreach ($attributesExport as $ebay => &$magento) {
+            if (!isset($attributesMatching[$ebay])) {
+                continue;
+            }
+
+            if (isset($attributesMatching[$magento])) {
+                continue;
+            }
+
+            $attributesMatching[$magento] = $attributesMatching[$ebay];
+            unset($attributesMatching[$ebay]);
+            unset($attributesExport[$ebay]);
+        }
+
+        //----------------------------------------
+
+        $adminStore = Mage::helper('e2m/Ebay_Config')->getMarketplaceCodeUseAdminStore();
+        foreach ($attributesMatching as $attributeCode => $attributeData) {
+            if (empty($attributeCode)) {
+                continue;
+            }
+
+            $code = $readConn->quote($attributeCode);
+            $type = $attributeData['type'];
+            $isSelect = (int)(M2E_E2M_Helper_Magento::TYPE_SELECT === $type);
+            $sourceModel = $isSelect ? $readConn->quote('Magento\\Eav\\Model\\Entity\\Attribute\\Source\\Table') : 'NULL';
+            $group = $isSelect ? 'main_group_id' : 'specific_group_id';
+
+            $name = reset($attributeData['name']);
+            if ($adminStore !== false && isset($attributeData['name'][$adminStore])) {
+                $name = $attributeData['name'][$adminStore];
+            }
+            $name = $readConn->quote($name);
+
+            $transactionSQL .= <<<SQL
+
+    -- {$code}
+
+    SET @attribute_code = {$code};
+    SET @frontend_input = {$name};
+
+    SET @attribute_id = (SELECT `attribute_id` FROM `eav_attribute` WHERE `attribute_code` = @attribute_code LIMIT 1);
+    IF @attribute_id IS NULL THEN
+        INSERT INTO `eav_attribute` (`entity_type_id`, `attribute_code`, `backend_type`, `frontend_input`, `frontend_label`, `source_model`, `is_required`, `is_user_defined`, `default_value`, `is_unique`)
+        VALUES (@entity_type_id, @attribute_code, 'varchar', '{$type}', @frontend_input, {$sourceModel}, 0, 1, NULL, 0);
+        SET @attribute_id = LAST_INSERT_ID();
+
+        INSERT INTO `catalog_eav_attribute` (`attribute_id`, `is_global`, `is_visible`, `is_searchable`, `is_filterable`, `is_comparable`, `is_visible_on_front`, `is_html_allowed_on_front`, `is_used_for_price_rules`, `is_filterable_in_search`, `used_in_product_listing`, `used_for_sort_by`, `apply_to`, `is_visible_in_advanced_search`, `position`, `is_wysiwyg_enabled`, `is_used_for_promo_rules`)
+        VALUES (@attribute_id, {$isSelect}, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 'simple,configurable', 1, 0, 0, 0);
+    END IF;
+
+    IF NOT EXISTS(SELECT `attribute_id` FROM `eav_entity_attribute` WHERE `entity_type_id` = @entity_type_id AND `attribute_set_id` = @attribute_set_id AND `attribute_id` = @attribute_id) THEN
+        INSERT INTO `eav_entity_attribute` (`entity_type_id`, `attribute_set_id`, `attribute_group_id`, `attribute_id`)
+        VALUES (@entity_type_id, @attribute_set_id, @{$group}, @attribute_id);
+    END IF;
+SQL;
+
+            foreach ($attributeData['name'] as $site => $value) {
+                $storeId = Mage::helper('e2m/Ebay_Config')->getStoreIdByMarketplaceCode($site);
+                if (M2E_E2M_Helper_Magento::STORE_SKIP === $storeId) {
+                    continue;
+                }
+
+                $name = $readConn->quote($value);
+
+                $transactionSQL .= <<<SQL
+
+
+    IF NOT EXISTS(SELECT `attribute_id` FROM `eav_attribute_label` WHERE `attribute_id` = @attribute_id AND `store_id` = {$storeId}) THEN
+        INSERT INTO `eav_attribute_label` (`attribute_id`, `store_id`, `value`) VALUES (@attribute_id, {$storeId}, {$name});
+    END IF;
+SQL;
+            }
+
+            if (!isset($attributeData['name'][$adminStore])) {
+                $storeId = M2E_E2M_Helper_Magento::STORE_ADMIN;
+
+                $transactionSQL .= <<<SQL
+
+
+    IF NOT EXISTS(SELECT `attribute_id` FROM `eav_attribute_label` WHERE `attribute_id` = @attribute_id AND `store_id` = {$storeId}) THEN
+        INSERT INTO `eav_attribute_label` (`attribute_id`, `store_id`, `value`) VALUES (@attribute_id, {$storeId}, @frontend_input);
+    END IF;
+SQL;
+            }
+
+            if (!$isSelect) {
+                $transactionSQL .= "\n\n\t-- end {$code}\n";
+
+                continue;
+            }
+
+            foreach ($attributeData['value'] as $valueCode => $attributeValueData) {
+
+                $value = false;
+                if ($adminStore !== false && isset($attributeValueData[strtolower($adminStore)])) {
+                    $value = $readConn->quote($attributeValueData[strtolower($adminStore)]);
+                } else {
+                    foreach ($attributeValueData as $site => $datum) {
+                        $value = $readConn->quote($datum);
+                        break;
+                    }
+                }
+
+                $transactionSQL .= <<<SQL
+
+
+    SET @option_id = (SELECT `eav_attribute_option`.`option_id` FROM `eav_attribute_option` LEFT JOIN `eav_attribute_option_value` ON `eav_attribute_option`.`option_id` = `eav_attribute_option_value`.`option_id` WHERE `attribute_id` = @attribute_id AND `value` = {$value} LIMIT 1);
+    IF @option_id IS NULL THEN
+        INSERT INTO `eav_attribute_option` (`attribute_id`) VALUES (@attribute_id);
+        SET @option_id = LAST_INSERT_ID();
+    END IF;
+SQL;
+                $addingAdminValue = false;
+                $adminValue = false;
+                foreach ($attributeValueData as $site => $value) {
+                    $storeId = Mage::helper('e2m/Ebay_Config')->getStoreIdByMarketplaceCode($site);
+                    if (M2E_E2M_Helper_Magento::STORE_SKIP === $storeId) {
+                        continue;
+                    }
+
+                    $adminValue = $value = $readConn->quote($value);
+                    if (M2E_E2M_Helper_Magento::STORE_ADMIN === $storeId) {
+                        $addingAdminValue = true;
+                    }
+
+                    $transactionSQL .= <<<SQL
+
+
+    IF NOT EXISTS(SELECT * FROM `eav_attribute_option_value` WHERE `option_id` = @option_id AND `store_id` = {$storeId}) THEN
+        INSERT INTO `eav_attribute_option_value` (`option_id`, `store_id`, `value`) VALUES (@option_id, {$storeId}, {$value});
+    END IF;
+SQL;
+                }
+
+                if (!$addingAdminValue) {
+                    $transactionSQL .= <<<SQL
+
+
+    IF NOT EXISTS(SELECT * FROM `eav_attribute_option_value` WHERE `option_id` = @option_id AND `store_id` = 0) THEN
+        INSERT INTO `eav_attribute_option_value` (`option_id`, `store_id`, `value`) VALUES (@option_id, 0, {$adminValue});
+    END IF;
+SQL;
+                }
+            }
+
+            $transactionSQL .= "\n\n\t-- end {$code}\n";
+        }
+
+        $stores = array_unique(array_merge(
+            array(M2E_E2M_Helper_Magento::STORE_ADMIN),
+            array_values(Mage::helper('e2m/Config')->get(
+                M2E_E2M_Helper_Ebay_Config::XML_PATH_STORE_MAP, array()
+            ))
+        ));
+
+        unset($attributesExport['ebay_sku'], $attributesExport['ebay_quantity']);
+        foreach ($attributesExport as $ebay => $magento) {
+            if (!empty($magento)) {
+                continue;
+            }
+
+            $title = str_replace('_', ' ', $ebay);
+            $title = str_replace('Ebay', 'eBay', ucwords($title));
+            $name = $readConn->quote($title);
+            $code = $readConn->quote($ebay);
+
+            $transactionSQL .= <<<SQL
+
+    -- {$code}
+
+    SET @attribute_code = {$code};
+    SET @frontend_input = {$name};
+
+    SET @attribute_id = (SELECT `attribute_id` FROM `eav_attribute` WHERE `attribute_code` = @attribute_code LIMIT 1);
+    IF @attribute_id IS NULL THEN
+        INSERT INTO `eav_attribute` (`entity_type_id`, `attribute_code`, `backend_type`, `frontend_input`, `frontend_label`, `source_model`, `is_required`, `is_user_defined`, `default_value`, `is_unique`)
+        VALUES (@entity_type_id, @attribute_code, 'varchar', 'text', @frontend_input, NULL, 0, 1, NULL, 0);
+        SET @attribute_id = LAST_INSERT_ID();
+
+        INSERT INTO `catalog_eav_attribute` (`attribute_id`, `is_global`, `is_visible`, `is_searchable`, `is_filterable`, `is_comparable`, `is_visible_on_front`, `is_html_allowed_on_front`, `is_used_for_price_rules`, `is_filterable_in_search`, `used_in_product_listing`, `used_for_sort_by`, `is_configurable`, `apply_to`, `is_visible_in_advanced_search`, `position`, `is_wysiwyg_enabled`, `is_used_for_promo_rules`)
+        VALUES (@attribute_id, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 'simple,configurable', 1, 0, 0, 0);
+    END IF;
+
+    IF NOT EXISTS(SELECT `attribute_id` FROM `eav_entity_attribute` WHERE `entity_type_id` = @entity_type_id AND `attribute_set_id` = @attribute_set_id AND `attribute_id` = @attribute_id) THEN
+        INSERT INTO `eav_entity_attribute` (`entity_type_id`, `attribute_set_id`, `attribute_group_id`, `attribute_id`)
+        VALUES (@entity_type_id, @attribute_set_id, @main_group_id, @attribute_id);
+    END IF;
+SQL;
+
+            foreach ($stores as $storeId) {
+                if (M2E_E2M_Helper_Magento::STORE_SKIP === $storeId) {
+                    continue;
+                }
+
+                $transactionSQL .= <<<SQL
+
+
+    IF NOT EXISTS(SELECT `attribute_id` FROM `eav_attribute_label` WHERE `attribute_id` = @attribute_id AND `store_id` = {$storeId}) THEN
+        INSERT INTO `eav_attribute_label` (`attribute_id`, `store_id`, `value`) VALUES (@attribute_id, {$storeId}, {$name});
+    END IF;
+SQL;
+            }
+
+            $transactionSQL .= "\n\n\t-- end {$code}\n";
+        }
+
+        $sql = <<<SQL
+DROP PROCEDURE IF EXISTS createM2Attributes;
+DELIMITER ;;
+CREATE PROCEDURE createM2Attributes()
+BEGIN
+    DECLARE error_code INT;
+    DECLARE error_message TEXT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN
+        GET DIAGNOSTICS CONDITION 1 error_code = MYSQL_ERRNO, error_message = MESSAGE_TEXT;
+        SELECT error_code as `Code`, error_message as `Message`;
+
+        ROLLBACK;
+    END;
+
+    DECLARE EXIT HANDLER FOR SQLWARNING BEGIN
+        GET DIAGNOSTICS CONDITION 1 error_code = MYSQL_ERRNO, error_message = MESSAGE_TEXT;
+        SELECT error_code as `Code`, error_message as `Message`;
+
+        ROLLBACK;
+    END;
+
+    SET @entity_type_id = (SELECT `entity_type_id` FROM `eav_entity_type` WHERE `entity_type_code` = 'catalog_product' LIMIT 1);
+    SET @attribute_set_id = (SELECT `attribute_set_id` FROM `eav_attribute_set` WHERE `attribute_set_name` = {$attributeSetName} AND `entity_type_id` = @entity_type_id LIMIT 1);
+
+    SET @main_group_id = (SELECT `attribute_group_id` FROM `eav_attribute_group` WHERE `attribute_group_name` = 'eBay' AND `attribute_set_id` = @attribute_set_id LIMIT 1);
+    IF @main_group_id IS NULL THEN
+        INSERT INTO `eav_attribute_group` (`attribute_set_id`, `attribute_group_name`, `sort_order`, `default_id`, `attribute_group_code`)
+        VALUES (@attribute_set_id, 'eBay', 20, 0, 'ebay');
+        SET @main_group_id = LAST_INSERT_ID();
+    END IF;
+
+    SET @specific_group_id = (SELECT `attribute_group_id` FROM `eav_attribute_group` WHERE `attribute_group_name` = 'eBay Specifics' AND `attribute_set_id` = @attribute_set_id LIMIT 1);
+    IF @specific_group_id IS NULL THEN
+        INSERT INTO `eav_attribute_group` (`attribute_set_id`, `attribute_group_name`, `sort_order`, `default_id`, `attribute_group_code`)
+        VALUES (@attribute_set_id, 'eBay Specifics', 30, 0, 'ebay-specifics');
+        SET @specific_group_id = LAST_INSERT_ID();
+    END IF;
+
+    START TRANSACTION;
+    {$transactionSQL}
+    COMMIT;
+END;
+;;
+DELIMITER ;
+CALL createM2Attributes();
+SQL;
+
+        file_put_contents($file, $sql, LOCK_EX);
+
+        return $this->getResponse()->setBody(Mage::helper('core')->jsonEncode(array('data' => array(
+            'completed' => true
+        ))));
+    }
+
+    //########################################
+
+    /**
+     * @return Zend_Controller_Response_Abstract
+     * @throws Exception
+     */
+    public function getMagmiInventoryExportCSVAction() {
+
+        $prefixPath = Mage::helper('e2m')->getFullPath();
+        $defaultValue = '';
+
+        $readConn = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $attributeSetName = Mage::helper('e2m')->getValue(Mage::helper('e2m/Magento')->getAttributeSetNameById(
+            Mage::helper('e2m/Config')->get(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET)
+        ), $defaultValue);
 
         if (!file_exists(Mage::helper('e2m')->getFullPath('ebay_attributes_export.csv'))) {
             $this->getAttributesExportCSVAction();
@@ -60,6 +703,7 @@ class M2E_E2M_Adminhtml_E2mController extends Mage_Adminhtml_Controller_Action {
             array_keys($exportAttributes),
             array_values($exportSpecifics)
         ));
+        $csvHeader = array_filter($csvHeader);
         sort($csvHeader);
 
         $productSkeleton = array_combine(
@@ -268,6 +912,10 @@ SQL;
 
         $items = $readConn->query($getItemsSQL);
         while ($item = $items->fetch(PDO::FETCH_ASSOC)) {
+            if (Mage::helper('e2m/Ebay_Config')->isMarketplaceSkip($item['ebay_site'])) {
+                continue;
+            }
+
             $item = Mage::helper('e2m/Ebay_Config')->applySettings($item);
 
             $parentAndChildIds = array($item['id'], $item['item_variation_id']);
@@ -280,14 +928,18 @@ SQL;
 
             $specifics = $readConn->query($getSpecificsForItemSQL, $parentAndChildIds);
             while ($specific = $specifics->fetch(PDO::FETCH_ASSOC)) {
+                if (empty($specific['name'])) {
+                    continue;
+                }
+
                 $item[$specific['name']] = $specific['value'];
                 if ('variation' !== $specific['type']) {
                     continue;
                 }
 
                 $code = Mage::helper('e2m')->getCode($specific['name']);
-                $variationData[$item['id']]['simples_skus'][] = $product['sku'];
-                $variationData[$item['id']]['configurable_attributes'][] = $code;
+                $variationData[$item['id']]['simples_skus'][$product['sku']] = $product['sku'];
+                $variationData[$item['id']]['configurable_attributes'][$code] = $code;
             }
 
             foreach ($exportSpecifics as $specificName => $magentoAttribute) {
@@ -321,12 +973,13 @@ SQL;
             }
 
             if ('configurable' === $item['type']) {
+
                 $product['simples_skus'] = Mage::helper('e2m')->getValue(implode(',',
-                    array_unique($variationData[$item['id']]['simples_skus'])
+                    $variationData[$item['id']]['simples_skus']
                 ), $defaultValue);
 
                 $product['configurable_attributes'] = Mage::helper('e2m')->getValue(implode(',',
-                    array_unique($variationData[$item['id']]['configurable_attributes'])
+                    $variationData[$item['id']]['configurable_attributes']
                 ), $defaultValue);
             }
 
@@ -351,13 +1004,13 @@ SQL;
     public function getNativeInventoryExportCSVAction() {
 
         $prefixPath = Mage::helper('e2m')->getFullPath();
-        $defaultValue = '""';
+        $defaultValue = '';
 
         $readConn = Mage::getSingleton('core/resource')->getConnection('core_read');
         $mediaAttributeId = Mage::helper('e2m/Magento')->getMediaAttributeId();
-        $attributeSetName = $readConn->quote(Mage::helper('e2m/Magento')->getAttributeSetNameById(
-            Mage::helper('e2m')->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET)
-        ));
+        $attributeSetName = Mage::helper('e2m')->getValue(Mage::helper('e2m/Magento')->getAttributeSetNameById(
+            Mage::helper('e2m/Config')->get(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET)
+        ), $defaultValue);
 
         if (!file_exists(Mage::helper('e2m')->getFullPath('ebay_attributes_export.csv'))) {
             $this->getAttributesExportCSVAction();
@@ -405,6 +1058,7 @@ SQL;
             array_keys($exportAttributes),
             array_values($exportSpecifics)
         ));
+        $csvHeader = array_filter($csvHeader);
         sort($csvHeader);
 
         $productSkeleton = array_combine(
@@ -614,6 +1268,10 @@ SQL;
 
         $items = $readConn->query($getItemsSQL);
         while ($item = $items->fetch(PDO::FETCH_ASSOC)) {
+            if (Mage::helper('e2m/Ebay_Config')->isMarketplaceSkip($item['ebay_site'])) {
+                continue;
+            }
+
             $item = Mage::helper('e2m/Ebay_Config')->applySettings($item);
 
             $parentAndChildIds = array($item['id'], $item['item_variation_id']);
@@ -626,6 +1284,10 @@ SQL;
 
             $specifics = $readConn->query($getSpecificsForItemSQL, $parentAndChildIds);
             while ($specific = $specifics->fetch(PDO::FETCH_ASSOC)) {
+                if (empty($specific['name'])) {
+                    continue;
+                }
+
                 $item[$specific['name']] = $specific['value'];
                 if ('variation' !== $specific['type']) {
                     continue;
@@ -756,7 +1418,7 @@ SQL;
 
         $readConn = Mage::getSingleton('core/resource')->getConnection('core_read');
         $attributeSetName = $readConn->quote(Mage::helper('e2m/Magento')->getAttributeSetNameById(
-            Mage::helper('e2m')->getConfig(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET)
+            Mage::helper('e2m/Config')->get(M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET)
         ));
 
         if (!file_exists(Mage::helper('e2m')->getFullPath('ebay_attributes_export.csv'))) {
@@ -789,9 +1451,11 @@ SQL;
 
         $adminStore = Mage::helper('e2m/Ebay_Config')->getMarketplaceCodeUseAdminStore();
         foreach ($attributesMatching as $attributeCode => $attributeData) {
+            if (empty($attributeCode)) {
+                continue;
+            }
 
             $code = $readConn->quote($attributeCode);
-
             $type = $attributeData['type'];
             $isSelect = (int)(M2E_E2M_Helper_Magento::TYPE_SELECT === $type);
             $sourceModel = $isSelect ? $readConn->quote('eav/entity_attribute_source_table') : 'NULL';
@@ -799,8 +1463,9 @@ SQL;
 
             $name = reset($attributeData['name']);
             if ($adminStore !== false && isset($attributeData['name'][$adminStore])) {
-                $name = $readConn->quote($attributeData['name'][$adminStore]);
+                $name = $attributeData['name'][$adminStore];
             }
+            $name = $readConn->quote($name);
 
             $transactionSQL .= <<<SQL
 
@@ -827,6 +1492,10 @@ SQL;
 
             foreach ($attributeData['name'] as $site => $value) {
                 $storeId = Mage::helper('e2m/Ebay_Config')->getStoreIdByMarketplaceCode($site);
+                if (M2E_E2M_Helper_Magento::STORE_SKIP === $storeId) {
+                    continue;
+                }
+
                 $name = $readConn->quote($value);
 
                 $transactionSQL .= <<<SQL
@@ -880,8 +1549,12 @@ SQL;
                 $addingAdminValue = false;
                 $adminValue = false;
                 foreach ($attributeValueData as $site => $value) {
-                    $adminValue = $value = $readConn->quote($value);
                     $storeId = Mage::helper('e2m/Ebay_Config')->getStoreIdByMarketplaceCode($site);
+                    if (M2E_E2M_Helper_Magento::STORE_SKIP === $storeId) {
+                        continue;
+                    }
+
+                    $adminValue = $value = $readConn->quote($value);
                     if (M2E_E2M_Helper_Magento::STORE_ADMIN === $storeId) {
                         $addingAdminValue = true;
                     }
@@ -911,7 +1584,7 @@ SQL;
 
         $stores = array_unique(array_merge(
             array(M2E_E2M_Helper_Magento::STORE_ADMIN),
-            array_values(Mage::helper('e2m')->getConfig(
+            array_values(Mage::helper('e2m/Config')->get(
                 M2E_E2M_Helper_Ebay_Config::XML_PATH_STORE_MAP, array()
             ))
         ));
@@ -951,6 +1624,10 @@ SQL;
 SQL;
 
             foreach ($stores as $storeId) {
+                if (M2E_E2M_Helper_Magento::STORE_SKIP === $storeId) {
+                    continue;
+                }
+
                 $transactionSQL .= <<<SQL
 
 
@@ -1017,6 +1694,8 @@ SQL;
         ))));
     }
 
+    //########################################
+
     /**
      * @return Zend_Controller_Response_Abstract
      * @throws Exception
@@ -1038,6 +1717,10 @@ ORDER BY `name`
 SQL;
         $specifics = Mage::getSingleton('core/resource')->getConnection('core_read')->query($sql);
         while ($specific = $specifics->fetch(PDO::FETCH_ASSOC)) {
+            if (Mage::helper('e2m/Ebay_Config')->isMarketplaceSkip($specific['site'])) {
+                continue;
+            }
+
             $code = Mage::helper('e2m')->getCode($specific['name']);
 
             $attributes[$code]['type'] = M2E_E2M_Helper_Magento::TYPE_SELECT;
@@ -1054,6 +1737,10 @@ ORDER BY `name`
 SQL;
         $specifics = Mage::getSingleton('core/resource')->getConnection('core_read')->query($sql);
         while ($specific = $specifics->fetch(PDO::FETCH_ASSOC)) {
+            if (Mage::helper('e2m/Ebay_Config')->isMarketplaceSkip($specific['site'])) {
+                continue;
+            }
+
             $code = Mage::helper('e2m')->getCode($specific['name']);
             if (isset($attributes[$code]) && $attributes[$code]['type'] === M2E_E2M_Helper_Magento::TYPE_SELECT) {
                 $attributes[$code]['name'][$specific['site']] = $specific['name'];

@@ -14,15 +14,16 @@
         window.e2m.url.startEbayDownloadInventory = '<?php echo $this->getUrl('*/e2m/startEbayDownloadInventory'); ?>';
         window.e2m.url.getAttributesBySetId = '<?php echo $this->getUrl('*/e2m/getAttributesBySetId'); ?>';
         window.e2m.url.setSettings = '<?php echo $this->getUrl('*/e2m/setSettings') ?>';
+        window.e2m.url.getM2InventoryExportCSV = '<?php echo $this->getUrl('*/e2m/getM2InventoryExportCSV') ?>';
         window.e2m.url.getMagmiInventoryExportCSV = '<?php echo $this->getUrl('*/e2m/getMagmiInventoryExportCSV') ?>';
         window.e2m.url.getNativeInventoryExportCSV = '<?php echo $this->getUrl('*/e2m/getNativeInventoryExportCSV') ?>';
         window.e2m.url.getAttributesSQL = '<?php echo $this->getUrl('*/e2m/getAttributesSQL') ?>';
+        window.e2m.url.getM2AttributesSQL = '<?php echo $this->getUrl('*/e2m/getM2AttributesSQL') ?>';
         window.e2m.url.getAttributesMatchingCSV = '<?php echo $this->getUrl('*/e2m/getAttributesMatchingCSV') ?>';
         window.e2m.url.getAttributesExportCSV = '<?php echo $this->getUrl('*/e2m/getAttributesExportCSV') ?>';
 
         Event.observe(window, 'load', function () {
             initializeLocalStorage();
-            attributeSet();
             configInput();
             e2mHideBlock();
             noteBlock();
@@ -258,6 +259,9 @@
                         <td class="value block-download-inventory-progress">
                             <?php echo $this->getChildHtml('attributes_sql_button'); ?>
                         </td>
+                        <td id="pause-download-inventory-button" class="value">
+                            <?php echo $this->getChildHtml('m2_attributes_sql_button'); ?>
+                        </td>
                     </tr>
                     <tr>
                         <td class="label">
@@ -268,6 +272,9 @@
                         </td>
                         <td id="pause-download-inventory-button" class="value">
                             <?php echo $this->getChildHtml('magmi_inventory_export_csv_button'); ?>
+                        </td>
+                        <td id="pause-download-inventory-button" class="value">
+                            <?php echo $this->getChildHtml('m2_inventory_export_csv_button'); ?>
                         </td>
                     </tr>
                 <?php endif; ?>

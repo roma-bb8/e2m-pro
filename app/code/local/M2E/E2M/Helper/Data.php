@@ -95,7 +95,7 @@ EXCEPTION;
         $value = stream_get_contents($fp);
         fclose($fp);
 
-        return $value;
+        return trim($value, "\n");
     }
 
     /**
@@ -179,7 +179,7 @@ EXCEPTION;
 
             $file = "ebay_{$source}_inventory_part_{$i}.csv";
             if (!file_exists($path . $file)) {
-                file_put_contents($path . $file, implode(',', $csvHeader) . PHP_EOL | LOCK_EX);
+                file_put_contents($path . $file, implode(',', $csvHeader) . PHP_EOL, LOCK_EX);
 
                 break;
             }

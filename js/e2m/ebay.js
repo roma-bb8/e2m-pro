@@ -6,49 +6,6 @@ function downloadInventoryHandler(data) {
     $('download-inventory-simple-items').innerHTML = data.simple;
 }
 
-function attributeSet() {
-
-    var attributeSet = $('attribute-set');
-    if (attributeSet === null) {
-        return;
-    }
-
-    attributeSet.observe('change', function (element) {
-        new Ajax.Request(e2m.url.getAttributesBySetId, {
-            method: 'get',
-            parameters: {
-                set_id: element.target.options[element.target.selectedIndex].value
-            },
-            onSuccess: function (transport) {
-                var response = JSON.parse(transport.responseText);
-
-                e2m.magentoAttributes = response.data.attributes;
-                e2m.attributes = {};
-
-                var magentoAttribute = $('magento-attribute');
-
-                magentoAttribute.select('option').invoke('remove');
-                var cleanOption = document.createElement('option');
-                cleanOption.text = '';
-                magentoAttribute.add(cleanOption);
-
-                for (var [code, title] of Object.entries(e2m.magentoAttributes)) {
-                    var option = document.createElement('option');
-                    option.value = code;
-                    option.text = title.toString();
-                    magentoAttribute.add(option);
-                }
-            },
-            onFailure: function (transport) {
-                var response = JSON.parse(transport.responseText);
-                console.log(response);
-
-                alert('Something went wrong...');
-            }
-        });
-    });
-}
-
 function configInput() {
     $$('.config-input').invoke('observe', 'change', function () {
         $$('.config-button').forEach(function (element) {
@@ -190,6 +147,25 @@ function sendSettings() {
     });
 }
 
+function getM2InventoryExportCSV() {
+    new Ajax.Request(e2m.url.getM2InventoryExportCSV, {
+        method: 'get',
+        onCreate: function () {
+            $('loading-mask').setStyle({
+                visibility: 'visible'
+            });
+        },
+        onSuccess: function () {
+
+        },
+        onFailure: function (transport) {
+            console.log(transport);
+
+            alert('Something went wrong...');
+        }
+    });
+}
+
 function getMagmiInventoryExportCSV() {
     new Ajax.Request(e2m.url.getMagmiInventoryExportCSV, {
         method: 'get',
@@ -211,6 +187,25 @@ function getMagmiInventoryExportCSV() {
 
 function getNativeInventoryExportCSV() {
     new Ajax.Request(e2m.url.getNativeInventoryExportCSV, {
+        method: 'get',
+        onCreate: function () {
+            $('loading-mask').setStyle({
+                visibility: 'visible'
+            });
+        },
+        onSuccess: function () {
+
+        },
+        onFailure: function (transport) {
+            console.log(transport);
+
+            alert('Something went wrong...');
+        }
+    });
+}
+
+function getM2AttributesSQL() {
+    new Ajax.Request(e2m.url.getM2AttributesSQL, {
         method: 'get',
         onCreate: function () {
             $('loading-mask').setStyle({
