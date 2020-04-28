@@ -2004,7 +2004,7 @@ TRUNCATE `m2e_e2m_ebay_items`;
 
 SET FOREIGN_KEY_CHECKS = 1;
 SQL;
-        Mage::getSingleton('core/resource')->getConnection('core_read')->multiQuery($sql)->execute();
+        Mage::getSingleton('core/resource')->getConnection('core_read')->multiQuery($sql);
 
         $this->_getSession()->addSuccess(Mage::helper('e2m')->__('Account unlink.'));
 
