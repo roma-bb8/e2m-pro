@@ -474,6 +474,12 @@ SQL;
                 continue;
             }
 
+            $transactionSQL .= <<<SQL
+
+
+    IF EXISTS(SELECT `backend_type` FROM `eav_attribute` WHERE `attribute_id` = @attribute_id AND `backend_type` = '{$type}') THEN
+SQL;
+
             foreach ($attributeData['value'] as $valueCode => $attributeValueData) {
 
                 $value = false;
@@ -489,11 +495,11 @@ SQL;
                 $transactionSQL .= <<<SQL
 
 
-    SET @option_id = (SELECT `eav_attribute_option`.`option_id` FROM `eav_attribute_option` LEFT JOIN `eav_attribute_option_value` ON `eav_attribute_option`.`option_id` = `eav_attribute_option_value`.`option_id` WHERE `attribute_id` = @attribute_id AND `value` = {$value} LIMIT 1);
-    IF @option_id IS NULL THEN
-        INSERT INTO `eav_attribute_option` (`attribute_id`) VALUES (@attribute_id);
-        SET @option_id = LAST_INSERT_ID();
-    END IF;
+        SET @option_id = (SELECT `eav_attribute_option`.`option_id` FROM `eav_attribute_option` LEFT JOIN `eav_attribute_option_value` ON `eav_attribute_option`.`option_id` = `eav_attribute_option_value`.`option_id` WHERE `attribute_id` = @attribute_id AND `value` = {$value} LIMIT 1);
+        IF @option_id IS NULL THEN
+            INSERT INTO `eav_attribute_option` (`attribute_id`) VALUES (@attribute_id);
+            SET @option_id = LAST_INSERT_ID();
+        END IF;
 SQL;
                 $addingAdminValue = false;
                 $adminValue = false;
@@ -511,9 +517,9 @@ SQL;
                     $transactionSQL .= <<<SQL
 
 
-    IF NOT EXISTS(SELECT * FROM `eav_attribute_option_value` WHERE `option_id` = @option_id AND `store_id` = {$storeId}) THEN
-        INSERT INTO `eav_attribute_option_value` (`option_id`, `store_id`, `value`) VALUES (@option_id, {$storeId}, {$value});
-    END IF;
+        IF NOT EXISTS(SELECT * FROM `eav_attribute_option_value` WHERE `option_id` = @option_id AND `store_id` = {$storeId}) THEN
+            INSERT INTO `eav_attribute_option_value` (`option_id`, `store_id`, `value`) VALUES (@option_id, {$storeId}, {$value});
+        END IF;
 SQL;
                 }
 
@@ -521,13 +527,18 @@ SQL;
                     $transactionSQL .= <<<SQL
 
 
-    IF NOT EXISTS(SELECT * FROM `eav_attribute_option_value` WHERE `option_id` = @option_id AND `store_id` = 0) THEN
-        INSERT INTO `eav_attribute_option_value` (`option_id`, `store_id`, `value`) VALUES (@option_id, 0, {$adminValue});
-    END IF;
+        IF NOT EXISTS(SELECT * FROM `eav_attribute_option_value` WHERE `option_id` = @option_id AND `store_id` = 0) THEN
+            INSERT INTO `eav_attribute_option_value` (`option_id`, `store_id`, `value`) VALUES (@option_id, 0, {$adminValue});
+        END IF;
 SQL;
                 }
             }
 
+            $transactionSQL .= <<<SQL
+
+
+    END IF;
+SQL;
             $transactionSQL .= "\n\n\t-- end {$code}\n";
         }
 
@@ -1525,6 +1536,12 @@ SQL;
                 continue;
             }
 
+            $transactionSQL .= <<<SQL
+
+
+    IF EXISTS(SELECT `backend_type` FROM `eav_attribute` WHERE `attribute_id` = @attribute_id AND `backend_type` = '{$type}') THEN
+SQL;
+
             foreach ($attributeData['value'] as $valueCode => $attributeValueData) {
 
                 $value = false;
@@ -1540,11 +1557,11 @@ SQL;
                 $transactionSQL .= <<<SQL
 
 
-    SET @option_id = (SELECT `eav_attribute_option`.`option_id` FROM `eav_attribute_option` LEFT JOIN `eav_attribute_option_value` ON `eav_attribute_option`.`option_id` = `eav_attribute_option_value`.`option_id` WHERE `attribute_id` = @attribute_id AND `value` = {$value} LIMIT 1);
-    IF @option_id IS NULL THEN
-        INSERT INTO `eav_attribute_option` (`attribute_id`) VALUES (@attribute_id);
-        SET @option_id = LAST_INSERT_ID();
-    END IF;
+        SET @option_id = (SELECT `eav_attribute_option`.`option_id` FROM `eav_attribute_option` LEFT JOIN `eav_attribute_option_value` ON `eav_attribute_option`.`option_id` = `eav_attribute_option_value`.`option_id` WHERE `attribute_id` = @attribute_id AND `value` = {$value} LIMIT 1);
+        IF @option_id IS NULL THEN
+            INSERT INTO `eav_attribute_option` (`attribute_id`) VALUES (@attribute_id);
+            SET @option_id = LAST_INSERT_ID();
+        END IF;
 SQL;
                 $addingAdminValue = false;
                 $adminValue = false;
@@ -1562,9 +1579,9 @@ SQL;
                     $transactionSQL .= <<<SQL
 
 
-    IF NOT EXISTS(SELECT * FROM `eav_attribute_option_value` WHERE `option_id` = @option_id AND `store_id` = {$storeId}) THEN
-        INSERT INTO `eav_attribute_option_value` (`option_id`, `store_id`, `value`) VALUES (@option_id, {$storeId}, {$value});
-    END IF;
+        IF NOT EXISTS(SELECT * FROM `eav_attribute_option_value` WHERE `option_id` = @option_id AND `store_id` = {$storeId}) THEN
+            INSERT INTO `eav_attribute_option_value` (`option_id`, `store_id`, `value`) VALUES (@option_id, {$storeId}, {$value});
+        END IF;
 SQL;
                 }
 
@@ -1572,13 +1589,18 @@ SQL;
                     $transactionSQL .= <<<SQL
 
 
-    IF NOT EXISTS(SELECT * FROM `eav_attribute_option_value` WHERE `option_id` = @option_id AND `store_id` = 0) THEN
-        INSERT INTO `eav_attribute_option_value` (`option_id`, `store_id`, `value`) VALUES (@option_id, 0, {$adminValue});
-    END IF;
+        IF NOT EXISTS(SELECT * FROM `eav_attribute_option_value` WHERE `option_id` = @option_id AND `store_id` = 0) THEN
+            INSERT INTO `eav_attribute_option_value` (`option_id`, `store_id`, `value`) VALUES (@option_id, 0, {$adminValue});
+        END IF;
 SQL;
                 }
             }
 
+            $transactionSQL .= <<<SQL
+
+
+    END IF;
+SQL;
             $transactionSQL .= "\n\n\t-- end {$code}\n";
         }
 
