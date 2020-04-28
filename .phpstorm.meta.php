@@ -1,4 +1,3 @@
-
 <?php namespace PHPSTORM_META {
 
     /** @noinspection PhpUnusedLocalVariableInspection */
