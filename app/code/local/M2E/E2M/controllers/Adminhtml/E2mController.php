@@ -1979,6 +1979,16 @@ SQL;
 
         Mage::helper('e2m/Config')->set(M2E_E2M_Model_Proxy_Ebay_Account::XML_PATH_EBAY_ACCOUNT_ID, 0, true);
 
+        $sql = <<<SQL
+TRUNCATE `m2e_e2m_ebay_item_variation_images`;
+TRUNCATE `m2e_e2m_ebay_item_variation_specifics`;
+TRUNCATE `m2e_e2m_ebay_item_variations`;
+TRUNCATE `m2e_e2m_ebay_item_images`;
+TRUNCATE `m2e_e2m_ebay_item_specifics`;
+TRUNCATE `m2e_e2m_ebay_items`;
+SQL;
+        Mage::getSingleton('core/resource')->getConnection('core_read')->multiQuery($sql)->execute();
+
         $this->_getSession()->addSuccess(Mage::helper('e2m')->__('Account unlink.'));
 
         return $this->getResponse()->setBody(Mage::helper('core')->jsonEncode(array('data' => array(
