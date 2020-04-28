@@ -1977,15 +1977,32 @@ SQL;
         Mage::helper('e2m/Config')->set(M2E_E2M_Helper_Ebay::XML_PATH_INVENTORY_SIMPLE_COUNT, 0);
         Mage::helper('e2m/Config')->set(M2E_E2M_Helper_Ebay::XML_PATH_INVENTORY_TOTAL_COUNT, 0);
 
+        Mage::helper('e2m/Config')->set(
+            M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::XML_PATH_PROCESS_DOWNLOAD_INVENTORY,
+            0
+        );
+        Mage::helper('e2m/Config')->set(
+            M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::XML_PATH_FROM_DOWNLOAD_INVENTORY,
+            0
+        );
+        Mage::helper('e2m/Config')->set(
+            M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::XML_PATH_TO_DOWNLOAD_INVENTORY,
+            0
+        );
+
         Mage::helper('e2m/Config')->set(M2E_E2M_Model_Proxy_Ebay_Account::XML_PATH_EBAY_ACCOUNT_ID, 0, true);
 
         $sql = <<<SQL
-TRUNCATE `m2e_e2m_ebay_item_variation_images`;
+SET FOREIGN_KEY_CHECKS = 0;
+
 TRUNCATE `m2e_e2m_ebay_item_variation_specifics`;
+TRUNCATE `m2e_e2m_ebay_item_variation_images`;
 TRUNCATE `m2e_e2m_ebay_item_variations`;
-TRUNCATE `m2e_e2m_ebay_item_images`;
 TRUNCATE `m2e_e2m_ebay_item_specifics`;
+TRUNCATE `m2e_e2m_ebay_item_images`;
 TRUNCATE `m2e_e2m_ebay_items`;
+
+SET FOREIGN_KEY_CHECKS = 1;
 SQL;
         Mage::getSingleton('core/resource')->getConnection('core_read')->multiQuery($sql)->execute();
 
