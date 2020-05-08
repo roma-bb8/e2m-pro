@@ -1901,7 +1901,6 @@ SQL;
 
         Mage::helper('e2m/Config')->set(
             M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::XML_PATH_WORK_DOWNLOAD_INVENTORY,
-            true,
             true
         );
 
@@ -1926,27 +1925,27 @@ SQL;
 
         isset($settings['attribute-set']) && Mage::helper('e2m/Config')->set(
             M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_ATTRIBUTE_SET,
-            $settings['attribute-set'], true
+            $settings['attribute-set']
         );
 
         isset($settings['marketplace-store']) && Mage::helper('e2m/Config')->set(
             M2E_E2M_Helper_Ebay_Config::XML_PATH_STORE_MAP,
-            $settings['marketplace-store'], true
+            $settings['marketplace-store']
         );
 
         isset($settings['generate-sku']) && Mage::helper('e2m/Config')->set(
             M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_SKU_GENERATE,
-            $settings['generate-sku'], true
+            $settings['generate-sku']
         );
 
         isset($settings['product-identifier']) && Mage::helper('e2m/Config')->set(
             M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_SKU,
-            $settings['product-identifier'], true
+            $settings['product-identifier']
         );
 
         isset($settings['delete-html']) && Mage::helper('e2m/Config')->set(
             M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_HTML_DELETE,
-            $settings['delete-html'], true
+            $settings['delete-html']
         );
 
         $this->_getSession()->addSuccess(Mage::helper('e2m')->__('Save settings'));
@@ -1990,7 +1989,7 @@ SQL;
             0
         );
 
-        Mage::helper('e2m/Config')->set(M2E_E2M_Model_Proxy_Ebay_Account::XML_PATH_EBAY_ACCOUNT_ID, 0, true);
+        Mage::helper('e2m/Config')->set(M2E_E2M_Model_Proxy_Ebay_Account::XML_PATH_EBAY_ACCOUNT_ID, 0);
 
         $sql = <<<SQL
 SET FOREIGN_KEY_CHECKS = 0;
@@ -2026,8 +2025,7 @@ SQL;
 
         Mage::helper('e2m/Config')->set(
             M2E_E2M_Model_Proxy_Ebay_Account::XML_PATH_EBAY_ACCOUNT_ID,
-            $accountId,
-            true
+            $accountId
         );
 
         $this->_getSession()->addSuccess(Mage::helper('e2m')->__('Account link.'));

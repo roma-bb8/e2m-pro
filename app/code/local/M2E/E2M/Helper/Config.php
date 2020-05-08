@@ -9,18 +9,31 @@ class M2E_E2M_Helper_Config {
     /**
      * @param string $path
      * @param mixed $value
-     * @param bool $cleanCache
      *
      * @return $this
      */
-    public function set($path, $value, $cleanCache = false) {
+    public function set($path, $value) {
 
-        Mage::getModel('core/config')->saveConfig(
-            $path,
-            Mage::helper('core')->jsonEncode($value)
-        );
+        $coreConfigData = Mage::getSingleton('core/resource')->getTableName('core_config_data');
 
-        $cleanCache && Mage::getModel('core/config')->cleanCache();
+        $id = Mage::getSingleton('core/resource')->getConnection('core_read')->select()
+            ->from($coreConfigData, 'config_id')
+            ->where('scope = ?', 'default')
+            ->where('scope_id = ?', 0)
+            ->where('path = ?', $path)->limit(1)->query()->fetchColumn();
+
+        if ($id) {
+            Mage::getSingleton('core/resource')->getConnection('core_write')->update($coreConfigData, array(
+                'value' => Mage::helper('core')->jsonEncode($value)
+            ), array('config_id = ?' => $id));
+        } else {
+            Mage::getSingleton('core/resource')->getConnection('core_write')->insert($coreConfigData, array(
+                'scope' => 'default',
+                'scope_id' => 0,
+                'path' => $path,
+                'value' => Mage::helper('core')->jsonEncode($value)
+            ));
+        }
 
         return $this;
     }
@@ -35,12 +48,16 @@ class M2E_E2M_Helper_Config {
 
         try {
 
-            $value = Mage::app()->getStore()->getConfig($path);
+            $value = Mage::getSingleton('core/resource')->getConnection('core_read')->select()
+                ->from(Mage::getSingleton('core/resource')->getTableName('core_config_data'), 'value')
+                ->where('scope = ?', 'default')
+                ->where('scope_id = ?', 0)
+                ->where('path = ?', $path)->limit(1)->query()->fetchColumn();
             if (!$value) {
                 return $default;
             }
 
-        } catch (Mage_Core_Model_Store_Exception $e) {
+        } catch (Exception $e) {
             Mage::helper('e2m')->writeExceptionLog($e);
 
             return $default;

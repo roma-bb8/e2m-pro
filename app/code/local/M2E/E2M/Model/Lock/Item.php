@@ -58,8 +58,11 @@ class M2E_E2M_Model_Lock_Item {
     public function activate() {
 
         rewind($this->lockItemFile);
+        if (!fwrite($this->lockItemFile, date('r'))) {
+            throw new Exception('Lock item is delete.');
+        }
 
-        return (bool)fwrite($this->lockItemFile, date('r'));
+        return true;
     }
 
     /**

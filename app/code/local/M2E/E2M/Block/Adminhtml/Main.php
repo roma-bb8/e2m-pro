@@ -37,7 +37,11 @@ class M2E_E2M_Block_Adminhtml_Main extends Mage_Adminhtml_Block_Widget_Form {
             $label = 'Reload inventory (completed)';
         }
 
-        if (Mage::getModel('e2m/Lock_Item', array('ebay_download_inventory'))->isLocked()) {
+        $isWork = Mage::helper('e2m/Config')->get(
+            M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::XML_PATH_WORK_DOWNLOAD_INVENTORY,
+            false
+        );
+        if ($isWork) {
             $label = 'Download inventory (in progress...)';
             $disabled = true;
         }

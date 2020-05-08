@@ -15,23 +15,7 @@ class M2E_E2M_Helper_Data extends Mage_Core_Helper_Abstract {
      * @param Exception $e
      */
     public function writeExceptionLog(Exception $e) {
-
-        $type = get_class($e);
-        $exceptionInfo = <<<EXCEPTION
-
--------------------------------- EXCEPTION INFO ----------------------------------
-Type: {$type}
-File: {$e->getFile()}
-Line: {$e->getLine()}
-Code: {$e->getCode()}
-Message: {$e->getMessage()}
--------------------------------- STACK TRACE INFO --------------------------------
-{$e->getTraceAsString()}
-
-###################################################################################
-EXCEPTION;
-
-        Mage::log($exceptionInfo, Zend_Log::ERR, 'e2m.log', true);
+        \Mage::helper('M2ePro/Module_Exception')->process($e, false);
     }
 
     //########################################

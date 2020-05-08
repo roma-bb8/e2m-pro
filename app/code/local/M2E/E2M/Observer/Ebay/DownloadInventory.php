@@ -16,8 +16,7 @@ class M2E_E2M_Observer_Ebay_DownloadInventory {
 
         Mage::helper('e2m/Config')->set(
             M2E_E2M_Helper_Ebay::XML_PATH_AVAILABLE_MARKETPLACES,
-            $marketplaces,
-            true
+            $marketplaces
         );
     }
 }

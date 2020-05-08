@@ -11,7 +11,7 @@ class M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory {
 
     const MAX_DOWNLOAD_TIME = 946684800;
     const MAX_REQUESTS = 4;
-    const MAX_DAYS = 118;
+    const MAX_SUB_REQUESTS = 3;
 
     //########################################
 
@@ -34,7 +34,7 @@ class M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory {
         $percentage = floor(($downloadInterval / $fullInterval) * 100);
         $percentage > 100 && $percentage = self::PERCENTAGE_COMPLETED;
 
-        return $percentage;
+        return (int)$percentage;
     }
 
     //########################################
@@ -44,8 +44,7 @@ class M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory {
      */
     public function process() {
 
-        $isWork = (bool)Mage::helper('e2m/Config')->get(self::XML_PATH_WORK_DOWNLOAD_INVENTORY, false);
-        if (!$isWork) {
+        if (!(bool)Mage::helper('e2m/Config')->get(self::XML_PATH_WORK_DOWNLOAD_INVENTORY, false)) {
             return;
         }
 
@@ -53,7 +52,11 @@ class M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory {
             return;
         }
 
-        $this->lockItem->lockAndActivate();
+        if (!$this->lockItem->lockAndActivate()) {
+            Mage::helper('e2m')->writeExceptionLog(new Exception('Lock item not Locked.'));
+
+            return;
+        }
 
         $dateTimeZone = new DateTimeZone('UTC');
         $dateTimeObj = new DateTime('now', $dateTimeZone);
@@ -67,89 +70,87 @@ class M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory {
         $request = 0;
         while (self::MAX_REQUESTS > $request && $fromDateTime->getTimestamp() < $toDateTime->getTimestamp()) {
 
-            $tmpDateTime = clone $fromDateTime;
-            $tmpDateTime->modify('+' . self::MAX_DAYS . ' days');
+            $this->lockItem->activate();
 
-            try {
-
-                $response = Mage::getSingleton('e2m/Proxy_Ebay_Api')->sendRequest(array(
-                    'command' => array('inventory', 'get', 'items'),
-                    'data' => array(
-                        'account' => Mage::getSingleton('e2m/Proxy_Ebay_Account')->getToken(),
-                        'realtime' => true,
-                        'since_time' => $fromDateTime->format('Y-m-d H:i:s'),
-                        'to_time' => $tmpDateTime->format('Y-m-d H:i:s')
-                    )
-                ));
-
-                if (!isset($response['to_time'])) {
-                    // throw new Exception('"To time" not send server api.');
-                    $fromDateTime = $tmpDateTime;
-
-                    continue;
-                }
-
-                $this->lockItem->activate();
-
-                if (!empty($response['items'])) {
-
-                    $items = array();
-                    foreach ($response['items'] as $index => $item) {
-
-                        $fullItemInfo = Mage::getSingleton('e2m/Proxy_Ebay_Api')->sendRequest(array(
-                            'command' => array('item', 'get', 'info'),
-                            'data' => array(
-                                'account' => Mage::getSingleton('e2m/Proxy_Ebay_Account')->getToken(),
-                                'item_id' => $item['id'],
-                                'parser_type' => 'full',
-                            )
-                        ));
-
-                        $items[$item['id']] = $fullItemInfo['result'];
-
-                        if ($index % 5 == 0) {
-                            $this->lockItem->activate();
-                        }
-                    }
-
-                    if (!empty($items)) {
-                        foreach (array_chunk($items, 5, true) as $inventory) {
-
-                            $inventory = Mage::getSingleton('e2m/Ebay_Inventory')->updateItems(
-                                Mage::getSingleton('core/resource'),
-                                $inventory
-                            );
-
-                            Mage::getSingleton('e2m/Ebay_Inventory')->createItems(
-                                Mage::getSingleton('core/resource'),
-                                $inventory
-                            );
-
-                            $this->lockItem->activate();
-                        }
-                    }
-                }
-
-            } catch (Exception $e) {
-                Mage::helper('e2m')->writeExceptionLog($e);
-
-                break;
-            }
-
-            /**
-             ** Dirty hack **
-             *      by pagination responses data
-             * app/code/Component/Ebay/Model/Command/Request/Auth/Trading/Paginated/Serial/Abstract.php:16
-             * getPaginatedOutputData:40
-             */
-            is_array($response['to_time']) && $response['to_time'] = array_pop($response['to_time']);
-
-            $toTime = new DateTime($response['to_time'], $dateTimeZone);
-            $fromDateTime = $toTime;
-
-            !empty($response['items']) && $request++;
+            $response = Mage::getSingleton('e2m/Proxy_Ebay_Api')->sendRequest(array(
+                'command' => array('inventory', 'get', 'items'),
+                'data' => array(
+                    'account' => Mage::getSingleton('e2m/Proxy_Ebay_Account')->getToken(),
+                    'realtime' => true,
+                    'since_time' => $fromDateTime->format('Y-m-d H:i:s')
+                )
+            ));
 
             $this->lockItem->activate();
+
+            if (empty($response['items'])) {
+                $fromDateTime->modify('+1 month');
+
+                continue;
+            }
+
+            if (is_array($response['to_time'])) {
+                $nextSinceTime = array();
+                foreach ($response['to_time'] as $tempToTime) {
+                    $nextSinceTime[] = strtotime($tempToTime);
+                }
+                sort($nextSinceTime, SORT_NUMERIC);
+                $nextSinceTime = array_pop($nextSinceTime);
+                $nextSinceTime = date('Y-m-d H:i:s', $nextSinceTime);
+            } else {
+                $nextSinceTime = $response['to_time'];
+            }
+
+            $fromDateTime = new DateTime($nextSinceTime, new DateTimeZone('UTC'));
+            $fromDateTime->modify('+1 second');
+
+            //------------------------------
+
+            $items = array();
+            foreach ($response['items'] as $index => $item) {
+
+                if ($index % 5 == 0) {
+                    $this->lockItem->activate();
+                }
+
+                $i = 0;
+                do {
+
+                    $i++;
+                    $fullItemInfo = Mage::getSingleton('e2m/Proxy_Ebay_Api')->sendRequest(array(
+                        'command' => array('item', 'get', 'info'),
+                        'data' => array(
+                            'account' => Mage::getSingleton('e2m/Proxy_Ebay_Account')->getToken(),
+                            'item_id' => $item['id'],
+                            'parser_type' => 'full',
+                        )
+                    ));
+
+                } while ($i < self::MAX_SUB_REQUESTS && empty($fullItemInfo['result']));
+
+                if (!empty($fullItemInfo['result'])) {
+                    $items[$item['id']] = $fullItemInfo['result'];
+                }
+            }
+
+            $this->lockItem->activate();
+
+            $items = Mage::getSingleton('e2m/Ebay_Inventory')->updateItems(
+                Mage::getSingleton('core/resource'),
+                $items
+            );
+
+            $this->lockItem->activate();
+
+            Mage::getSingleton('e2m/Ebay_Inventory')->createItems(
+                Mage::getSingleton('core/resource'),
+                $items
+            );
+
+            Mage::helper('e2m/Config')->set(
+                self::XML_PATH_FROM_DOWNLOAD_INVENTORY,
+                $fromDateTime->getTimestamp()
+            );
         }
 
         $percentage = $this->getProcessAsPercentage($fromDateTime, $toDateTime);
@@ -160,8 +161,7 @@ class M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory {
 
         Mage::helper('e2m/Config')->set(
             self::XML_PATH_FROM_DOWNLOAD_INVENTORY,
-            $fromDateTime->getTimestamp(),
-            true
+            $fromDateTime->getTimestamp()
         );
 
         $this->lockItem->unlock();
