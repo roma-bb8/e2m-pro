@@ -477,7 +477,7 @@ SQL;
             $transactionSQL .= <<<SQL
 
 
-    IF EXISTS(SELECT `backend_type` FROM `eav_attribute` WHERE `attribute_id` = @attribute_id AND `backend_type` = '{$type}') THEN
+    IF EXISTS(SELECT `frontend_input` FROM `eav_attribute` WHERE `attribute_id` = @attribute_id AND `frontend_input` = '{$type}') THEN
 SQL;
 
             foreach ($attributeData['value'] as $valueCode => $attributeValueData) {
@@ -1539,7 +1539,7 @@ SQL;
             $transactionSQL .= <<<SQL
 
 
-    IF EXISTS(SELECT `backend_type` FROM `eav_attribute` WHERE `attribute_id` = @attribute_id AND `backend_type` = '{$type}') THEN
+    IF EXISTS(SELECT `frontend_input` FROM `eav_attribute` WHERE `attribute_id` = @attribute_id AND `frontend_input` = '{$type}') THEN
 SQL;
 
             foreach ($attributeData['value'] as $valueCode => $attributeValueData) {
