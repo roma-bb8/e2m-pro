@@ -265,7 +265,7 @@ FROM (
      ) as `specifics`
 SQL;
 
-        $variationData = array();
+        $vData = array();
 
         $items = $readConn->query($getItemsSQL);
         while ($item = $items->fetch(PDO::FETCH_ASSOC)) {
@@ -297,8 +297,8 @@ SQL;
                 $name = $specific['name'];
                 $code = Mage::helper('e2m')->getCode($name);
 
-                $variationData[$item['id']]['configurable_variations'][$product['sku']] = 'sku=' . $product['sku'];
-                $variationData[$item['id']]['configurable_variation_labels'][$code] = "{$code}={$name}";
+                $vData[$item['id']]['configurable_variations'][$product['sku']][$code] = "{$code}={$item[$name]}";
+                $vData[$item['id']]['configurable_variation_labels'][$code] = "{$code}={$name}";
             }
 
             foreach ($exportSpecifics as $specificName => $magentoAttribute) {
@@ -334,11 +334,16 @@ SQL;
             if ('configurable' === $item['type']) {
 
                 $product['configurable_variation_labels'] = Mage::helper('e2m')->getValue(implode(',',
-                    $variationData[$item['id']]['configurable_variation_labels']
+                    $vData[$item['id']]['configurable_variation_labels']
                 ), $defaultValue);
 
+                $configurableVariations = array();
+                foreach ($vData[$item['id']]['configurable_variations'] as $sku => $values) {
+                    $configurableVariations[$sku] = "sku={$sku}," . implode(',', $values);
+                }
+
                 $product['configurable_variations'] = Mage::helper('e2m')->getValue(implode('|',
-                    $variationData[$item['id']]['configurable_variations']
+                    $configurableVariations
                 ), $defaultValue);
             }
 
@@ -1884,7 +1889,7 @@ SQL;
         $toDateTime = new DateTime('now', new DateTimeZone('UTC'));
 
         $fromDatetime = clone $toDateTime;
-        $fromDatetime->setTimestamp(M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::MAX_DOWNLOAD_TIME);
+        $fromDatetime->modify('-5 years');
 
         Mage::helper('e2m/Config')->set(
             M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::XML_PATH_PROCESS_DOWNLOAD_INVENTORY,

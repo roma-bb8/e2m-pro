@@ -9,7 +9,6 @@ class M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory {
 
     const PERCENTAGE_COMPLETED = 100;
 
-    const MAX_DOWNLOAD_TIME = 946684800;
     const MAX_REQUESTS = 4;
     const MAX_SUB_REQUESTS = 3;
 
@@ -28,10 +27,7 @@ class M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory {
      */
     private function getProcessAsPercentage(DateTime $from, DateTime $to) {
 
-        $fullInterval = $to->getTimestamp() - self::MAX_DOWNLOAD_TIME;
-        $downloadInterval = $from->getTimestamp() - self::MAX_DOWNLOAD_TIME;
-
-        $percentage = floor(($downloadInterval / $fullInterval) * 100);
+        $percentage = floor(($from->getTimestamp() / $to->getTimestamp()) * 100);
         $percentage > 100 && $percentage = self::PERCENTAGE_COMPLETED;
 
         return (int)$percentage;
