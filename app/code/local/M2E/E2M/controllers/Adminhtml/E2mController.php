@@ -924,7 +924,7 @@ FROM (
      ) as `specifics`
 SQL;
 
-        $variationData = array();
+        $vData = array();
 
         $items = $readConn->query($getItemsSQL);
         while ($item = $items->fetch(PDO::FETCH_ASSOC)) {
@@ -954,8 +954,8 @@ SQL;
                 }
 
                 $code = Mage::helper('e2m')->getCode($specific['name']);
-                $variationData[$item['id']]['simples_skus'][$product['sku']] = $product['sku'];
-                $variationData[$item['id']]['configurable_attributes'][$code] = $code;
+                $vData[$item['id']]['simples_skus'][$product['sku']] = $product['sku'];
+                $vData[$item['id']]['configurable_attributes'][$code] = $code;
             }
 
             foreach ($exportSpecifics as $specificName => $magentoAttribute) {
@@ -991,11 +991,11 @@ SQL;
             if ('configurable' === $item['type']) {
 
                 $product['simples_skus'] = Mage::helper('e2m')->getValue(implode(',',
-                    $variationData[$item['id']]['simples_skus']
+                    $vData[$item['id']]['simples_skus']
                 ), $defaultValue);
 
                 $product['configurable_attributes'] = Mage::helper('e2m')->getValue(implode(',',
-                    $variationData[$item['id']]['configurable_attributes']
+                    $vData[$item['id']]['configurable_attributes']
                 ), $defaultValue);
             }
 
@@ -1280,7 +1280,7 @@ FROM (
 SQL;
 
         $beforeSku = false;
-        $variationData = array();
+        $vData = array();
 
         $items = $readConn->query($getItemsSQL);
         while ($item = $items->fetch(PDO::FETCH_ASSOC)) {
@@ -1311,7 +1311,7 @@ SQL;
 
                 $value = Mage::helper('e2m')->getValue($specific['value'], $defaultValue);
                 $code = Mage::helper('e2m')->getCode($specific['name']);
-                $variationData[$item['id']][$product['sku']][$code] = $value;
+                $vData[$item['id']][$product['sku']][$code] = $value;
             }
 
             foreach ($exportSpecifics as $specificName => $magentoAttribute) {
@@ -1366,7 +1366,7 @@ SQL;
             $variations = array();
             if ('configurable' === $item['type']) {
 
-                foreach ($variationData[$item['id']] as $sku => $data) {
+                foreach ($vData[$item['id']] as $sku => $data) {
                     foreach ($data as $code => $value) {
                         $variation = $productSkeleton;
 
