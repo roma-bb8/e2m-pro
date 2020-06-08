@@ -111,6 +111,13 @@ class M2E_E2M_Model_Ebay_Inventory {
                 try {
                     file_put_contents($importPath . DS . $fileName, file_get_contents($url));
                 } catch (Exception $e) {
+
+                    \Mage::helper('M2ePro/Module_Logger')->process(array(
+                        'item_id' => isset($item['identifiers']['item_id']) ? $item['identifiers']['item_id'] : 'NULL',
+                        'url'     => $url,
+                        'message' => $e->getMessage()
+                    ), 'e2MPro image failed', false);
+
                     continue;
                 }
             }

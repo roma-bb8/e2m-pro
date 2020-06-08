@@ -52,7 +52,8 @@ class M2E_E2M_Adminhtml_E2mController extends Mage_Adminhtml_Controller_Action {
             'base_image',
             'small_image',
             'thumbnail_image',
-            'additional_images'
+            'additional_images',
+            'url_key'
         );
 
         $csvHeader = array_unique(array_merge(
@@ -352,6 +353,11 @@ SQL;
             $product['status'] = 1;
             $product['visibility'] = Mage::helper('e2m')->getValue('Not Visible Individually', $defaultValue);
             $product['tax_class_id'] = Mage::helper('e2m')->getValue('None', $defaultValue);
+
+            $product['url_key'] = str_replace(array(' ', '_', '[', ']', '&', '.', ','), '-', $product['name']);
+            if (isset($vData[$item['id']]['configurable_variations'][$product['sku']])) {
+                $product['url_key'] .= '_' . count($vData[$item['id']]['configurable_variations']);
+            }
 
             Mage::helper('e2m')->writeCSVFile($prefixPath, implode(',', $product), $csvHeader, 'm2');
         }
