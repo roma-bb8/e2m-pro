@@ -85,7 +85,7 @@
     </div>
 <?php endif; ?>
 
-<?php if (M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::PERCENTAGE_COMPLETED === (int)Mage::helper('e2m/Config')->get(M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::XML_PATH_PROCESS_DOWNLOAD_INVENTORY, 0)): ?>
+<?php if (!empty(Mage::getSingleton('e2m/Proxy_Ebay_Account')->getUserId()) && M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::PERCENTAGE_COMPLETED === (int)Mage::helper('e2m/Config')->get(M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::XML_PATH_PROCESS_DOWNLOAD_INVENTORY, 0)): ?>
     <div class="entry-edit">
         <div class="entry-edit-head">
             <h4><?php echo Mage::helper('e2m')->__('Store settings'); ?></h4>
@@ -184,6 +184,20 @@
                         </select>
                         <p class="note">
                             <span><?php echo Mage::helper('e2m')->__('Clean HTML in Description'); ?></span>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        <label for="generate-url-random"><?php echo Mage::helper('e2m')->__('Generate URL Random') ?>:</label>
+                    </td>
+                    <td class="value">
+                        <select id="generate-url-random" class="config-input">
+                            <option value="1" <?php if (Mage::helper('e2m/Ebay_Config')->isGenerateUrlRandom()) echo ' selected="selected"'; ?>><?php echo Mage::helper('e2m')->__('Yes'); ?></option>
+                            <option value="0" <?php if (!Mage::helper('e2m/Ebay_Config')->isGenerateUrlRandom()) echo ' selected="selected"'; ?>><?php echo Mage::helper('e2m')->__('No'); ?></option>
+                        </select>
+                        <p class="note">
+                            <span><?php echo Mage::helper('e2m')->__('Generate URL Random'); ?></span>
                         </p>
                     </td>
                 </tr>

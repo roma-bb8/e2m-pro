@@ -12,6 +12,7 @@ class M2E_E2M_Helper_Ebay_Config extends M2E_E2M_Helper_Config {
     const XML_PATH_PRODUCT_SKU = self::PREFIX . 'product/sku';
     const XML_PATH_PRODUCT_SKU_GENERATE = self::PREFIX . 'product/sku_generate';
     const XML_PATH_PRODUCT_HTML_DELETE = self::PREFIX . 'product/html_delete';
+    const XML_PATH_PRODUCT_URL_GENERATE_RANDOM = self::PREFIX . 'product/url_generate_random';
 
     //########################################
 
@@ -43,6 +44,13 @@ class M2E_E2M_Helper_Ebay_Config extends M2E_E2M_Helper_Config {
      */
     public function isDeleteHtml() {
         return (bool)$this->get(self::XML_PATH_PRODUCT_HTML_DELETE);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isGenerateUrlRandom() {
+        return (bool)$this->get(self::XML_PATH_PRODUCT_URL_GENERATE_RANDOM);
     }
 
     //########################################
@@ -104,11 +112,15 @@ class M2E_E2M_Helper_Ebay_Config extends M2E_E2M_Helper_Config {
 
         $productSKU = $this->getProductIdentifier();
         if (empty($item[$productSKU]) && $this->isGenerateSku()) {
-            $item[$productSKU] = 'SKU_' . md5($item['ebay_item_id'] . $item['item_variation_id']);
+            $item[$productSKU] = 'SKU_' . strtoupper(md5($item['ebay_item_id'] . $item['item_variation_id']));
         }
 
         if (self::DOES_NOT_APPLY === strtolower($item[$productSKU]) && $this->isGenerateSku()) {
-            $item[$productSKU] = 'DNA_' . md5($item['ebay_item_id'] . $item['item_variation_id']);
+            $item[$productSKU] = 'DNA_' . strtoupper(md5($item['ebay_item_id'] . $item['item_variation_id']));
+        }
+
+        if ($this->isGenerateUrlRandom()) {
+            $item['ebay_url_key'] = 'URL_' . strtoupper(md5(json_encode($item)));
         }
 
         return $item;

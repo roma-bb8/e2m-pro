@@ -53,7 +53,8 @@ class M2E_E2M_Adminhtml_E2mController extends Mage_Adminhtml_Controller_Action {
             'small_image',
             'thumbnail_image',
             'additional_images',
-            'url_key'
+            'url_key',
+            'variation_name'
         );
 
         $csvHeader = array_unique(array_merge(
@@ -300,6 +301,7 @@ SQL;
 
                 $vData[$item['id']]['configurable_variations'][$product['sku']][$code] = "{$code}={$item[$name]}";
                 $vData[$item['id']]['configurable_variation_labels'][$code] = "{$code}={$name}";
+                $vData[$item['id']]['variation_name'][$product['sku']][$name] = $item[$name];
             }
 
             foreach ($exportSpecifics as $specificName => $magentoAttribute) {
@@ -354,9 +356,20 @@ SQL;
             $product['visibility'] = Mage::helper('e2m')->getValue('Not Visible Individually', $defaultValue);
             $product['tax_class_id'] = Mage::helper('e2m')->getValue('None', $defaultValue);
 
-            $product['url_key'] = str_replace(array(' ', '_', '[', ']', '&', '.', ','), '-', $product['name']);
-            if (isset($vData[$item['id']]['configurable_variations'][$product['sku']])) {
-                $product['url_key'] .= '_' . count($vData[$item['id']]['configurable_variations']);
+            if (Mage::helper('e2m/Ebay_Config')->isGenerateUrlRandom()) {
+                $product['url_key'] = $item['ebay_url_key'];
+            } else {
+                $product['url_key'] = str_replace(array(' ', '_', '[', ']', '&', '.', ','), '-', $product['name']);
+                if (isset($vData[$item['id']]['configurable_variations'][$product['sku']])) {
+                    $product['url_key'] .= '_' . count($vData[$item['id']]['configurable_variations']);
+                }
+            }
+
+            if ('configurable' !== $item['type'] && isset($vData[$item['id']]['variation_name'][$product['sku']])) {
+                $product['variation_name'] = $product['name'];
+                foreach ($vData[$item['id']]['variation_name'][$product['sku']] as $name => $value) {
+                    $product['variation_name'] .= " ({$name}) $value";
+                }
             }
 
             Mage::helper('e2m')->writeCSVFile($prefixPath, implode(',', $product), $csvHeader, 'm2');
@@ -1947,6 +1960,11 @@ SQL;
         isset($settings['generate-sku']) && Mage::helper('e2m/Config')->set(
             M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_SKU_GENERATE,
             $settings['generate-sku']
+        );
+
+        isset($settings['generate-url-random']) && Mage::helper('e2m/Config')->set(
+            M2E_E2M_Helper_Ebay_Config::XML_PATH_PRODUCT_URL_GENERATE_RANDOM,
+            $settings['generate-url-random']
         );
 
         isset($settings['product-identifier']) && Mage::helper('e2m/Config')->set(
