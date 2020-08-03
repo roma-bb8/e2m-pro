@@ -1908,7 +1908,7 @@ SQL;
         $toDateTime = new DateTime('now', new DateTimeZone('UTC'));
 
         $fromDatetime = clone $toDateTime;
-        $fromDatetime->modify('-5 years');
+        $fromDatetime->modify('-7 years');
 
         Mage::helper('e2m/Config')->set(
             M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::XML_PATH_PROCESS_DOWNLOAD_INVENTORY,
