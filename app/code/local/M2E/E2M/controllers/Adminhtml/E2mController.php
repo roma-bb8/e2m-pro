@@ -2020,6 +2020,11 @@ SQL;
 
         Mage::helper('e2m/Config')->set(M2E_E2M_Model_Proxy_Ebay_Account::XML_PATH_EBAY_ACCOUNT_ID, 0);
 
+        Mage::helper('e2m/Config')->set(
+            M2E_E2M_Model_Cron_Job_Ebay_DownloadInventory::XML_PATH_WORK_DOWNLOAD_INVENTORY,
+            false
+        );
+
         $sql = <<<SQL
 SET FOREIGN_KEY_CHECKS = 0;
 
